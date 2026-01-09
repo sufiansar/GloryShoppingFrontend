@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { Search, User, ShoppingBag, Heart } from "lucide-react";
+import { Search, User, ShoppingBag, Heart, LogIn } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import logo from "@/components/Assets/Logo.png";
 
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 const SecondaryNavbar = () => {
   return (
-    <nav className=" z-50 w-full border-b bg-white p-4 shadow-sm">
+    <nav className=" z-50 w-full border-b bg-white p-1 shadow-sm">
       <div className="container mx-auto px-4">
         {/* Main Navigation */}
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between ">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold tracking-wider">
-            Glory Shopping BD
+            <Image src={logo} alt="Logo" className="h-20 w-auto" />
           </Link>
 
           {/* Search Bar */}
@@ -31,8 +33,10 @@ const SecondaryNavbar = () => {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             <Button variant="outline" className="gap-2">
-              <User className="h-4 w-4 text-[#ca428b] " />
-              <p className="text-[#ca428b]"> My Account</p>
+              <LogIn className="h-4 w-4 text-[#ca428b] " />
+              <Link href="/login" className="text-[#ca428b]">
+                Login
+              </Link>
             </Button>
 
             <Button variant="outline" className="gap-2 relative">

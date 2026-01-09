@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -22,11 +22,15 @@ export function LoginForm({
           <form className="p-6 md:p-8">
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">
-                  Login to your Glory Shopping account
+                <h1 className="text-2xl font-bold">Create your account</h1>
+                <p className="text-muted-foreground text-sm text-balance">
+                  Enter your email below to create your account
                 </p>
               </div>
+              <Field>
+                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <Input id="name" type="text" placeholder="Your name" required />
+              </Field>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -37,19 +41,33 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
+                <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="017XXXXXXXX"
+                  required
+                />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Field className="grid grid-cols-2 gap-4">
+                  <Field>
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <Input id="password" type="password" required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="confirm-password">
+                      Confirm Password
+                    </FieldLabel>
+                    <Input id="confirm-password" type="password" required />
+                  </Field>
+                </Field>
+                <FieldDescription>
+                  Must be at least 8 characters long.
+                </FieldDescription>
+              </Field>
+              <Field>
+                <Button type="submit">Create Account</Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
@@ -62,11 +80,11 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Google</span>
+                  <span className="sr-only">Sign up with Google</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <Link href="register">Sign up</Link>
+                Already have an account? <Link href="login">Sign in</Link>
               </FieldDescription>
             </FieldGroup>
           </form>
