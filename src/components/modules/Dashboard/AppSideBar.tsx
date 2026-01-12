@@ -1,182 +1,74 @@
 "use client";
 
 import * as React from "react";
-import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react";
-
-import { NavDocuments } from "@/components/modules/Dashboard/nav-documents";
-import { NavMain } from "@/components/modules/Dashboard/nav-main";
-import { NavSecondary } from "@/components/modules/Dashboard/nav-secondary";
-import { NavUser } from "@/components/modules/Dashboard/nav-user";
+import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-};
+import * as Icons from "lucide-react";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+import { Separator } from "@/components/ui/separator";
+import { NavSection } from "@/types/dashboard.section";
+import { NavMain } from "./nav-main";
+import { IUserCreate } from "@/types/User.interface";
+import logo from "@/components/Assets/Logo.png";
+import Image from "next/image";
+import LogoutButton from "../Navbar/Logout";
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  userInfo: IUserCreate | null;
+  navItems: NavSection[];
+}
+
+export function AppSidebar({ userInfo, navItems, ...props }: AppSidebarProps) {
+  const mappedSections = navItems?.map((section) => ({
+    ...section,
+    items: section.items.map((item) => ({
+      ...item,
+      icon: item.icon ? (Icons as any)[item.icon] : undefined,
+    })),
+  }));
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-            >
-              <Link href="/">
-                <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+            <SidebarMenuButton asChild>
+              <Link href="/dashboard" className="text-xl font-bold">
+                <Image src={logo} width={60} height={60} alt="logo" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain sections={mappedSections} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      {mappedSections?.length > 0 && <Separator className="my-3" />}
+      {userInfo && (
+        <SidebarMenuItem className="mt-3 px-2">
+          <div className="text-sm text-muted-foreground">
+            <p className="font-medium text-primary">
+              {userInfo.name || "Unknown"}
+            </p>
+            <p className="text-xs font-bold">{userInfo.email}</p>
+            <p className="text-[12px] font-bold text-gray-500 mt-1">
+              Role: {userInfo.role}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 mt-2 text-red-600 cursor-pointer">
+            <LogoutButton />
+          </div>
+        </SidebarMenuItem>
+      )}
     </Sidebar>
   );
 }

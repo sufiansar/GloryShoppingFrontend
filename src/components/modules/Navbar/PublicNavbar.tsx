@@ -17,9 +17,11 @@ import { ShoppingCart, Search, User, Menu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NavItem, navItems } from "@/components/Shared/NavItems/Navitems";
+import { useSession } from "next-auth/react";
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
+
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

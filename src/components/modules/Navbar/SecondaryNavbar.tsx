@@ -1,53 +1,102 @@
 "use client";
 
 import Link from "next/link";
-import { Search, User, ShoppingBag, Heart, LogIn } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { Search, LogIn } from "lucide-react";
+import { useSession } from "next-auth/react";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import LogoutButton from "./Logout";
 import logo from "@/components/Assets/Logo.png";
 
-import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-
 const SecondaryNavbar = () => {
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+
+  const { data: session, status } = useSession();
+
+  console.log(session);
+
+  const canAccessDashboard =
+    session?.user?.role === "SUPER_ADMIN" || session?.user?.role === "ADMIN";
+
   return (
-    <nav className=" z-50 w-full border-b bg-white p-1 shadow-sm">
+    <nav className="top-0 z-50 w-full border-b bg-white p-1 shadow-sm">
       <div className="container mx-auto px-4">
         {/* Main Navigation */}
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold tracking-wider">
-            <Image src={logo} alt="Logo" className="h-20 w-auto" />
+          <Link href="/" className="shrink-0">
+            <Image
+              src={logo}
+              alt="Logo"
+              className="h-12 w-auto sm:h-16 md:h-20 lg:h-24"
+              priority
+            />
           </Link>
 
-          {/* Search Bar */}
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="search"
-              placeholder="Search products"
-              className="pl-10 pr-4 py-2 w-full border-gray-300 focus-visible:ring-primary"
-            />
+          {/* Desktop Search */}
+          <div className="hidden lg:block absolute left-1/2 -translate-x-1/2">
+            <div className="relative w-80 xl:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Search products"
+                className="pl-10"
+              />
+            </div>
           </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" className="gap-2">
-              <LogIn className="h-4 w-4 text-[#ca428b] " />
-              <Link href="/login" className="text-[#ca428b]">
-                Login
-              </Link>
+          {/* Right Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Mobile Search Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setIsSearchVisible(!isSearchVisible)}
+            >
+              <Search className="h-5 w-5" />
             </Button>
 
-            <Button variant="outline" className="gap-2 relative">
-              <ShoppingBag className="h-4 w-4 text-[#ca428b] " />
-              <p className="text-[#ca428b]"> Cart</p>
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                0
-              </Badge>
-            </Button>
+            {/* Dashboard (Admin only) */}
+            {canAccessDashboard && (
+              <Link href="/dashboard">
+                <Button variant="default" className="hidden md:inline-flex">
+                  Dashboard
+                </Button>
+              </Link>
+            )}
+
+            {/* Auth buttons */}
+            {status === "authenticated" ? (
+              <LogoutButton />
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" className="hidden md:inline-flex">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
+
+        {/* Mobile Search */}
+        {isSearchVisible && (
+          <div className="lg:hidden mt-3 pb-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Search products"
+                className="pl-10"
+                autoFocus
+              />
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
