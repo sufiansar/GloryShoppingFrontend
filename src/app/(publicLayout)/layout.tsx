@@ -1,7 +1,8 @@
 import Footer from "@/components/modules/Footer/Footer";
-import { HeroSlider } from "@/components/modules/Hero/HeroSidebar/HeroSlider";
+
 import Navbar from "@/components/modules/Navbar/PublicNavbar";
 import SecondaryNavbar from "@/components/modules/Navbar/SecondaryNavbar";
+import { SkincareMarquee } from "@/components/SkincareMarquee";
 
 export default function PublicLayout({
   children,
@@ -12,7 +13,8 @@ export default function PublicLayout({
     <div>
       <SecondaryNavbar />
       <Navbar />
-      <HeroSlider sections={[]} autoPlay={true} delay={5000} />
+      {/* <HeroSlider sections={[]} autoPlay={true} delay={5000} /> */}
+      <SkincareMarquee />
       {children};
       <Footer />
     </div>
