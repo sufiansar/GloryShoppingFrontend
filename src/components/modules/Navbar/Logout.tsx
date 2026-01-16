@@ -14,7 +14,7 @@ const LogoutButton = () => {
   return (
     <Button
       variant={"destructive"}
-      className="hidden md:inline-flex"
+      className=" inline-flex"
       onClick={handleLogout}
     >
       <LogIn className="mr-2 h-4 w-4" />

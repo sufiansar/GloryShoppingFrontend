@@ -16,7 +16,7 @@ const SecondaryNavbar = () => {
 
   const { data: session, status } = useSession();
 
-  console.log(session);
+  // console.log(session);
 
   const canAccessDashboard =
     session?.user?.role === "SUPER_ADMIN" || session?.user?.role === "ADMIN";
@@ -59,27 +59,6 @@ const SecondaryNavbar = () => {
             >
               <Search className="h-5 w-5" />
             </Button>
-
-            {/* Dashboard (Admin only) */}
-            {canAccessDashboard && (
-              <Link href="/dashboard">
-                <Button variant="default" className="hidden md:inline-flex">
-                  Dashboard
-                </Button>
-              </Link>
-            )}
-
-            {/* Auth buttons */}
-            {status === "authenticated" ? (
-              <LogoutButton />
-            ) : (
-              <Link href="/login">
-                <Button variant="outline" className="hidden md:inline-flex">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Login
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
 
