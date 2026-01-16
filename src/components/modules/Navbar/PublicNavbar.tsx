@@ -1,74 +1,23 @@
-// components/navbar.tsx
-"use client";
+"use server";
 
-import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation";
 import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Search, User, Menu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NavItem, navItems } from "@/components/Shared/NavItems/Navitems";
-import { useSession } from "next-auth/react";
-
-const MobileNav = () => {
-  const [open, setOpen] = useState(false);
-
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="md:hidden bg-transparent border border-white/30 hover:border-white/70"
-        >
-          <Menu className="h-5 w-5 text-white" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="w-75 sm:w-100 bg-[#6b205a] border-[#6b205a]"
-      >
-        <div className="flex flex-col space-y-4 mt-8">
-          {navItems.map((item) => (
-            <div key={item.title} className="space-y-2">
-              <Link
-                href={item.href}
-                className="text-lg font-medium text-white hover:text-white/80 transition-colors"
-                onClick={() => setOpen(false)}
-              >
-                {item.title}
-              </Link>
-              {item.subItems && (
-                <div className="pl-4 space-y-2 border-l-2 border-white/20">
-                  {item.subItems.map((subItem) => (
-                    <Link
-                      key={subItem.title}
-                      href={subItem.href}
-                      className="block text-sm text-white/80 hover:text-white transition-colors"
-                      onClick={() => setOpen(false)}
-                    >
-                      {subItem.title}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};
+import { getSession, useSession } from "next-auth/react";
+import UserMenu from "../Profile/ProfileForNavbar";
+import { MobileNav } from "./MobileNav";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/helpers/authOptions";
 
 const NavDropdown = ({ item }: { item: NavItem }) => {
   return (
@@ -138,9 +87,12 @@ const NavDropdown = ({ item }: { item: NavItem }) => {
 };
 
 // Main Navbar Component
-const Navbar = ({ cartCount = 3 }: { cartCount?: number }) => {
-  const pathname = usePathname();
-
+const Navbar = async ({ cartCount = 2 }: { cartCount?: number }) => {
+  // const pathname = usePathname();
+  const userInfo = await getServerSession(authOptions);
+  console.log("SERVER SESSION:", userInfo);
+  // const userInfo: any = await getSession();
+  // console.log("SERVER SESSION:", userInfo);
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#ca428b] backdrop-blur">
       <div className="container mx-auto px-4">
@@ -182,9 +134,7 @@ const Navbar = ({ cartCount = 3 }: { cartCount?: number }) => {
               className="text-white hover:bg-[#ca428b] hover:text-white border border-white/30 hover:border-white bg-transparent"
               asChild
             >
-              <Link href="/account">
-                <User className="h-5 w-5" />
-              </Link>
+              <UserMenu user={userInfo} />
             </Button>
 
             {/* Shopping Cart */}

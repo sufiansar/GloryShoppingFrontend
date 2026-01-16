@@ -11,6 +11,8 @@ declare module "next-auth" {
       image?: string | null;
       role: "SUPER_ADMIN" | "ADMIN" | "USER";
     };
+    accessToken?: string;
+    refreshToken?: string;
   }
 
   interface User {
@@ -19,6 +21,8 @@ declare module "next-auth" {
     email: string;
     image?: string | null;
     role: "SUPER_ADMIN" | "ADMIN" | "USER";
+    accessToken?: string;
+    refreshToken?: string;
   }
 }
 
@@ -26,6 +30,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: "SUPER_ADMIN" | "ADMIN" | "USER";
+    accessToken?: string;
+    refreshToken?: string;
   }
 }
 
@@ -55,7 +61,7 @@ export const authOptions: NextAuthOptions = {
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include", // ✅ VERY IMPORTANT
+            credentials: "include",
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
@@ -73,24 +79,30 @@ export const authOptions: NextAuthOptions = {
          * Backend response shape:
          * {
          *   data: {
-         *     userData: { id, name, email, profileImage }
+         *     userData: { id, name, email, profileImage, role },
+         *     accessToken: "...",
+         *     refreshToken: "..."
          *   }
          * }
          */
-        const user = result?.data?.userData;
+        const data = result?.data;
+        const user = data?.userData;
 
         if (!user) {
           return null;
         }
 
-        // ✅ Tokens are already stored in cookies by backend
-        return {
+        const returnValue = {
           id: user.id,
           name: user.name,
           email: user.email,
           image: user.profileImage,
           role: user.role,
+          accessToken: data?.accessToken,
+          refreshToken: data?.refreshToken,
         };
+
+        return returnValue;
       },
     }),
   ],
@@ -100,13 +112,20 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.accessToken = (user as any).accessToken;
+        token.refreshToken = (user as any).refreshToken;
+      } else {
       }
+
       return token;
     },
 
     async session({ session, token }) {
       session.user.id = token.id as string;
-      session.user.role = token.role;
+      session.user.role = token.role as any;
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
+
       return session;
     },
   },
