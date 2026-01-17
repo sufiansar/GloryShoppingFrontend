@@ -3,7 +3,7 @@ import { authOptions } from "@/helpers/authOptions";
 
 export const makeApiCall = async <T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> => {
   const session = await getServerSession(authOptions);
 
@@ -15,7 +15,6 @@ export const makeApiCall = async <T>(
     console.warn("❌ No accessToken found in session");
   }
 
-  // Don't set Content-Type for FormData - let the browser handle it
   const isFormData = options.body instanceof FormData;
 
   if (

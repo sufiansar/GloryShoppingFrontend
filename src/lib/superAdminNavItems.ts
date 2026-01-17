@@ -24,16 +24,16 @@ export const superAdminNavItems: NavSection[] = [
       },
       {
         title: "Product Variant",
-        href: "/admin/dashboard/product-variants",
+        href: "/admin/dashboard/variants/create",
         icon: "BoxMultiple",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
-      {
-        title: "Brands",
-        href: "/admin/dashboard/brands",
-        icon: "Trademark",
-        roles: ["SUPER_ADMIN", "ADMIN"],
-      },
+      // {
+      //   title: "Brands",
+      //   href: "/admin/dashboard/brand/brand-management",
+      //   icon: "Trademark",
+      //   roles: ["SUPER_ADMIN", "ADMIN"],
+      // },
       {
         title: "Product Ingredients",
         href: "/admin/dashboard/ingredients",
@@ -67,6 +67,24 @@ export const superAdminNavItems: NavSection[] = [
         title: "User Roles",
         href: "/admin/dashboard/roles",
         icon: "ShieldCheck",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        title: "Categories Management",
+        href: "/admin/dashboard/categories-management",
+        icon: "Tag",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        title: "Brand Management",
+        href: "/admin/dashboard/brand/brand-management",
+        icon: "Trademark",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        title: "Product Variants Management",
+        href: "/admin/dashboard/variants",
+        icon: "BoxMultiple",
         roles: ["SUPER_ADMIN"],
       },
 
