@@ -21,3 +21,35 @@ export interface Section {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface HeroSliderProps {
+  /** Array of hero slides to display */
+  slides: Section[];
+
+  /** Enable automatic sliding */
+  autoPlay?: boolean;
+
+  /** Time between slides in milliseconds */
+  autoPlayInterval?: number;
+
+  /** Show navigation arrows */
+  showNavigation?: boolean;
+
+  /** Show pagination dots */
+  showDots?: boolean;
+
+  /** Pause on hover */
+  pauseOnHover?: boolean;
+
+  /** Animation duration in ms */
+  animationDuration?: number;
+
+  /** Container height */
+  height?: string;
+
+  /** Custom className */
+  className?: string;
+
+  /** Callback when slide changes */
+  onSlideChange?: (index: number, slide: Section) => void;
+}

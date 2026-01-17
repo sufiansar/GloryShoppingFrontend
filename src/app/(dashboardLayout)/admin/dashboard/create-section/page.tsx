@@ -1,7 +1,9 @@
+import CreateSectionForm from "@/components/modules/Sections/SectionsCreate";
+
 const page = () => {
   return (
     <div>
-      <h1>Welcome to the page Component!</h1>
+      <CreateSectionForm />
     </div>
   );
 };

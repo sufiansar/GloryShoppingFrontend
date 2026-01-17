@@ -1,41 +1,31 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { makeApiCall } from "../apiClinet";
 
 export const createSection = async (data: FormData) => {
-  const sectionInfo = Object.fromEntries(data.entries());
-
-  const modify = {
-    ...sectionInfo,
-    type: sectionInfo.type as string,
-    images: sectionInfo.images ? JSON.parse(sectionInfo.images as string) : [],
-    isVisible:
-      sectionInfo.isVisible === "true" || sectionInfo.isVisible === "on",
-  };
-
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/section`, {
+    // Log what we're sending to help with debugging
+    console.log("📤 Creating section with FormData");
+
+    const result = await makeApiCall<any>("/section", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(modify),
+      body: data,
     });
-
-    const result = await res.json();
-
+    console.log("section", result);
     if (result?.id) {
-      revalidateTag("SECTION", "create-section"); // refresh cached section list
-      redirect("/sections"); // go back to list
+      revalidatePath("/sections", "page");
+      redirect("/sections");
     }
 
     return result;
   } catch (error) {
     console.error("Error creating section:", error);
-    throw new Error("Failed to create section");
+    throw error;
   }
 };
+
 export const updateSection = async (id: string, data: FormData) => {
   const sectionInfo = Object.fromEntries(data.entries());
 
@@ -49,21 +39,16 @@ export const updateSection = async (id: string, data: FormData) => {
   console.log("Updating section:", id, modify);
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/section/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(modify),
-      }
-    );
-
-    const result = await res.json();
+    const result = await makeApiCall<any>(`/section/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(modify),
+    });
 
     if (result?.id) {
-      revalidateTag("SECTION", "update-section");
+      revalidatePath("/sections", "page");
       redirect("/sections");
     }
 
@@ -78,17 +63,12 @@ export const deleteSection = async (id: string) => {
   console.log("Deleting section:", id);
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/section/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const result = await makeApiCall<any>(`/section/${id}`, {
+      method: "DELETE",
+    });
 
-    const result = await res.json();
-
-    if (result.success) {
-      revalidateTag("SECTION", "delete-section");
+    if (result?.success) {
+      revalidatePath("/sections", "page");
       return { success: true };
     }
 
@@ -101,30 +81,21 @@ export const deleteSection = async (id: string) => {
 
 export const getSections = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/section`, {
+    return await makeApiCall<any>("/section", {
       next: { tags: ["SECTION"] },
     });
-
-    return res.json();
   } catch (error) {
     console.error("Error fetching sections:", error);
     return [];
   }
 };
+
 export const getSectionById = async (id: string) => {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/section/${id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      }
-    );
-
-    return await res.json();
+    return await makeApiCall<any>(`/section/${id}`, {
+      method: "GET",
+      cache: "no-store",
+    });
   } catch (error) {
     console.error("Error fetching section:", error);
     return null;

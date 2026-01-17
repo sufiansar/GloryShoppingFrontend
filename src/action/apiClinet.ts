@@ -15,19 +15,19 @@ export const makeApiCall = async <T>(
     console.warn("❌ No accessToken found in session");
   }
 
+  // Don't set Content-Type for FormData - let the browser handle it
+  const isFormData = options.body instanceof FormData;
+
   if (
     !headers.has("Content-Type") &&
+    !isFormData &&
     options.method &&
     options.method !== "GET"
   ) {
     headers.set("Content-Type", "application/json");
   }
 
-  if (
-    options.body &&
-    typeof options.body === "object" &&
-    !(options.body instanceof FormData)
-  ) {
+  if (options.body && typeof options.body === "object" && !isFormData) {
     options.body = JSON.stringify(options.body);
   }
 
