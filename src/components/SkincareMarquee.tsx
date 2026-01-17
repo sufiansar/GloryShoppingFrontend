@@ -7,7 +7,7 @@ export function SkincareMarquee() {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <div className="w-full py-4 bg-pink-400 border-y my-4 border-border/50">
+    <div className="w-full py-2 bg-pink-400 border-y  border-border/50">
       {/* Add CSS animation to global scope */}
       <style jsx global>{`
         @keyframes infiniteScroll {

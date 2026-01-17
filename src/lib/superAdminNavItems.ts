@@ -6,7 +6,7 @@ export const superAdminNavItems: NavSection[] = [
     items: [
       {
         title: "Create Section",
-        href: "/admin/dashboard/sections",
+        href: "/admin/dashboard/create-section",
         icon: "FolderPlus",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
