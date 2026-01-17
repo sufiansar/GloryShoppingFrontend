@@ -1,6 +1,7 @@
 // types/product.ts
 export interface Product {
-  name: string; // Acts as the identifier
+  id?: string;
+  name: string;
   slug: string | null;
   description: string | null;
   country: string | null;
@@ -20,4 +21,8 @@ export interface Product {
   shortDesc: string | null;
   tags: string[]; // Array of tag names
   isActive: boolean;
+  category?: {
+    id: string;
+    name: string;
+  };
 }

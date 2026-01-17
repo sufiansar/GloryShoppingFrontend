@@ -45,7 +45,6 @@ import { SECTION_TYPE } from "@/types/section.interface";
 import { createSection } from "@/action/section/section.action";
 import { toast } from "sonner";
 
-// Schema without images field since we're handling files separately
 const createSchema = z.object({
   type: z.nativeEnum(SECTION_TYPE),
   title: z.string().optional(),
@@ -97,7 +96,7 @@ export default function CreateSectionForm() {
 
       if (!validTypes.includes(file.type)) {
         toast.error(
-          `Invalid file type: ${file.name}. Please upload images only.`
+          `Invalid file type: ${file.name}. Please upload images only.`,
         );
         return false;
       }
@@ -144,7 +143,7 @@ export default function CreateSectionForm() {
 
       if (!validTypes.includes(file.type)) {
         toast.error(
-          `Invalid file type: ${file.name}. Please upload images only.`
+          `Invalid file type: ${file.name}. Please upload images only.`,
         );
         return false;
       }
@@ -175,15 +174,14 @@ export default function CreateSectionForm() {
         if (value === undefined || value === "") return;
 
         if (key === "isVisible") {
-          formData.append(key, String(value)); // "true" | "false"
+          formData.append(key, String(value));
         } else {
-          formData.append(key, String(value)); // HERO, PROMOTIONAL, etc
+          formData.append(key, String(value));
         }
       });
 
-      // Append each image file - multer expects field name "images"
       selectedFiles.forEach((file) => {
-        formData.append("images", file); // Important: field name must be "images"
+        formData.append("images", file);
       });
 
       console.log("📤 Form data entries:");
@@ -195,7 +193,6 @@ export default function CreateSectionForm() {
         }
       }
 
-      // Call the action with FormData
       const result = await createSection(formData);
       console.log("createPage", result);
       if (result.success) {

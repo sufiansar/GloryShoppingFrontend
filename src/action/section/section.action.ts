@@ -6,7 +6,6 @@ import { makeApiCall } from "../apiClinet";
 
 export const createSection = async (data: FormData) => {
   try {
-    // Log what we're sending to help with debugging
     console.log("📤 Creating section with FormData");
 
     const result = await makeApiCall<any>("/section", {
