@@ -18,7 +18,7 @@ export const superAdminNavItems: NavSection[] = [
       },
       {
         title: "Create Product",
-        href: "/admin/dashboard/products",
+        href: "/admin/dashboard/products/create",
         icon: "PackagePlus",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
@@ -85,6 +85,12 @@ export const superAdminNavItems: NavSection[] = [
         title: "Product Variants Management",
         href: "/admin/dashboard/variants",
         icon: "BoxMultiple",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        title: "Product Management",
+        href: "/admin/dashboard/products",
+        icon: "Package",
         roles: ["SUPER_ADMIN"],
       },
 

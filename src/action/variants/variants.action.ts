@@ -78,14 +78,14 @@ export const getAllVariants = async (queryString: string) => {
   }
 };
 
-export const getVariantBySKU = async (sku: string) => {
+export const getVariantByID = async (id: string) => {
   try {
-    const result = await makeApiCall<any>(`/variant/${sku}`, {
+    const result = await makeApiCall<any>(`/variant/${id}`, {
       method: "GET",
     });
-    if (result?.success) {
-      revalidatePath("/variants", "page");
-    }
+    // if (result?.success) {
+    //   revalidatePath("/admin/dashboard/variants", "page");
+    // }
     return result;
   } catch (error) {
     console.log("Error", error);

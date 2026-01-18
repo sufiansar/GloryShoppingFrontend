@@ -75,6 +75,19 @@ export const getAllProducts = async (queryString: string) => {
   }
 };
 
+export const getProductBySlug = async (slug: string) => {
+  try {
+    const result = await makeApiCall<any>(`/product/slug/${slug}`, {
+      method: "GET",
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching product by slug:", error);
+    throw new Error("Failed to fetch product by slug");
+  }
+};
+
 export const getProductById = async (id: string) => {
   try {
     const result = await makeApiCall<any>(`/product/${id}`, {

@@ -59,7 +59,7 @@ export default async function VariantsPage({
           </p>
         </div>
         <Button asChild>
-          <Link href="/admin/variants/create">
+          <Link href="/admin/dashboard/variants/create">
             <Plus className="mr-2 h-4 w-4" />
             Create Variant
           </Link>
@@ -77,12 +77,12 @@ export default async function VariantsPage({
             readOnly
           />
         </div>
-        <Select defaultValue={params.productId || ""}>
+        <Select defaultValue={params.productId || "all"}>
           <SelectTrigger className="w-45">
             <SelectValue placeholder="Filter by product" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All products</SelectItem>
+            <SelectItem value="all">All products</SelectItem>
             {/* You would populate this from your products API */}
           </SelectContent>
         </Select>
