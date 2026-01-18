@@ -76,11 +76,11 @@ export default function VariantsTable({
   };
 
   const handleViewDetails = (variant: ProductVariant) => {
-    router.push(`/admin/variants/${variant.id}`);
+    router.push(`/admin/dashboard/variants/${variant.id}`);
   };
 
   const handleEdit = (variant: ProductVariant) => {
-    router.push(`/admin/variants/${variant.id}/edit`);
+    router.push(`/admin/dashboard/variants/${variant.id}/edit`);
   };
 
   const handleSearch = useDebouncedCallback((term: string) => {
@@ -92,7 +92,7 @@ export default function VariantsTable({
       params.delete("searchTerm");
     }
     params.set("page", "1"); // Reset to first page on new search
-    router.push(`/admin/variants?${params.toString()}`);
+    router.push(`/admin/dashboard/variants?${params.toString()}`);
   }, 500);
 
   const handleClearSearch = () => {
@@ -100,20 +100,20 @@ export default function VariantsTable({
     const params = new URLSearchParams(searchParams);
     params.delete("searchTerm");
     params.set("page", "1");
-    router.push(`/admin/variants?${params.toString()}`);
+    router.push(`/admin/dashboard/variants?${params.toString()}`);
   };
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`/admin/variants?${params.toString()}`);
+    router.push(`/admin/dashboard/variants?${params.toString()}`);
   };
 
   const handleItemsPerPageChange = (limit: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("limit", limit.toString());
     params.set("page", "1");
-    router.push(`/admin/variants?${params.toString()}`);
+    router.push(`/admin/dashboard/variants?${params.toString()}`);
   };
 
   const handleSortChange = (field: string) => {
@@ -128,7 +128,7 @@ export default function VariantsTable({
 
     params.set("sortBy", field);
     params.set("sortOrder", newSortOrder);
-    router.push(`/admin/variants?${params.toString()}`);
+    router.push(`/admin/dashboard/variants?${params.toString()}`);
   };
 
   if (variants.length === 0) {
@@ -136,7 +136,9 @@ export default function VariantsTable({
       <div className="border rounded-lg p-8 text-center">
         <p className="text-muted-foreground">No variants found</p>
         <Button className="mt-4" asChild>
-          <a href="/admin/variants/create">Create Your First Variant</a>
+          <a href="/admin/dashboard/variants/create">
+            Create Your First Variant
+          </a>
         </Button>
       </div>
     );

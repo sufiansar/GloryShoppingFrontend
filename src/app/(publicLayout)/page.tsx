@@ -1,7 +1,20 @@
+import ProductsPage from "./product/page";
+
 const PublicPage = () => {
+  let searchParams = new Promise<{
+    page?: string;
+    limit?: string;
+    searchTerm?: string;
+    categoryId?: string;
+    brandId?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }>((resolve) => {
+    resolve({});
+  });
   return (
     <div>
-      <h1>Welcome to the PublicPage Component!</h1>
+      <ProductsPage searchParams={searchParams} />
     </div>
   );
 };

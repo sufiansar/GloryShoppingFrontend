@@ -12,12 +12,14 @@ import Image from "next/image";
 import ProductSelectionDialog from "./ProductSelectionDialog";
 import { Product } from "@/types/product.interface";
 import { createProductVariant } from "@/action/variants/variants.action";
+import { toast } from "sonner";
 
 export default function CreateVariantForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
 
@@ -42,18 +44,27 @@ export default function CreateVariantForm() {
       const formDataObj = new FormData();
       formDataObj.append("productId", selectedProduct?.id || "");
       formDataObj.append("size", formData.size);
-      formDataObj.append("stock", formData.stock);
-      formDataObj.append("lowStockThreshold", formData.lowStockThreshold);
+      formDataObj.append("stock", formData.stock.toString());
+      formDataObj.append(
+        "lowStockThreshold",
+        formData.lowStockThreshold.toString(),
+      );
 
-      // Add images
       if (images.length > 0) {
-        formDataObj.append("images", JSON.stringify(images));
+        images.forEach((file) => {
+          formDataObj.append("images", file);
+        });
       }
 
-      await createProductVariant(formDataObj);
-
-      router.push("/admin/variants");
-      router.refresh();
+      const result = await createProductVariant(formDataObj);
+      if (result.success) {
+        toast.success("✅ Variant created successfully!");
+        router.push("/admin/dashboard/variants");
+        router.refresh();
+        return;
+      } else {
+        toast.error(result.message || "Failed to create variant");
+      }
     } catch (error) {
       console.error("Create error:", error);
       setError(
@@ -66,32 +77,33 @@ export default function CreateVariantForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    if (name === "stock" || name === "lowStockThreshold") {
+      const numericValue = Math.max(0, Number(value));
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const files = e.target.files;
+    if (!files) return;
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImages((prev) => [...prev, result]);
-      };
-      reader.readAsDataURL(file);
-    });
+    setImages((prev) => [...prev, ...Array.from(files)]);
   };
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddImageUrl = () => {
-    const url = prompt("Enter image URL:");
-    if (url && url.trim()) {
-      setImages((prev) => [...prev, url.trim()]);
-    }
-  };
+  // const handleAddImageUrl = () => {
+  //   const url = prompt("Enter image URL:");
+  //   if (url && url.trim()) {
+  //     setImages((prev) => [...prev, url.trim()]);
+  //   }
+  // };
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
@@ -132,7 +144,7 @@ export default function CreateVariantForm() {
                       {selectedProduct?.thumbleImage?.[0] && (
                         <div className="relative w-12 h-12">
                           <Image
-                            src={selectedProduct.thumbleImage[0]}
+                            src={selectedProduct.thumbleImage}
                             alt={selectedProduct.name}
                             fill
                             className="object-cover rounded"
@@ -231,7 +243,7 @@ export default function CreateVariantForm() {
               <div className="flex items-center justify-between">
                 <Label>Variant Images</Label>
                 <div className="flex gap-2">
-                  <Button
+                  {/* <Button
                     type="button"
                     variant="outline"
                     size="sm"
@@ -239,7 +251,7 @@ export default function CreateVariantForm() {
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add URL
-                  </Button>
+                  </Button> */}
                   <div>
                     <Input
                       type="file"
@@ -266,28 +278,31 @@ export default function CreateVariantForm() {
 
               {images.length > 0 ? (
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative aspect-square group">
-                      <Image
-                        src={image}
-                        alt={`Variant image ${index + 1}`}
-                        fill
-                        className="object-cover rounded-lg border"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveImage(index)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
+                  {images.map((file, index) => {
+                    const imageUrl = URL.createObjectURL(file); // create temporary URL
+                    return (
+                      <div key={index} className="relative aspect-square group">
+                        <Image
+                          src={imageUrl}
+                          alt={`Variant image ${index + 1}`}
+                          fill
+                          className="object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleRemoveImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                <div className="text-center">
                   <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground">
                     No images uploaded yet

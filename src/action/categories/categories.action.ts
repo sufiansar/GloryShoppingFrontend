@@ -96,12 +96,9 @@ export const fetchAllCategories = async (queryString?: string) => {
     } else {
       builtQueryString = `page=${page}&limit=${limit}`;
     }
-    const result = await makeApiCall<any>(
-      `/category${queryString ? `?${queryString}` : ""}`,
-      {
-        method: "GET",
-      },
-    );
+    const result = await makeApiCall<any>(`/category?${builtQueryString}`, {
+      method: "GET",
+    });
 
     return result;
   } catch (error) {

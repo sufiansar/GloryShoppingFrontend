@@ -1,4 +1,4 @@
-import { getVariantBySKU } from "@/action/variants/variants.action";
+import { getVariantByID } from "@/action/variants/variants.action";
 import EditVariantForm from "@/components/modules/Admin/ProductVariant/EditVariantForm";
 import { notFound } from "next/navigation";
 
@@ -13,7 +13,7 @@ export default async function EditVariantPage({
 }: EditVariantPageProps) {
   const { id } = await params;
 
-  const variant = await getVariantBySKU(id);
+  const variant = await getVariantByID(id);
 
   if (!variant) {
     notFound();
@@ -24,12 +24,12 @@ export default async function EditVariantPage({
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Edit Variant</h1>
         <p className="text-muted-foreground">
-          Update variant details for {variant.sku}
+          Update variant details for {variant?.data?.sku}
         </p>
       </div>
 
       <div className="max-w-2xl">
-        <EditVariantForm variant={variant} />
+        <EditVariantForm variant={variant?.data} />
       </div>
     </div>
   );

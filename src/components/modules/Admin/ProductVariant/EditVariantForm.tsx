@@ -1,4 +1,3 @@
-// components/admin/variants/EditVariantForm.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Upload, X, Plus, Package } from "lucide-react";
+import { X, Package } from "lucide-react";
 import Image from "next/image";
 import { ProductVariant } from "@/types/variants.interface";
 import { updateProductVariant } from "@/action/variants/variants.action";
@@ -22,7 +21,10 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [images, setImages] = useState<string[]>(variant.images || []);
+  const [images, setImages] = useState<File[]>([]); // store files
+  const [previewImages, setPreviewImages] = useState<string[]>(
+    variant.images || [],
+  ); // preview URLs
 
   const [formData, setFormData] = useState({
     size: variant.size,
@@ -42,9 +44,9 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
       formDataObj.append("stock", formData.stock);
       formDataObj.append("lowStockThreshold", formData.lowStockThreshold);
 
-      if (images.length > 0) {
-        formDataObj.append("images", JSON.stringify(images));
-      }
+      images.forEach((file) => {
+        formDataObj.append("images", file);
+      });
 
       const result = await updateProductVariant(variant.id, formDataObj);
       if (result.success) {
@@ -69,15 +71,20 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddImageUrl = () => {
-    const url = prompt("Enter image URL:");
-    if (url && url.trim()) {
-      setImages((prev) => [...prev, url.trim()]);
-    }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const filesArray = Array.from(e.target.files);
+    setImages((prev) => [...prev, ...filesArray]);
+
+    // add preview URLs
+    const newPreviews = filesArray.map((file) => URL.createObjectURL(file));
+    setPreviewImages((prev) => [...prev, ...newPreviews]);
   };
 
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -191,20 +198,17 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Variant Images</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddImageUrl}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Image URL
-              </Button>
+              <Input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+              />
             </div>
 
-            {images.length > 0 ? (
+            {previewImages.length > 0 ? (
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {images.map((image, index) => (
+                {previewImages.map((image, index) => (
                   <div key={index} className="relative aspect-square group">
                     <Image
                       src={image}
