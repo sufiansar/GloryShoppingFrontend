@@ -26,7 +26,6 @@ export default async function ProductsPage({
   const sortBy = params.sortBy || "createdAt";
   const sortOrder = params.sortOrder || "desc";
 
-  // Build query string with isActive=true for public page
   const queryString = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
@@ -38,7 +37,6 @@ export default async function ProductsPage({
     ...(params.brandId && { brandId: params.brandId }),
   }).toString();
 
-  // Fetch products
   const result = await getAllProducts(queryString);
 
   return (
@@ -71,9 +69,6 @@ export default async function ProductsPage({
         </div>
       </div>
 
-      {/* Filters and Controls */}
-
-      {/* Product Grid */}
       <ProductGrid
         products={result?.data || []}
         currentPage={page}

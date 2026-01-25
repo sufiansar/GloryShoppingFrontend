@@ -48,6 +48,7 @@ export interface Product {
     id?: string;
     name: string;
     country?: string;
+    logoUrl?: string | null;
   };
   category?: {
     id?: string;

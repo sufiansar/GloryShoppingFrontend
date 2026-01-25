@@ -10,12 +10,12 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Search, User, Menu } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Search, User, Menu } from "lucide-react";
 import { NavItem, navItems } from "@/components/Shared/NavItems/Navitems";
 import { getSession, useSession } from "next-auth/react";
 import UserMenu from "../Profile/ProfileForNavbar";
 import { MobileNav } from "./MobileNav";
+import { CartIcon } from "./CartIcon";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/helpers/authOptions";
 
@@ -23,10 +23,23 @@ const NavDropdown = ({ item }: { item: NavItem }) => {
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className="px-4 py-2 hover:bg-[#ca428b] rounded-md transition-colors text-white data-[state=open]:bg-[#ca428b] border border-white/30 hover:border-white bg-transparent">
-        {item.title}
+        <Link href={item.href}>{item.title}</Link>
       </NavigationMenuTrigger>
       <NavigationMenuContent className="bg-[#6b205a] border-[#6b205a] text-white">
         <div className="grid gap-3 p-6 md:w-100 lg:w-125 lg:grid-cols-2">
+          {/* View All link for main category */}
+          <Link
+            href={item.href}
+            className="block space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white/10 focus:bg-white/10 lg:col-span-2 border-2 border-white/30 font-semibold"
+          >
+            <div className="text-sm font-bold leading-none text-white">
+              View All {item.title} Products
+            </div>
+            <p className="line-clamp-2 text-sm leading-snug text-white/80">
+              Browse all products in this category
+            </p>
+          </Link>
+
           {item.featured && item.featured.length > 0 && (
             <>
               {item.featured.map((featuredItem) => (
@@ -87,7 +100,7 @@ const NavDropdown = ({ item }: { item: NavItem }) => {
 };
 
 // Main Navbar Component
-const Navbar = async ({ cartCount = 2 }: { cartCount?: number }) => {
+const Navbar = async () => {
   // const pathname = usePathname();
   const userInfo = await getServerSession(authOptions);
   console.log("SERVER SESSION:", userInfo);
@@ -101,7 +114,9 @@ const Navbar = async ({ cartCount = 2 }: { cartCount?: number }) => {
           <div className="flex items-center">
             <MobileNav />
             <Link href="/" className="ml-4 flex items-center space-x-2 md:ml-0">
-              {/* <span className="text-xl font-bold text-white">ChetceLrcacy</span> */}
+              <span className="text-xl font-bold text-white">
+                Glory Shopping
+              </span>
             </Link>
           </div>
 
@@ -138,21 +153,7 @@ const Navbar = async ({ cartCount = 2 }: { cartCount?: number }) => {
             </Button>
 
             {/* Shopping Cart */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative text-white hover:bg-[#ca428b] hover:text-white border border-white/30 hover:border-white bg-transparent"
-              asChild
-            >
-              <Link href="/cart">
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-white text-[#ca428b]">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
+            <CartIcon />
           </div>
         </div>
       </div>
