@@ -14,6 +14,39 @@ export interface NavLink {
 
 export const navItems: NavItem[] = [
   {
+    title: "B R A N D",
+    href: "/brand",
+    subItems: [
+      {
+        title: "About Us",
+        href: "/brand/about",
+        description: "Learn more about our brand and values",
+      },
+      {
+        title: "Our Story",
+        href: "/brand/story",
+        description: "Discover how we started and our journey",
+      },
+      {
+        title: "Sustainability",
+        href: "/brand/sustainability",
+        description: "Our commitment to sustainable practices",
+      },
+    ],
+    featured: [
+      {
+        title: "Spring Collection",
+        href: "/brand/collections/spring",
+        description: "Fresh styles for the new season",
+      },
+      {
+        title: "Eco-Friendly Products",
+        href: "/brand/collections/eco-friendly",
+        description: "Shop our sustainable product range",
+      },
+    ],
+  },
+  {
     title: "S K I N  C A R E",
     href: "/skin-care",
     subItems: [

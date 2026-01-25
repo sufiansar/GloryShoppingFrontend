@@ -17,44 +17,52 @@ export default async function PublicLayout({
   const heroSlides: Section[] = allSections
     .filter(
       (section: Section) =>
-        section.type === "HERO" && section.images && section.images.length > 0
+        section.type === "HERO" && section.images && section.images.length > 0,
     )
     .map((section: Section) => ({
       ...section,
-      // Ensure we only use the first image from each slide
       images: section.images.slice(0, 1),
     }));
+
+  const isProductDetailsPage = false;
 
   return (
     <div>
       <SecondaryNavbar />
       <Navbar />
 
-      {heroSlides.length > 0 ? (
-        <section className="p-2">
-          <div className="container mx-auto">
-            <HeroSliderWrapper
-              slides={heroSlides}
-              autoPlay={true}
-              autoPlayInterval={6000}
-              showNavigation={true}
-              showDots={true}
-              pauseOnHover={true}
-              height="400px"
-              className="shadow-2xl"
-              showText={false}
-            />
+      {!isProductDetailsPage && (
+        <>
+          {heroSlides.length > 0 ? (
+            <section className="hidden md:block p-2">
+              <div className="container mx-auto">
+                <HeroSliderWrapper
+                  slides={heroSlides}
+                  autoPlay={true}
+                  autoPlayInterval={6000}
+                  showNavigation={true}
+                  showDots={true}
+                  pauseOnHover={true}
+                  height="400px"
+                  className="shadow-2xl"
+                  showText={false}
+                />
+              </div>
+            </section>
+          ) : (
+            <section className="hidden md:block p-2">
+              <div className="container mx-auto h-100 bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                <p className="text-gray-500">No hero slides available</p>
+              </div>
+            </section>
+          )}
+
+          <div className="hidden md:block">
+            <SkincareMarquee />
           </div>
-        </section>
-      ) : (
-        <section className="p-2">
-          <div className="container mx-auto h-100 bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-            <p className="text-gray-500">No hero slides available</p>
-          </div>
-        </section>
+        </>
       )}
 
-      <SkincareMarquee />
       {children}
       <Footer />
     </div>

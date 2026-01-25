@@ -1,5 +1,7 @@
 import ProductsPage from "./product/page";
 
+export const dynamic = "force-dynamic";
+
 const PublicPage = () => {
   let searchParams = new Promise<{
     page?: string;
