@@ -15,6 +15,7 @@ export interface DeliveryInput {
   city: string;
   postalCode: string;
   deliveryCharge?: number;
+  deliveryZone?: "INSIDE_DHAKA" | "OUTSIDE_DHAKA";
 }
 
 export interface CheckoutInput {

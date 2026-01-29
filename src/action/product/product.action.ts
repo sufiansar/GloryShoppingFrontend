@@ -88,6 +88,87 @@ export const getProductBySlug = async (slug: string) => {
   }
 };
 
+export const getProductByBrand = async (brandId: string) => {
+  try {
+    const result = await makeApiCall<any>(`/product/brand/${brandId}`, {
+      method: "GET",
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching products by brand:", error);
+    throw new Error("Failed to fetch products by brand");
+  }
+};
+
+export const getProductBySkintype = async (
+  queryString: string,
+  skintypeId: string,
+) => {
+  try {
+    const searchParams = new URLSearchParams(queryString);
+    const page = searchParams.get("page") || "1";
+    const limit = searchParams.get("limit") || "10";
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const searchTerm = searchParams.get("searchTerm") || "";
+    let builtQueryString = `?page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    if (searchTerm) {
+      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
+        searchTerm,
+      )}`;
+    } else {
+      builtQueryString = `page=${page}&limit=${limit}`;
+    }
+
+    const result = await makeApiCall<any>(
+      `/product/skintype/${skintypeId}${builtQueryString}`,
+      {
+        method: "GET",
+      },
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching products by skintype:", error);
+    throw new Error("Failed to fetch products by skintype");
+  }
+};
+
+export const getProductBySkinConcern = async (
+  query: string,
+  skinConcernId: string,
+) => {
+  try {
+    const searchParams = new URLSearchParams(query);
+    const page = searchParams.get("page") || "1";
+    const limit = searchParams.get("limit") || "10";
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const searchTerm = searchParams.get("searchTerm") || "";
+    let builtQueryString = `?page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    if (searchTerm) {
+      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
+        searchTerm,
+      )}`;
+    } else {
+      builtQueryString = `page=${page}&limit=${limit}`;
+    }
+
+    const result = await makeApiCall<any>(
+      `/product/skinconcern/${skinConcernId}${builtQueryString}`,
+      {
+        method: "GET",
+      },
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching products by skin concern:", error);
+    throw new Error("Failed to fetch products by skin concern");
+  }
+};
+
 export const getProductById = async (id: string) => {
   try {
     const result = await makeApiCall<any>(`/product/${id}`, {

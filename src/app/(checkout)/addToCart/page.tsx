@@ -327,3 +327,7 @@
 //     </div>
 //   );
 // }
+
+export default function AddToCartPage() {
+  return <div>Page is under development</div>;
+}

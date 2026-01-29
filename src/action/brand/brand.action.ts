@@ -1,6 +1,10 @@
 "use server";
 import { revalidateTag } from "next/cache";
 import { makeApiCall } from "../apiClinet";
+import {
+  getBrandInfoFromSlug,
+  getBrandNameFromSlug,
+} from "@/components/utility/brand-slug-mapping";
 
 export const createBrand = async (formdata: FormData) => {
   try {
@@ -73,6 +77,48 @@ export const getAllBrand = async (queryString: string) => {
   } catch (error) {
     console.error("Error fetching brands:", error);
     throw new Error("Failed to fetch brands");
+  }
+};
+
+// Get brand information by slug (frontend only)
+export const getBrandBySlug = async (slug: string) => {
+  try {
+    // First, get the brand info from our mapping
+    const brandInfo = getBrandInfoFromSlug(slug);
+
+    if (!brandInfo) {
+      return {
+        id: null,
+        name: getBrandNameFromSlug(slug),
+        slug: slug,
+      };
+    }
+
+    if (!brandInfo.id) {
+      const allBrands = await getAllBrand("");
+      const matchingBrand = allBrands.find(
+        (b: any) => b.name.toLowerCase() === brandInfo.name.toLowerCase(),
+      );
+
+      if (matchingBrand) {
+        brandInfo.id = matchingBrand.id;
+        brandInfo.logo = matchingBrand.logo;
+      }
+    }
+
+    return {
+      id: brandInfo.id,
+      name: brandInfo.name,
+      slug: slug,
+      logo: brandInfo.logo,
+    };
+  } catch (error) {
+    console.error("Error getting brand by slug:", error);
+    return {
+      id: null,
+      name: getBrandNameFromSlug(slug),
+      slug: slug,
+    };
   }
 };
 
