@@ -107,8 +107,14 @@ export default function ProductDetailsPage({
   const displayPrice = selectedVariant?.price || product?.price || 0;
 
   const handleBuyNow = () => {
-    // handleAddToCart();
-    router.push("/checkout");
+    const variantId = selectedVariant?.id || product?.variants?.[0]?.id;
+    if (!variantId) {
+      alert("Please select a variant");
+      return;
+    }
+    router.push(
+      `/checkout?type=DIRECT&variantId=${variantId}&quantity=${quantity}`,
+    );
   };
 
   const handleShare = () => {

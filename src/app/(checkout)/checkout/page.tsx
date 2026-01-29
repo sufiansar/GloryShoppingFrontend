@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckoutForm } from "@/components/modules/Checkout/CheckoutFrom";
 import { OrderSuccess } from "@/components/modules/Checkout/OrderSuccess";
@@ -10,17 +11,59 @@ import { useCart } from "@/providers/CartProvider";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 
-export default function CheckoutPage() {
+// Client-side fetch for variant info
+const fetchVariant = async (variantId: string) => {
+  const API_BASE = process.env.NEXT_PUBLIC_BASE_API;
+  const res = await fetch(`${API_BASE}/variant/${variantId}`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to fetch variant");
+  return res.json();
+};
+
+function CheckoutPageContent() {
+  const searchParams = useSearchParams();
+  const checkoutType = searchParams.get("type") || "CART";
+  const directVariantId = searchParams.get("variantId");
+  const directQuantity = parseInt(searchParams.get("quantity") || "1");
+
   const [order, setOrder] = useState<any>(null);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
   const [cartItems, setCartItems] = useState<ICartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableVariants, setAvailableVariants] = useState<any[]>([]);
   const { refreshCartCount } = useCart();
 
   const fetchCart = useCallback(async () => {
     try {
       setIsLoading(true);
+
+      // If direct purchase, fetch variant info instead of cart
+      if (checkoutType === "DIRECT" && directVariantId) {
+        try {
+          const variantData = await fetchVariant(directVariantId);
+          if (variantData?.data) {
+            const variant = variantData.data;
+            setAvailableVariants([
+              {
+                id: variant.id,
+                name: variant.name || variant.sku || "Variant",
+                price: variant.price || 0,
+                productName: variant.product?.name || "Product",
+                stock: variant.stock || 0,
+              },
+            ]);
+          }
+        } catch (err) {
+          console.error("Error loading variant:", err);
+          setError("Unable to load product details. Please try again.");
+        }
+        setCartItems([]);
+        setIsLoading(false);
+        return;
+      }
+
       const result = await getCart();
 
       let items: any[] = [];
@@ -55,7 +98,7 @@ export default function CheckoutPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [checkoutType, directVariantId]);
 
   useEffect(() => {
     fetchCart();
@@ -110,7 +153,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && checkoutType !== "DIRECT") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4">
         <div className="max-w-md text-center space-y-4">
@@ -136,9 +179,19 @@ export default function CheckoutPage() {
     <CheckoutForm
       cartItems={cartItems}
       cartItemIds={cartItemIds}
-      deliveryCharge={0}
-      availableVariants={[]}
+      availableVariants={availableVariants}
       onOrderSuccess={handleOrderSuccess}
+      initialCheckoutType={checkoutType as "CART" | "DIRECT"}
+      directVariantId={directVariantId || undefined}
+      directQuantity={directQuantity}
     />
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

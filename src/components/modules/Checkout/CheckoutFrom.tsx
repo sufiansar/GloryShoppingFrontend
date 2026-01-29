@@ -41,6 +41,7 @@ import {
   Package,
   CreditCard,
   Truck,
+  MapPin,
 } from "lucide-react";
 import {
   CheckoutInput,
@@ -50,6 +51,12 @@ import {
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+// Delivery charge constants
+const DELIVERY_CHARGES = {
+  INSIDE_DHAKA: 60,
+  OUTSIDE_DHAKA: 120,
+} as const;
+
 // Form validation schema
 const formSchema = z.object({
   checkoutType: z.enum(["CART", "DIRECT"]),
@@ -57,8 +64,9 @@ const formSchema = z.object({
   phone: z.string().min(10, "Please enter a valid phone number"),
   email: z.string().email("Please enter a valid email"),
   address: z.string().min(5, "Address must be at least 5 characters"),
-  city: z.string().min(2, "City must be at least 2 characters"),
-  postalCode: z.string().min(4, "Please enter a valid postal code"),
+  city: z.string().optional(),
+  postalCode: z.string().optional(),
+  deliveryZone: z.enum(["INSIDE_DHAKA", "OUTSIDE_DHAKA"]),
   // Direct checkout fields
   variantId: z.string().optional(),
   quantity: z.number().min(1).optional(),
@@ -68,7 +76,6 @@ interface CheckoutFormProps {
   cartItems: ICartItem[];
   cartItemIds?: string[];
   userId?: string;
-  deliveryCharge?: number;
   availableVariants?: Array<{
     id: string;
     name: string;
@@ -77,35 +84,48 @@ interface CheckoutFormProps {
     stock: number;
   }>;
   onOrderSuccess?: (order: any) => void;
+  initialCheckoutType?: "CART" | "DIRECT";
+  directVariantId?: string;
+  directQuantity?: number;
 }
 
 export function CheckoutForm({
   cartItems,
   cartItemIds,
   userId,
-  deliveryCharge = 0,
   availableVariants = [],
   onOrderSuccess,
+  initialCheckoutType,
+  directVariantId,
+  directQuantity: initialDirectQuantity = 1,
 }: CheckoutFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<string>("");
-  const [directQuantity, setDirectQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<string>(
+    directVariantId || "",
+  );
+  const [directQuantity, setDirectQuantity] = useState(initialDirectQuantity);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      checkoutType: cartItems.length > 0 ? "CART" : "DIRECT",
+      checkoutType:
+        initialCheckoutType || (cartItems.length > 0 ? "CART" : "DIRECT"),
       name: "",
       phone: "",
       email: "",
       address: "",
       city: "",
       postalCode: "",
-      quantity: 1,
+      deliveryZone: "INSIDE_DHAKA", // Default to Inside Dhaka
+      quantity: initialDirectQuantity,
     },
   });
 
   const watchCheckoutType = form.watch("checkoutType");
+  const watchDeliveryZone = form.watch("deliveryZone");
+
+  // Get delivery charge based on zone
+  const deliveryCharge = DELIVERY_CHARGES[watchDeliveryZone];
 
   // Calculate totals based on checkout type
   const calculateTotals = () => {
@@ -160,9 +180,11 @@ export function CheckoutForm({
         phone: values.phone,
         email: values.email,
         address: values.address,
-        city: values.city,
-        postalCode: values.postalCode,
+        city: values?.city || "",
+        postalCode: values.postalCode || "",
         deliveryCharge,
+        // Add delivery zone to delivery data if your backend expects it
+        deliveryZone: values.deliveryZone,
       };
 
       // Prepare checkout input based on type
@@ -178,24 +200,27 @@ export function CheckoutForm({
         checkoutInput.quantity = directQuantity;
       }
 
-      const data = await createOrder(checkoutInput);
+      // Call your API client function
+      const result = await createOrder(checkoutInput);
 
-      if (!data?.data) {
-        throw new Error(data?.message || "Failed to create order");
+      if (!result?.data) {
+        throw new Error(result?.message || "Failed to create order");
       }
 
+      const order = result.data;
+
       toast("Order Created Successfully!", {
-        description: `Order ID: ${data.data.id}`,
+        description: `Order ID: ${order.id}`,
       });
 
       toast("Your order has been successfully placed!", {
-        description: `Order #${data.data.id} - Total: $${data.data.amount.toFixed(
-          2,
-        )}`,
+        description: `Order #${order.id} - Total: $${
+          order.amount?.toFixed(2) || grandTotal.toFixed(2)
+        }`,
       });
 
       if (onOrderSuccess) {
-        onOrderSuccess(data.data);
+        onOrderSuccess(order);
       }
     } catch (error) {
       console.error("Order creation error:", error);
@@ -210,170 +235,216 @@ export function CheckoutForm({
       <form
         id="checkout-form"
         onSubmit={form.handleSubmit(onSubmit)}
-        className="container mx-auto px-4 py-8"
+        className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 py-12 px-4"
       >
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+          <div className="mb-10 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-3">
+              Complete Your Order
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Just a few more details to finalize your purchase
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Order Details */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Checkout Type Selector */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Checkout Method</CardTitle>
-                  <CardDescription>
-                    Choose how you want to checkout
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <FormField
-                    control={form.control}
-                    name="checkoutType"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-col space-y-1"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="CART" id="cart" />
-                              <Label htmlFor="cart" className="cursor-pointer">
-                                <div className="flex items-center gap-2">
-                                  <ShoppingCart className="h-4 w-4" />
-                                  <span>Checkout from Cart</span>
-                                  {cartItems.length > 0 && (
-                                    <Badge variant="secondary">
-                                      {cartItems.length} items
-                                    </Badge>
-                                  )}
-                                </div>
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="DIRECT" id="direct" />
-                              <Label
-                                htmlFor="direct"
-                                className="cursor-pointer"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Package className="h-4 w-4" />
-                                  <span>Direct Purchase</span>
-                                </div>
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Product Selection for Direct Checkout */}
-              {watchCheckoutType === "DIRECT" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Select Product</CardTitle>
+              {/* Checkout Type Selector - Only show if both modes are available */}
+              {cartItems.length > 0 && availableVariants.length === 0 && (
+                <Card className="shadow-lg border-purple-100 bg-white/80 backdrop-blur">
+                  <CardHeader className="bg-linear-to-r from-purple-50 to-pink-50">
+                    <CardTitle className="text-purple-900">
+                      Checkout Method
+                    </CardTitle>
+                    <CardDescription>
+                      Choose how you want to checkout
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="variant-select">Product Variant</Label>
-                      <Select
-                        value={selectedVariant}
-                        onValueChange={setSelectedVariant}
-                      >
-                        <SelectTrigger id="variant-select">
-                          <SelectValue placeholder="Select a product variant" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableVariants.map((variant) => (
-                            <SelectItem key={variant.id} value={variant.id}>
-                              <div className="flex justify-between items-center w-full">
-                                <span>
-                                  {variant.productName} - {variant.name}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  ${variant.price}
-                                </span>
+                  <CardContent>
+                    <FormField
+                      control={form.control}
+                      name="checkoutType"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col space-y-1"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="CART" id="cart" />
+                                <Label
+                                  htmlFor="cart"
+                                  className="cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <ShoppingCart className="h-4 w-4" />
+                                    <span>Checkout from Cart</span>
+                                    {cartItems.length > 0 && (
+                                      <Badge variant="secondary">
+                                        {cartItems.length} items
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </Label>
                               </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {selectedVariant && (
-                      <div>
-                        <Label htmlFor="quantity">Quantity</Label>
-                        <div className="flex items-center gap-4 mt-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              setDirectQuantity(Math.max(1, directQuantity - 1))
-                            }
-                            disabled={directQuantity <= 1}
-                          >
-                            -
-                          </Button>
-                          <Input
-                            id="quantity"
-                            type="number"
-                            min="1"
-                            value={directQuantity}
-                            onChange={(e) =>
-                              setDirectQuantity(parseInt(e.target.value) || 1)
-                            }
-                            className="w-20 text-center"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              setDirectQuantity(directQuantity + 1)
-                            }
-                          >
-                            +
-                          </Button>
-                        </div>
-                      </div>
-                    )}
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="DIRECT" id="direct" />
+                                <Label
+                                  htmlFor="direct"
+                                  className="cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Package className="h-4 w-4" />
+                                    <span>Direct Purchase</span>
+                                  </div>
+                                </Label>
+                              </div>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 </Card>
               )}
 
+              {/* Product Selection for Direct Checkout */}
+              {watchCheckoutType === "DIRECT" &&
+                availableVariants.length > 0 && (
+                  <Card className="shadow-lg border-pink-100 bg-white/80 backdrop-blur">
+                    <CardHeader className="bg-linear-to-r from-pink-50 to-rose-50">
+                      <CardTitle className="text-pink-900">
+                        Product Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {availableVariants.length === 1 ? (
+                        // Single variant - show as display only
+                        <div className="p-5 border-2 rounded-xl bg-linear-to-br from-pink-50 to-rose-50 border-pink-200">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <p className="font-bold text-xl text-pink-900">
+                                {availableVariants[0].productName}
+                              </p>
+                              <p className="text-sm text-pink-700 mt-1">
+                                {availableVariants[0].name}
+                              </p>
+                            </div>
+                            <p className="text-2xl font-bold text-pink-700">
+                              ${availableVariants[0].price}
+                            </p>
+                          </div>
+                          <p className="text-sm text-pink-600 bg-white/50 inline-block px-3 py-1 rounded-full">
+                            Stock: {availableVariants[0].stock} available
+                          </p>
+                        </div>
+                      ) : (
+                        // Multiple variants - show selector
+                        <div>
+                          <Label htmlFor="variant-select">
+                            Product Variant
+                          </Label>
+                          <Select
+                            value={selectedVariant}
+                            onValueChange={setSelectedVariant}
+                          >
+                            <SelectTrigger id="variant-select">
+                              <SelectValue placeholder="Select a product variant" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableVariants.map((variant) => (
+                                <SelectItem key={variant.id} value={variant.id}>
+                                  <div className="flex justify-between items-center w-full">
+                                    <span>
+                                      {variant.productName} - {variant.name}
+                                    </span>
+                                    <span className="text-muted-foreground">
+                                      ${variant.price}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {selectedVariant && (
+                        <div>
+                          <Label htmlFor="quantity">Quantity</Label>
+                          <div className="flex items-center gap-4 mt-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                setDirectQuantity(
+                                  Math.max(1, directQuantity - 1),
+                                )
+                              }
+                              disabled={directQuantity <= 1}
+                            >
+                              -
+                            </Button>
+                            <Input
+                              id="quantity"
+                              type="number"
+                              min="1"
+                              value={directQuantity}
+                              onChange={(e) =>
+                                setDirectQuantity(parseInt(e.target.value) || 1)
+                              }
+                              className="w-20 text-center"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() =>
+                                setDirectQuantity(directQuantity + 1)
+                              }
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
               {/* Cart Items Display for Cart Checkout */}
               {watchCheckoutType === "CART" && cartItems.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Cart Items</CardTitle>
+                <Card className="shadow-lg border-indigo-100 bg-white/80 backdrop-blur">
+                  <CardHeader className="bg-linear-to-r from-indigo-50 to-purple-50">
+                    <CardTitle className="text-indigo-900">
+                      Cart Items
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {cartItems.map((item, index) => (
                         <div
                           key={item.variantId || index}
-                          className="flex items-center justify-between p-4 border rounded-lg"
+                          className="flex items-center justify-between p-4 border-2 rounded-xl bg-linear-to-r from-indigo-50/50 to-purple-50/50 border-indigo-100 hover:border-indigo-300 transition-all"
                         >
                           <div>
-                            <p className="font-semibold">
+                            <p className="font-bold text-indigo-900">
                               {item.productName || "Product"}
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              Variant: {item.variantId}
+                            <p className="text-sm text-indigo-600 mt-1">
+                              Variant ID: {item.variantId?.slice(0, 13)}...
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">
+                            <p className="font-bold text-xl text-indigo-700">
                               ${((item.price || 0) * item.quantity).toFixed(2)}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-indigo-600 mt-1">
                               Qty: {item.quantity} × ${item.price?.toFixed(2)}
                             </p>
                           </div>
@@ -384,10 +455,93 @@ export function CheckoutForm({
                 </Card>
               )}
 
+              {/* Delivery Zone Selection */}
+              <Card className="shadow-lg border-blue-100 bg-white/80 backdrop-blur">
+                <CardHeader className="bg-linear-to-r from-blue-50 to-cyan-50">
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <MapPin className="h-5 w-5" />
+                    Delivery Zone
+                  </CardTitle>
+                  <CardDescription>
+                    Select your delivery location
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="deliveryZone"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col space-y-1"
+                          >
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer">
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem
+                                  value="INSIDE_DHAKA"
+                                  id="inside-dhaka"
+                                />
+                                <Label
+                                  htmlFor="inside-dhaka"
+                                  className="cursor-pointer"
+                                >
+                                  <div>
+                                    <p className="font-medium">Inside Dhaka</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      Dhaka City Corporation areas
+                                    </p>
+                                  </div>
+                                </Label>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold">
+                                  ৳{DELIVERY_CHARGES.INSIDE_DHAKA}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer">
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem
+                                  value="OUTSIDE_DHAKA"
+                                  id="outside-dhaka"
+                                />
+                                <Label
+                                  htmlFor="outside-dhaka"
+                                  className="cursor-pointer"
+                                >
+                                  <div>
+                                    <p className="font-medium">Outside Dhaka</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      Other cities and districts
+                                    </p>
+                                  </div>
+                                </Label>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold">
+                                  ৳{DELIVERY_CHARGES.OUTSIDE_DHAKA}
+                                </p>
+                              </div>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
               {/* Delivery Information Form */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Delivery Information</CardTitle>
+              <Card className="shadow-lg border-green-100 bg-white/80 backdrop-blur">
+                <CardHeader className="bg-linear-to-r from-green-50 to-emerald-50">
+                  <CardTitle className="text-green-900">
+                    Delivery Information
+                  </CardTitle>
                   <CardDescription>
                     Please provide your delivery details
                   </CardDescription>
@@ -465,9 +619,9 @@ export function CheckoutForm({
                       name="city"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>City *</FormLabel>
+                          <FormLabel>City (Optional)</FormLabel>
                           <FormControl>
-                            <Input placeholder="New York" {...field} />
+                            <Input placeholder="Dhaka" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -479,9 +633,9 @@ export function CheckoutForm({
                       name="postalCode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Postal Code *</FormLabel>
+                          <FormLabel>Postal Code (Optional)</FormLabel>
                           <FormControl>
-                            <Input placeholder="10001" {...field} />
+                            <Input placeholder="1212" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -494,9 +648,11 @@ export function CheckoutForm({
 
             {/* Right Column - Order Summary */}
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+              <Card className="shadow-xl border-purple-200 bg-white/90 backdrop-blur sticky top-6">
+                <CardHeader className="bg-linear-to-r from-purple-50 to-pink-50">
+                  <CardTitle className="text-purple-900">
+                    Order Summary
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Items Summary */}
@@ -520,7 +676,7 @@ export function CheckoutForm({
                                 </span>
                               </span>
                               <span>
-                                $
+                                ৳
                                 {((item.price || 0) * item.quantity).toFixed(2)}
                               </span>
                             </div>
@@ -537,7 +693,7 @@ export function CheckoutForm({
                                   ×{directQuantity}
                                 </span>
                               </span>
-                              <span>${productTotal.toFixed(2)}</span>
+                              <span>৳{productTotal.toFixed(2)}</span>
                             </div>
                           )}
                     </div>
@@ -549,16 +705,22 @@ export function CheckoutForm({
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${productTotal.toFixed(2)}</span>
+                      <span>৳{productTotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Delivery Charge</span>
+                      <span>
+                        Delivery Charge (
+                        {watchDeliveryZone === "INSIDE_DHAKA"
+                          ? "Inside Dhaka"
+                          : "Outside Dhaka"}
+                        )
+                      </span>
                       <span>${deliveryCharge.toFixed(2)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>${grandTotal.toFixed(2)}</span>
+                      <span>৳{grandTotal.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -569,11 +731,11 @@ export function CheckoutForm({
                     </p>
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="pt-6">
                   <Button
                     type="submit"
                     form="checkout-form"
-                    className="w-full"
+                    className="w-full bg-linear-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300"
                     size="lg"
                     disabled={
                       isLoading ||
@@ -584,13 +746,13 @@ export function CheckoutForm({
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing Order...
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing Your Order...
                       </>
                     ) : (
                       <>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Place Order
+                        <CreditCard className="mr-2 h-5 w-5" />
+                        Place Order - ৳{grandTotal.toFixed(2)}
                       </>
                     )}
                   </Button>
@@ -598,23 +760,35 @@ export function CheckoutForm({
               </Card>
 
               {/* Delivery Info Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
+              <Card className="shadow-lg border-blue-100 bg-white/80 backdrop-blur">
+                <CardHeader className="bg-linear-to-r from-blue-50 to-cyan-50">
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <Truck className="h-5 w-5" />
                     Delivery Info
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Zone</span>
+                    <span>
+                      {watchDeliveryZone === "INSIDE_DHAKA"
+                        ? "Inside Dhaka"
+                        : "Outside Dhaka"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-muted-foreground">Charge</span>
-                    <span>${deliveryCharge.toFixed(2)}</span>
+                    <span>৳{deliveryCharge.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
                       Estimated Time
                     </span>
-                    <span>3-5 business days</span>
+                    <span>
+                      {watchDeliveryZone === "INSIDE_DHAKA"
+                        ? "1-2 business days"
+                        : "3-5 business days"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tracking</span>
