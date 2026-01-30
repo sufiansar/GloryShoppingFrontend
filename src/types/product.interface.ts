@@ -20,7 +20,7 @@ export interface Product {
   stock: number;
   shortDesc: string | null;
   longDesc: string | null;
-  tags: string[]; // Array of tag names
+  tags: string[];
   isActive: boolean;
   faquestions?: string | null;
   variants?: {
@@ -40,20 +40,39 @@ export interface Product {
     createdAt: string;
   }[];
   ingredients?: {
-    id?: string;
-    name: string;
-    quantity: string;
+    ingredient: {
+      name: string;
+      description?: string;
+      benefits?: string;
+      sideEffects?: string;
+      usage?: string;
+      precautions?: string;
+      isActive?: boolean;
+      safetyLevel: "SAFE" | "MODERATE" | "RESTRICTED";
+    };
   }[];
   brand?: {
     id?: string;
     name: string;
-    country?: string;
+    country?: string | null;
     logoUrl?: string | null;
   };
   category?: {
     id?: string;
     name: string;
   };
+
+  concerns?: {
+    skinConcern?: {
+      name: string;
+      description?: string;
+    };
+  }[];
+  skinTypes?: {
+    skinType?: {
+      name: string;
+    };
+  }[];
   categoryId: string | null;
   brandId: string | null;
   createdAt?: string;

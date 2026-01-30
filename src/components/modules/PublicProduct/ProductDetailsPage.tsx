@@ -83,11 +83,17 @@ export default function ProductDetailsPage({
   const [expandedSections, setExpandedSections] = useState<{
     description: boolean;
     specifications: boolean;
+    ingredients: boolean;
+    skinTypes: boolean;
+    concerns: boolean;
     reviews: boolean;
     faq: boolean;
   }>({
     description: false,
     specifications: false,
+    ingredients: false,
+    skinTypes: false,
+    concerns: false,
     reviews: false,
     faq: false,
   });
@@ -662,6 +668,192 @@ export default function ProductDetailsPage({
                   )}
                 </div>
 
+                {/* Ingredients Accordion */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleSection("ingredients")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="font-semibold text-left">
+                      Ingredients ({product?.ingredients?.length || 0})
+                    </span>
+                    {expandedSections.ingredients ? (
+                      <Minus className="h-5 w-5 text-gray-600" />
+                    ) : (
+                      <Plus className="h-5 w-5 text-gray-600" />
+                    )}
+                  </button>
+                  {expandedSections?.ingredients && (
+                    <div className="px-4 pb-4 border-t">
+                      {product?.ingredients &&
+                      product?.ingredients?.length > 0 ? (
+                        <div className="pt-4 space-y-4">
+                          {product?.ingredients?.map((item, idx) => {
+                            const ingredient = item?.ingredient;
+                            if (!ingredient) return null;
+                            return (
+                              <div
+                                key={idx}
+                                className="border-b pb-4 last:border-b-0"
+                              >
+                                <h4 className="font-semibold text-sm mb-2">
+                                  {ingredient?.name}
+                                </h4>
+                                {ingredient?.description && (
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    {ingredient?.description}
+                                  </p>
+                                )}
+                                {ingredient?.benefits && (
+                                  <div className="mb-2">
+                                    <p className="text-xs font-medium text-gray-600 mb-1">
+                                      Benefits:
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {ingredient?.benefits}
+                                    </p>
+                                  </div>
+                                )}
+                                {ingredient?.usage && (
+                                  <div className="mb-2">
+                                    <p className="text-xs font-medium text-gray-600 mb-1">
+                                      Usage:
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {ingredient?.usage}
+                                    </p>
+                                  </div>
+                                )}
+                                {ingredient?.sideEffects && (
+                                  <div className="mb-2">
+                                    <p className="text-xs font-medium text-red-600 mb-1">
+                                      Side Effects:
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {ingredient?.sideEffects}
+                                    </p>
+                                  </div>
+                                )}
+                                {ingredient?.precautions && (
+                                  <div>
+                                    <p className="text-xs font-medium text-orange-600 mb-1">
+                                      Precautions:
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {ingredient?.precautions}
+                                    </p>
+                                  </div>
+                                )}
+                                {ingredient?.safetyLevel && (
+                                  <Badge
+                                    variant="outline"
+                                    className={`mt-2 ${
+                                      ingredient?.safetyLevel === "SAFE"
+                                        ? "border-green-500 text-green-700"
+                                        : ingredient?.safetyLevel === "MODERATE"
+                                          ? "border-orange-500 text-orange-700"
+                                          : "border-red-500 text-red-700"
+                                    }`}
+                                  >
+                                    {ingredient?.safetyLevel}
+                                  </Badge>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground pt-4">
+                          No ingredients information available.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Skin Types Accordion */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleSection("skinTypes")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="font-semibold text-left">
+                      Suitable For Skin Types ({product?.skinTypes?.length || 0}
+                      )
+                    </span>
+                    {expandedSections?.skinTypes ? (
+                      <Minus className="h-5 w-5 text-gray-600" />
+                    ) : (
+                      <Plus className="h-5 w-5 text-gray-600" />
+                    )}
+                  </button>
+                  {expandedSections?.skinTypes && (
+                    <div className="px-4 pb-4 border-t">
+                      {product?.skinTypes && product?.skinTypes?.length > 0 ? (
+                        <div className="pt-4 flex flex-wrap gap-2">
+                          {product?.skinTypes?.map((item, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="px-3 py-1.5"
+                            >
+                              {item?.skinType?.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground pt-4">
+                          No skin type information available.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Skin Concerns Accordion */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleSection("concerns")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="font-semibold text-left">
+                      Addresses Skin Concerns ({product?.concerns?.length || 0})
+                    </span>
+                    {expandedSections?.concerns ? (
+                      <Minus className="h-5 w-5 text-gray-600" />
+                    ) : (
+                      <Plus className="h-5 w-5 text-gray-600" />
+                    )}
+                  </button>
+                  {expandedSections?.concerns && (
+                    <div className="px-4 pb-4 border-t">
+                      {product?.concerns && product?.concerns?.length > 0 ? (
+                        <div className="pt-4 space-y-3">
+                          {product?.concerns?.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="pb-3 border-b last:border-b-0"
+                            >
+                              <h4 className="font-semibold text-sm mb-1">
+                                {item?.skinConcern?.name}
+                              </h4>
+                              {item?.skinConcern?.description && (
+                                <p className="text-sm text-muted-foreground">
+                                  {item?.skinConcern?.description}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground pt-4">
+                          No skin concern information available.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* Reviews Accordion */}
                 <div className="border rounded-lg">
                   <button
@@ -671,13 +863,13 @@ export default function ProductDetailsPage({
                     <span className="font-semibold text-left">
                       Reviews ({product?.reviewCount || 0})
                     </span>
-                    {expandedSections.reviews ? (
+                    {expandedSections?.reviews ? (
                       <Minus className="h-5 w-5 text-gray-600" />
                     ) : (
                       <Plus className="h-5 w-5 text-gray-600" />
                     )}
                   </button>
-                  {expandedSections.reviews && (
+                  {expandedSections?.reviews && (
                     <div className="px-4 pb-4 border-t">
                       <div className="pt-4">
                         <div className="flex items-center gap-2 mb-4">
@@ -741,240 +933,6 @@ export default function ProductDetailsPage({
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Remove old tabs section */}
-        <div className="hidden mb-12">
-          <div className="border-b">
-            <div className="flex space-x-8">
-              <button
-                onClick={() => setActiveTab("description")}
-                className={`py-4 border-b-2 transition-colors ${
-                  activeTab === "description"
-                    ? "border-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Description
-              </button>
-              <button
-                onClick={() => setActiveTab("specifications")}
-                className={`py-4 border-b-2 transition-colors ${
-                  activeTab === "specifications"
-                    ? "border-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Specifications
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`py-4 border-b-2 transition-colors ${
-                  activeTab === "reviews"
-                    ? "border-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Reviews ({product?.reviewCount || 0})
-              </button>
-              <button
-                onClick={() => setActiveTab("faq")}
-                className={`py-4 border-b-2 transition-colors ${
-                  activeTab === "faq"
-                    ? "border-primary font-medium"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                FAQ
-              </button>
-            </div>
-          </div>
-
-          <div className="py-8">
-            {activeTab === "description" && (
-              <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold mb-4">Product Description</h2>
-                {product?.shortDesc && (
-                  <p className="text-lg text-muted-foreground mb-4">
-                    {product.shortDesc}
-                  </p>
-                )}
-                {product?.longDesc && (
-                  <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-2">Details</h3>
-                    <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                      {product.longDesc}
-                    </p>
-                  </div>
-                )}
-                {product?.description && (
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">
-                      Additional Information
-                    </h3>
-                    <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                      {product.description}
-                    </p>
-                  </div>
-                )}
-                {!product?.description && !product?.longDesc && (
-                  <p className="text-muted-foreground">
-                    No description available for this product.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {activeTab === "specifications" && (
-              <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold mb-4">Specifications</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border rounded-lg p-4">
-                    <p className="font-semibold mb-3">General Information</p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">SKU:</span>
-                        <span className="font-medium">
-                          {product?.slug || product?.id}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Stock:</span>
-                        <span className="font-medium">
-                          {product?.stock} units
-                        </span>
-                      </div>
-                      {product?.category && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            Category:
-                          </span>
-                          <span className="font-medium">
-                            {product.category.name}
-                          </span>
-                        </div>
-                      )}
-                      {product?.brand && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Brand:</span>
-                          <span className="font-medium">
-                            {product.brand.name}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {productVariants.length > 0 && (
-                    <div className="border rounded-lg p-4">
-                      <p className="font-semibold mb-3">Available Variants</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            Total variants:
-                          </span>
-                          <span className="font-medium">
-                            {productVariants.length}
-                          </span>
-                        </div>
-                        {productVariants.map((v, idx) => (
-                          <div key={v.id} className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              Size {idx + 1}:
-                            </span>
-                            <span className="font-medium">{v.size}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {product?.ingredients && product.ingredients.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-xl font-semibold mb-3">Ingredients</h3>
-                    <div className="border rounded-lg p-4">
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        {product.ingredients.map(
-                          (ingredient: any, idx: number) => (
-                            <li key={idx}>{ingredient.name || ingredient}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "reviews" && (
-              <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold mb-4">Customer Reviews</h2>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-                    <span className="text-2xl font-bold">
-                      {product?.averageRating || 0}
-                    </span>
-                    <span className="text-muted-foreground">out of 5</span>
-                  </div>
-                  <span className="text-muted-foreground">
-                    Based on {product?.reviewCount || 0} reviews
-                  </span>
-                </div>
-                {product?.reviews && product.reviews.length > 0 ? (
-                  <div className="space-y-4">
-                    {product.reviews.map((review: any) => (
-                      <div key={review.id} className="border rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < review.rating
-                                    ? "text-yellow-500 fill-yellow-500"
-                                    : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="font-medium">{review.userName}</span>
-                        </div>
-                        <p className="text-muted-foreground">
-                          {review.comment}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">
-                    No reviews yet. Be the first to review!
-                  </p>
-                )}
-              </div>
-            )}
-
-            {activeTab === "faq" && (
-              <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold mb-4">
-                  Frequently Asked Questions
-                </h2>
-                {product?.faquestions ? (
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <p className="whitespace-pre-wrap text-muted-foreground">
-                        {product.faquestions}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">
-                    No FAQ available for this product.
-                  </p>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
