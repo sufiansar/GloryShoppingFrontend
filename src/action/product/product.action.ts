@@ -10,6 +10,7 @@ export const createProduct = async (formData: FormData) => {
       method: "POST",
       body: formData,
     });
+    revalidatePath("/", "layout");
     console.log("product", result);
   } catch (error) {
     console.error("Error creating product:", error);
@@ -37,6 +38,7 @@ export const updateProduct = async (id: string, formData: FormData) => {
 
     if (result?.id) {
       revalidatePath("/products", "page");
+      revalidatePath("/", "layout");
       redirect("/products");
     }
 
@@ -182,6 +184,41 @@ export const getProductById = async (id: string) => {
   }
 };
 
+export const getAllProductByCategory = async (
+  queryString: string,
+  categoryId: string,
+) => {
+  try {
+    const searchParams = new URLSearchParams(queryString);
+    const page = searchParams.get("page") || "1";
+    const limit = searchParams.get("limit") || "10";
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const searchTerm = searchParams.get("searchTerm") || "";
+    let builtQueryString = `?page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    if (searchTerm) {
+      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
+        searchTerm,
+      )}`;
+    } else {
+      builtQueryString = `page=${page}&limit=${limit}`;
+    }
+
+    const result = await makeApiCall<any>(
+      `/product/category/${categoryId}?${builtQueryString}`,
+      {
+        method: "GET",
+        next: { revalidate: 60 },
+      },
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    throw new Error("Failed to fetch products by category");
+  }
+};
+
 export const deleteProduct = async (id: string) => {
   console.log("Deleting product:", id);
 
@@ -189,12 +226,21 @@ export const deleteProduct = async (id: string) => {
     const result = await makeApiCall<any>(`/product/${id}`, {
       method: "DELETE",
     });
-    if (result?.success) {
-      revalidatePath("/products", "page");
+    const isSuccess =
+      result?.success === true ||
+      result?.statusCode === 200 ||
+      Boolean(result?.id);
+
+    if (isSuccess) {
+      revalidatePath("/admin/dashboard/products", "page");
       return { success: true };
     }
 
-    return result;
+    return {
+      success: false,
+      message: result?.message || "Failed to delete product",
+      result,
+    };
   } catch (error) {
     console.error("Error deleting product:", error);
     throw new Error("Failed to delete product");

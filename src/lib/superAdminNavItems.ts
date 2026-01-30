@@ -46,6 +46,7 @@ export const superAdminNavItems: NavSection[] = [
         icon: "Skin",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
+
       {
         title: "Add Products to Skin Types",
         href: "/admin/dashboard/skin-management/add-products",
@@ -104,6 +105,12 @@ export const superAdminNavItems: NavSection[] = [
         href: "/admin/dashboard/products",
         icon: "Package",
         roles: ["SUPER_ADMIN"],
+      },
+      {
+        title: "Section Management",
+        href: " /admin/dashboard/section-management",
+        icon: "Layers",
+        roles: ["SUPER_ADMIN", "ADMIN"],
       },
 
       {

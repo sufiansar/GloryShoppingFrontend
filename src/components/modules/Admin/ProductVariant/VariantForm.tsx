@@ -27,6 +27,7 @@ export default function CreateVariantForm() {
     size: "",
     stock: "",
     lowStockThreshold: "10",
+    price: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,6 +50,9 @@ export default function CreateVariantForm() {
         "lowStockThreshold",
         formData.lowStockThreshold.toString(),
       );
+      if (formData.price) {
+        formDataObj.append("price", formData.price.toString());
+      }
 
       if (images.length > 0) {
         images.forEach((file) => {
@@ -78,7 +82,7 @@ export default function CreateVariantForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === "stock" || name === "lowStockThreshold") {
+    if (name === "stock" || name === "lowStockThreshold" || name === "price") {
       const numericValue = Math.max(0, Number(value));
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
       return;
@@ -202,6 +206,18 @@ export default function CreateVariantForm() {
                     onChange={handleChange}
                     placeholder="e.g., S, M, L, XL or 10, 12, 14"
                     required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="price">Variant Price (Optional)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={handleChange}
+                    placeholder="Leave empty to use product price"
                   />
                 </div>
 

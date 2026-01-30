@@ -87,9 +87,18 @@ export default function ProductCard({
                   {product.category.name}
                 </Badge>
               )}
+
+              {product?.skinTypes?.[0]?.skinType?.name && (
+                <Badge className="text-xs font-normal bg-pink-100 text-pink-600 border-pink-200 px-1 py-0">
+                  {product?.skinTypes[0]?.skinType?.name}
+                </Badge>
+              )}
             </div>
 
-            <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-gray-900 hover:text-pink-600 transition-colors">
+            <h3
+              className="font-semibold text-sm leading-tight text-gray-900 hover:text-pink-600 transition-colors truncate"
+              title={product.name}
+            >
               {product.name}
             </h3>
 

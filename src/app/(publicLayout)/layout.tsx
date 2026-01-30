@@ -1,4 +1,6 @@
 import { getSections } from "@/action/section/section.action";
+import { fetchAllCategories } from "@/action/categories/categories.action";
+import CategoryMarquee from "@/components/modules/category.marqieu";
 import Footer from "@/components/modules/Footer/Footer";
 import Navbar from "@/components/modules/Navbar/PublicNavbar";
 import SecondaryNavbar from "@/components/modules/Navbar/SecondaryNavbar";
@@ -13,6 +15,22 @@ export default async function PublicLayout({
 }>) {
   const sectionsResponse = await getSections();
   const allSections = sectionsResponse?.data || [];
+
+  const categoriesResponse = await fetchAllCategories();
+  console.log("Full categoriesResponse:", categoriesResponse);
+
+  let categories = [];
+  try {
+    if (categoriesResponse?.data && Array.isArray(categoriesResponse.data)) {
+      categories = categoriesResponse.data;
+    } else if (Array.isArray(categoriesResponse)) {
+      categories = categoriesResponse;
+    }
+  } catch (err) {
+    console.error("Error parsing categories:", err);
+  }
+
+  console.log("Extracted categories:", categories.length, categories);
 
   const heroSlides: Section[] = allSections
     .filter(
@@ -56,10 +74,10 @@ export default async function PublicLayout({
               </div>
             </section>
           )}
-
           <div className="hidden md:block">
             <SkincareMarquee />
           </div>
+          <CategoryMarquee categories={categories} />
         </>
       )}
 

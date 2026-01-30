@@ -37,7 +37,10 @@ export default function DeleteAlert({
       setIsDeleting(true);
       setError(null);
 
-      await deleteProduct(productId);
+      const result = await deleteProduct(productId);
+      if (!result?.success) {
+        throw new Error(result?.message || "Failed to delete product");
+      }
 
       router.refresh();
       onOpenChange(false);
