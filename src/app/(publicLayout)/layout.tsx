@@ -32,15 +32,33 @@ export default async function PublicLayout({
 
   console.log("Extracted categories:", categories.length, categories);
 
-  const heroSlides: Section[] = allSections
+  const heroSections = allSections
     .filter(
       (section: Section) =>
-        section.type === "HERO" && section.images && section.images.length > 0,
+        section.type === "HERO" &&
+        section.isVisible !== false &&
+        section.images &&
+        section.images.length > 0,
     )
-    .map((section: Section) => ({
-      ...section,
-      images: section.images.slice(0, 1),
-    }));
+    .sort((a: Section, b: Section) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return dateB - dateA; // Newest first
+    });
+
+  const heroSection: Section | undefined = heroSections[0];
+
+  console.log(
+    "🎯 Hero section found:",
+    heroSection
+      ? {
+          title: heroSection.title,
+          type: heroSection.type,
+          createdAt: heroSection.createdAt,
+          imagesCount: heroSection.images?.length,
+        }
+      : "No hero section",
+  );
 
   const isProductDetailsPage = false;
 
@@ -51,11 +69,11 @@ export default async function PublicLayout({
 
       {!isProductDetailsPage && (
         <>
-          {heroSlides.length > 0 ? (
+          {heroSection ? (
             <section className="hidden md:block p-2">
               <div className="container mx-auto">
                 <HeroSliderWrapper
-                  slides={heroSlides}
+                  section={heroSection}
                   autoPlay={true}
                   autoPlayInterval={6000}
                   showNavigation={true}

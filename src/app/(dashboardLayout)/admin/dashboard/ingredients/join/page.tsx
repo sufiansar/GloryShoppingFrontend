@@ -7,7 +7,7 @@ import { getAllIngredients } from "@/action/ingredian/ingrediant.action";
 import JoinProductsForm from "@/components/modules/Ingredients/JoinProductsForm";
 
 export default async function JoinProductsPage() {
-  // Fetch all ingredients instead of relying on params
+  // Fetch all ingredients
   const ingredientsResult = await getAllIngredients("?limit=100");
   const ingredients = ingredientsResult?.data || [];
 

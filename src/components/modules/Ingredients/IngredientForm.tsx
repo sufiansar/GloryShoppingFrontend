@@ -79,20 +79,12 @@ export default function IngredientForm({
       if (isEdit && initialData?.id) {
         await updateIngredient(initialData.id, data);
         toast.success("Ingredient updated successfully");
-      } else {
-        await createIngreadtAction(data);
-        toast.success("Ingredient created successfully");
-      }
-
-      // After successful creation, redirect to join page
-      if (!isEdit) {
-        const result = await createIngreadtAction(data);
-        if (result?.id) {
-          router.push(`/admin/dashboard/ingredients/${result.id}/join`);
-          return;
-        }
-      } else {
         router.push("/admin/dashboard/ingredients");
+      } else {
+        const result = await createIngreadtAction(data);
+        toast.success("Ingredient created successfully");
+        form.reset();
+        router.push(`/admin/dashboard/ingredients/join`);
       }
     } catch (error) {
       toast.error("Failed to save ingredient");

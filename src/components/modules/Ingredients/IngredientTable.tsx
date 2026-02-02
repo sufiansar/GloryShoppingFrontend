@@ -178,7 +178,11 @@ export default function IngredientTable({
                     {ingredient.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </TableCell>
-
+                <TableCell>
+                  {ingredient.createdAt
+                    ? new Date(ingredient.createdAt).toLocaleDateString()
+                    : "-"}
+                </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -211,9 +215,7 @@ export default function IngredientTable({
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
-                          router.push(
-                            `/admin/dashboard/ingredients/${ingredient.id}/join`,
-                          )
+                          router.push(`/admin/dashboard/ingredients/join`)
                         }
                       >
                         <LinkIcon className="mr-2 h-4 w-4" />

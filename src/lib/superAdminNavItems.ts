@@ -25,7 +25,7 @@ export const superAdminNavItems: NavSection[] = [
       {
         title: "Product Variant",
         href: "/admin/dashboard/variants/create",
-        icon: "BoxMultiple",
+        icon: "Package",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
       // {
@@ -91,13 +91,13 @@ export const superAdminNavItems: NavSection[] = [
       {
         title: "Brand Management",
         href: "/admin/dashboard/brand/brand-management",
-        icon: "Trademark",
+        icon: "Beaker",
         roles: ["SUPER_ADMIN"],
       },
       {
         title: "Product Variants Management",
         href: "/admin/dashboard/variants",
-        icon: "BoxMultiple",
+        icon: "Package",
         roles: ["SUPER_ADMIN"],
       },
       {
@@ -111,6 +111,13 @@ export const superAdminNavItems: NavSection[] = [
         href: " /admin/dashboard/section-management",
         icon: "Layers",
         roles: ["SUPER_ADMIN", "ADMIN"],
+      },
+
+      {
+        title: "Order Management",
+        href: "/admin/dashboard/orders-management",
+        icon: "ShoppingCart",
+        roles: ["SUPER_ADMIN"],
       },
 
       {

@@ -1,7 +1,5 @@
 import { getAllProducts } from "@/action/product/product.action";
 import ProductGrid from "@/components/modules/PublicProduct/ProductGrid";
-import { Button } from "@/components/ui/button";
-import { Filter, Grid, List } from "lucide-react";
 
 interface ProductsPageProps {
   searchParams: Promise<{

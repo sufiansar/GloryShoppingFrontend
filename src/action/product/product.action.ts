@@ -37,7 +37,7 @@ export const updateProduct = async (id: string, formData: FormData) => {
     });
 
     if (result?.id) {
-      revalidatePath("/products", "page");
+      revalidatePath("/product", "page");
       revalidatePath("/", "layout");
       redirect("/products");
     }

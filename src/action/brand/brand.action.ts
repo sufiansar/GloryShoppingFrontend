@@ -1,5 +1,5 @@
 "use server";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { makeApiCall } from "../apiClinet";
 import {
   getBrandInfoFromSlug,
@@ -14,7 +14,8 @@ export const createBrand = async (formdata: FormData) => {
     });
 
     if (result?.id) {
-      revalidateTag("BRAND", "page");
+      revalidatePath("/brand", "page");
+      revalidatePath("/", "layout");
       // redirect("/brands");
     }
 
@@ -44,7 +45,8 @@ export const updateBrand = async (id: string, formdata: FormData) => {
     });
 
     if (result?.id) {
-      revalidateTag("BRAND", "page");
+      revalidatePath("/brand", "page");
+      revalidatePath("/", "layout");
       // redirect("/brands");
     }
 
@@ -133,5 +135,11 @@ export const deleteBrand = async (id: string) => {
   const result = await makeApiCall<any>(`/brand/${id}`, {
     method: "DELETE",
   });
+
+  if (result) {
+    revalidatePath("/brand", "page");
+    revalidatePath("/", "layout");
+  }
+
   return result;
 };

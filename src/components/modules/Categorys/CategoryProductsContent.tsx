@@ -116,14 +116,14 @@ export default function CategoryProductsContent({
       newParams.delete("searchTerm");
     }
     newParams.set("page", "1");
-    router.push(`/category/${category.slug}?${newParams.toString()}`);
+    router.push(`/categorys/${category.slug}?${newParams.toString()}`);
   };
 
   const handleSortChange = (value: string) => {
     const newParams = new URLSearchParams(params.toString());
     newParams.set("sort", value);
     newParams.set("page", "1");
-    router.push(`/category/${category.slug}?${newParams.toString()}`);
+    router.push(`/categorys/${category.slug}?${newParams.toString()}`);
   };
 
   const handleFilterChange = (filters: any) => {
@@ -138,20 +138,20 @@ export default function CategoryProductsContent({
     });
 
     newParams.set("page", "1");
-    router.push(`/category/${category.slug}?${newParams.toString()}`);
+    router.push(`/categorys/${category.slug}?${newParams.toString()}`);
   };
 
   const handlePageChange = (page: number) => {
     const newParams = new URLSearchParams(params.toString());
     newParams.set("page", page.toString());
-    router.push(`/category/${category.slug}?${newParams.toString()}`);
+    router.push(`/categorys/${category.slug}?${newParams.toString()}`);
   };
 
   const handleItemsPerPageChange = (limit: number) => {
     const newParams = new URLSearchParams(params.toString());
     newParams.set("limit", limit.toString());
     newParams.set("page", "1");
-    router.push(`/category/${category.slug}?${newParams.toString()}`);
+    router.push(`/categorys/${category.slug}?${newParams.toString()}`);
   };
 
   return (
@@ -354,7 +354,7 @@ export default function CategoryProductsContent({
                 </div>
 
                 {/* Pagination */}
-                {pagination.totalPages > 1 && (
+                {pagination.totalPages >= 1 && (
                   <div className="mt-8">
                     <div className="flex justify-center">
                       <div className="flex items-center gap-2">

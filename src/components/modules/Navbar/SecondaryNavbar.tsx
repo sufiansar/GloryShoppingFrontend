@@ -17,7 +17,6 @@ const SecondaryNavbar = () => {
   const { data: session, status } = useSession();
 
   // console.log(session);
-
   const canAccessDashboard =
     session?.user?.role === "SUPER_ADMIN" || session?.user?.role === "ADMIN";
 
