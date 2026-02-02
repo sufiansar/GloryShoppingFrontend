@@ -1,12 +1,17 @@
 "use server";
+import { revalidatePath } from "next/cache";
 import { makeApiCall } from "../apiClinet";
 
 export const createSkinConcern = async (payload: any) => {
   try {
     const result = await makeApiCall<any>("/skin/skin-concerns/", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: payload,
     });
+
+    if (result?.id) {
+      revalidatePath("/admin/dashboard/skin-concerns", "page");
+    }
 
     return result;
   } catch (error) {
@@ -19,8 +24,12 @@ export const updateSkinConcern = async (id: string, payload: any) => {
   try {
     const result = await makeApiCall<any>(`/skin/skin-concerns/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: payload,
     });
+
+    if (result?.id) {
+      revalidatePath("/admin/dashboard/skin-concerns", "page");
+    }
 
     return result;
   } catch (error) {
@@ -72,6 +81,10 @@ export const deleteSkinConcern = async (id: string) => {
       method: "DELETE",
     });
 
+    if (result) {
+      revalidatePath("/admin/dashboard/skin-concerns", "page");
+    }
+
     return result;
   } catch (error) {
     console.error("Error deleting skin concern:", error);
@@ -85,19 +98,20 @@ export const addToProducts = async (
   productIds: string[],
 ) => {
   try {
-    const payload = {
-      skinTypeId,
-      productIds,
-      skinConcernId,
-    };
-    const res = await makeApiCall<any>(`/skin/addProductSkin`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-    return res;
+    const results = [];
+    for (const productId of productIds) {
+      const payload = {
+        productId,
+        skinConcernIds: [skinConcernId],
+        skinTypeIds: [skinTypeId],
+      };
+      const res = await makeApiCall<any>(`/skin/addProductSkin`, {
+        method: "POST",
+        body: payload as any,
+      });
+      results.push(res);
+    }
+    return results;
   } catch (error) {
     console.error("Failed to add skin concern to products:", error);
     throw new Error("Failed to add skin concern to products");

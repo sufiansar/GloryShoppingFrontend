@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Section } from "@/types/section.interface";
 
 interface HeroSliderWrapperProps {
-  slides: Section[];
+  section: Section;
   autoPlay?: boolean;
   autoPlayInterval?: number;
   showNavigation?: boolean;
@@ -18,7 +18,7 @@ interface HeroSliderWrapperProps {
 }
 
 export default function HeroSliderWrapper({
-  slides,
+  section,
   autoPlay = true,
   autoPlayInterval = 5000,
   showNavigation = true,
@@ -31,44 +31,39 @@ export default function HeroSliderWrapper({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const validSlides = slides.filter(
-    (slide) => slide.images && slide.images.length > 0 && slide.images[0],
-  );
+  const images = section.images || [];
 
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % validSlides.length);
-  }, [validSlides.length]);
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  }, [images.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex(
-      (prev) => (prev - 1 + validSlides.length) % validSlides.length,
-    );
-  }, [validSlides.length]);
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  }, [images.length]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
 
   useEffect(() => {
-    if (!autoPlay || isPaused || validSlides.length <= 1) return;
+    if (!autoPlay || isPaused || images.length <= 1) return;
 
     const interval = setInterval(nextSlide, autoPlayInterval);
     return () => clearInterval(interval);
-  }, [autoPlay, isPaused, autoPlayInterval, nextSlide, validSlides.length]);
+  }, [autoPlay, isPaused, autoPlayInterval, nextSlide, images.length]);
 
-  if (validSlides.length === 0) {
+  if (images.length === 0) {
     return (
       <div
         className={`w-full bg-linear-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center ${className}`}
         style={{ height }}
       >
-        <p className="text-gray-500">No slides available</p>
+        <p className="text-gray-500">No images available</p>
       </div>
     );
   }
 
-  const currentSlide = validSlides[currentIndex];
-  const currentImage = currentSlide.images[0];
+  const currentImage = images[currentIndex];
 
   return (
     <div
@@ -81,7 +76,7 @@ export default function HeroSliderWrapper({
       <div className="absolute inset-0 transition-opacity duration-500">
         <Image
           src={currentImage}
-          alt={currentSlide.title || "Hero image"}
+          alt={section.title || "Hero image"}
           fill
           className="object-cover"
           priority
@@ -89,7 +84,7 @@ export default function HeroSliderWrapper({
         />
       </div>
 
-      {showNavigation && validSlides.length > 1 && (
+      {showNavigation && images.length > 1 && (
         <>
           <button
             onClick={prevSlide}
@@ -108,9 +103,9 @@ export default function HeroSliderWrapper({
         </>
       )}
 
-      {showDots && validSlides.length > 1 && (
+      {showDots && images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {validSlides.map((_, index) => (
+          {images.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
@@ -125,9 +120,9 @@ export default function HeroSliderWrapper({
         </div>
       )}
 
-      {validSlides.length > 1 && (
+      {images.length > 1 && (
         <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium z-20">
-          {currentIndex + 1} / {validSlides.length}
+          {currentIndex + 1} / {images.length}
         </div>
       )}
     </div>

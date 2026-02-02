@@ -8,12 +8,11 @@ export const createIngreadtAction = async (data: any) => {
   try {
     const result = await makeApiCall<any>("/ingredient", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: data as any,
     });
 
     if (result?.id) {
       revalidatePath("/admin/dashboard/ingredients", "page");
-      redirect("/admin/dashboard/ingredients");
     }
 
     return result;
@@ -27,15 +26,11 @@ export const updateIngredient = async (id: string, data: any) => {
   try {
     const result = await makeApiCall<any>(`/ingredient/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      body: data as any,
     });
 
     if (result?.id) {
       revalidatePath("/admin/dashboard/ingredients", "page");
-      redirect("/admin/dashboard/ingredients");
     }
 
     return result;
@@ -87,24 +82,50 @@ export const getIngredientById = async (id: string) => {
 };
 
 export const joinIngredientsToProduct = async (
+  ingredientIds: string | string[],
   productId: string,
-  ingredientIds: string[],
 ) => {
   try {
-    const result = await makeApiCall<any>(`/product/${productId}/ingredients`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ingredientIds }),
+    // Convert to array if string
+    const ids = Array.isArray(ingredientIds) ? ingredientIds : [ingredientIds];
+
+    console.log("📝 [joinIngredientsToProduct] Raw params:", {
+      ingredientIds,
+      productId,
     });
 
-    if (result?.id) {
-      revalidatePath(`/product/${productId}`, "page");
-      return result;
+    // Filter out null/undefined values
+    const validIngredientIds = ids.filter(
+      (id): id is string => id !== null && id !== undefined && id.trim() !== "",
+    );
+
+    console.log("📝 [joinIngredientsToProduct] After filter:", {
+      validIngredientIds,
+    });
+
+    if (!productId || productId.trim() === "") {
+      throw new Error("Product ID is required");
     }
 
-    throw new Error("Failed to join ingredients to product");
+    if (!validIngredientIds.length) {
+      console.error("❌ No valid ingredient IDs after filtering:", ids);
+      throw new Error("At least one ingredient ID is required");
+    }
+
+    const payload = {
+      ingredientIds: validIngredientIds,
+      productId,
+    };
+
+    console.log("📤 [joinIngredientsToProduct] Payload:", payload);
+
+    const res = await makeApiCall<any>(`/ingredient/join`, {
+      method: "POST",
+      body: payload as any,
+    });
+
+    console.log("✅ [joinIngredientsToProduct] Response:", res);
+    return res;
   } catch (error) {
     console.error("Error joining ingredients to product:", error);
     throw new Error("Failed to join ingredients to product");

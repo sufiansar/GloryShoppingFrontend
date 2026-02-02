@@ -12,7 +12,7 @@ export const createCategoriesAction = async (categoryData: FormData) => {
     });
 
     if (result?.id) {
-      revalidatePath("/categories", "page");
+      revalidatePath("/categorys", "page");
       revalidatePath("/", "layout");
       redirect("/categories");
     }
@@ -51,7 +51,8 @@ export const updateCategoriesAction = async (
     });
 
     if (result?.id) {
-      revalidatePath("/categories", "page");
+      revalidatePath("/categorys", "page");
+      revalidatePath("/", "layout");
       redirect("/categories");
     }
 
@@ -71,7 +72,8 @@ export const deleteCategoriesAction = async (id: string) => {
     });
 
     if (result?.id) {
-      revalidatePath("/categories", "page");
+      revalidatePath("/categorys", "page");
+      revalidatePath("/", "layout");
       redirect("/categories");
     }
 

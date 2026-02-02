@@ -14,11 +14,11 @@ export default async function CategoryShowcase({
   category,
 }: CategoryShowcaseProps) {
   try {
-    // Fetch 4 products for this category using category ID
+    // Fetch 8 products for this category to show more items on the homepage
     console.log(
       `🔍 Fetching products for category: ${category.name} (ID: ${category.id})`,
     );
-    const result = await getAllProductByCategory("limit=4", category.id || "");
+    const result = await getAllProductByCategory("limit=8", category.id || "");
     console.log(`📊 API Response:`, result);
     // Handle nested data structure: result.data.data contains the products array
     const products: Product[] = result?.data?.data || result?.data || [];

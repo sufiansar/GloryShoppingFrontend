@@ -111,6 +111,98 @@ export const makeApiCall = async <T>(
 
   // For 204 No Content, return null
   if (res.status === 204) return null as any;
+  // Normalize common API pagination shapes so frontend components
+  // can rely on consistent fields (page, limit, total, totalPages, pagination)
+  try {
+    if (!data) return data as T;
 
-  return data as T;
+    // Helper to build pagination object
+    const buildPagination = (meta: any, inferredTotal = 0) => {
+      const total = meta?.total ?? inferredTotal ?? 0;
+      const limit = meta?.limit ?? meta?.perPage ?? 10;
+      const derivedTotalPages = meta?.totalPages ?? meta?.totalPage;
+      let totalPages: number;
+      if (derivedTotalPages != null) {
+        totalPages = derivedTotalPages;
+      } else if (limit) {
+        totalPages = Math.max(1, Math.ceil(total / limit));
+      } else {
+        totalPages = 1;
+      }
+      const page = meta?.page ?? 1;
+      return { page, limit, total, totalPages };
+    };
+
+    // Case A: nested shape { data: { data: [...], meta: {...} }, ... }
+    if (data.data && data.data.data && Array.isArray(data.data.data)) {
+      const inner = data.data;
+      const meta = inner.meta || data.meta || {};
+      const pagination = buildPagination(meta, inner.data.length);
+
+      return {
+        ...data,
+        data: inner.data,
+        meta: meta,
+        pagination,
+        page: pagination.page,
+        limit: pagination.limit,
+        total: pagination.total,
+        totalPages: pagination.totalPages,
+      } as T;
+    }
+
+    // Case B: top-level shape { data: [...], meta: {...} }
+    if (Array.isArray(data.data) && data.meta) {
+      const meta = data.meta || {};
+      const pagination = buildPagination(meta, data.data.length);
+
+      return {
+        ...data,
+        meta,
+        pagination,
+        page: pagination.page,
+        limit: pagination.limit,
+        total: pagination.total,
+        totalPages: pagination.totalPages,
+      } as T;
+    }
+
+    // Case C: response directly returns array in `data` without pagination
+    if (Array.isArray(data.data)) {
+      const pagination = {
+        page: 1,
+        limit: data.data.length || 0,
+        total: data.data.length || 0,
+        totalPages: 1,
+      };
+      return {
+        ...data,
+        pagination,
+        page: pagination.page,
+        limit: pagination.limit,
+        total: pagination.total,
+        totalPages: pagination.totalPages,
+      } as T;
+    }
+
+    // Case D: if response has `meta` but not `data` as array (some endpoints)
+    if (data.meta && !Array.isArray(data.data)) {
+      const meta = data.meta || {};
+      const pagination = buildPagination(meta, meta.total ?? 0);
+      return {
+        ...data,
+        pagination,
+        page: pagination.page,
+        limit: pagination.limit,
+        total: pagination.total,
+        totalPages: pagination.totalPages,
+      } as T;
+    }
+
+    // Default: return original parsed data
+    return data as T;
+  } catch (err) {
+    console.warn("[makeApiCall] Response normalization failed:", err);
+    return data as T;
+  }
 };

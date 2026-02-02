@@ -105,11 +105,27 @@ export function SkinTypeForm({
     try {
       setIsLoading(true);
 
+      console.log("📝 Form values received:", values);
+
+      // Validate name is not empty
+      if (!values.name || values.name.trim() === "") {
+        toast.error("Skin type name is required");
+        setIsLoading(false);
+        return;
+      }
+
+      // Only send name to backend - backend only accepts name field
+      const dataToSend = { name: values.name.trim() };
+
+      console.log("📤 Submitting skin type:", dataToSend);
+
       if (isEditing) {
-        await updateSkinType(skinTypeId as string, values as any);
+        await updateSkinType(skinTypeId as string, dataToSend);
         toast.success("Skin type updated successfully");
       } else {
-        const result = (await createSkinType(values as any)) as { id?: string } | null;
+        const result = (await createSkinType(dataToSend)) as {
+          id?: string;
+        } | null;
         if (result?.id !== undefined) {
           form.reset();
           toast.success("Skin type created successfully");
@@ -121,6 +137,7 @@ export function SkinTypeForm({
       form.reset();
       onSuccess?.();
     } catch (error) {
+      console.error("❌ Submit error:", error);
       toast.error(`Failed to ${isEditing ? "update" : "create"} skin type`);
     } finally {
       setIsLoading(false);

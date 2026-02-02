@@ -3,13 +3,17 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Filter } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { Category } from "@/types/categorys.interface";
 
 export function FilterSidebar({
   onFilterChange,
   initialFilters,
+  categories,
 }: {
   onFilterChange: (filters: any) => void;
   initialFilters?: { minPrice?: number; maxPrice?: number };
+  categories?: Category[];
 }) {
   const [priceRange, setPriceRange] = useState([0, 100000]);
 
@@ -82,6 +86,26 @@ export function FilterSidebar({
             </Button>
           </div>
         </div>
+
+        <Separator />
+
+        {/* Categories List */}
+        {categories && categories.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-4">Categories</h4>
+            <div className="grid grid-cols-1 gap-2">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/categorys/${cat.slug}`}
+                  className="text-sm text-left px-3 py-2 rounded hover:bg-gray-100"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Separator />
 

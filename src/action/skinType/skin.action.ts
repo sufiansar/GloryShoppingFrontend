@@ -1,25 +1,75 @@
 "use server";
+import { revalidatePath } from "next/cache";
 import { makeApiCall } from "../apiClinet";
+import { toast } from "sonner";
 
-export const createSkinType = async (data: string) => {
+export const createSkinType = async (data: any) => {
   try {
-    const result = await makeApiCall("/skin/skin-types", {
+    console.log("🔹 createSkinType received raw data:", data);
+    console.log("🔹 data.name:", data.name);
+    console.log("🔹 typeof data:", typeof data);
+
+    // If data is a JSON string, parse it
+    let parsedData = data;
+    if (typeof data === "string") {
+      console.log("🔹 Data is a string, parsing JSON...");
+      parsedData = JSON.parse(data);
+    }
+
+    console.log("🔹 Parsed data:", parsedData);
+
+    // Ensure only name field is sent
+    const sanitizedData: any = { name: parsedData.name };
+
+    console.log("🔍 Creating skin type with sanitized data:", sanitizedData);
+
+    if (!sanitizedData.name || sanitizedData.name.trim() === "") {
+      throw new Error("Skin type name is required and cannot be empty");
+    }
+
+    const result: any = await makeApiCall("/skin/skin-types", {
       method: "POST",
-      body: data,
+      body: sanitizedData,
     });
+
+    if (result?.id) {
+      revalidatePath("/admin/dashboard/skin-types", "page");
+    }
+
     return result;
   } catch (error) {
     console.error("Failed to create skin type:", error);
-    throw new Error("Failed to create skin type");
+    throw error;
   }
 };
 
 export const updateSkinType = async (id: string, data: any) => {
   try {
-    const res = await makeApiCall(`/skin/skin-types/${id}`, {
+    // Handle if data arrives as JSON string
+    let parsedData = data;
+    if (typeof data === "string") {
+      console.log("🔹 Data is a string, parsing JSON...", data);
+      parsedData = JSON.parse(data);
+    }
+
+    // Ensure only name field is sent
+    const sanitizedData: any = { name: parsedData.name };
+
+    console.log("🔍 Updating skin type with data:", sanitizedData);
+
+    if (!sanitizedData.name || sanitizedData.name.trim() === "") {
+      throw new Error("Skin type name is required and cannot be empty");
+    }
+
+    const res: any = await makeApiCall(`/skin/skin-types/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(data),
+      body: sanitizedData,
     });
+
+    if (res?.id) {
+      revalidatePath("/admin/dashboard/skin-types", "page");
+    }
+
     return res;
   } catch (error) {
     console.error("Failed to update skin type:", error);
@@ -69,6 +119,11 @@ export const deleteSkinTypeByID = async (id: string) => {
     const result = await makeApiCall(`/skin/skin-types/${id}`, {
       method: "DELETE",
     });
+
+    if (result) {
+      revalidatePath("/admin/dashboard/skin-types", "page");
+    }
+
     return result;
   } catch (err) {
     console.error("Failed to delete skin type:", err);

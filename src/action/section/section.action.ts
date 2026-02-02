@@ -15,6 +15,7 @@ export const createSection = async (data: FormData) => {
     console.log("section", result);
     if (result?.id) {
       revalidatePath("/sections", "page");
+      revalidatePath("/", "layout");
       redirect("/sections");
     }
 
@@ -48,6 +49,7 @@ export const updateSection = async (id: string, data: FormData) => {
 
     if (result?.id) {
       revalidatePath("/sections", "page");
+      revalidatePath("/", "layout");
       redirect("/sections");
     }
 
@@ -68,6 +70,7 @@ export const deleteSection = async (id: string) => {
 
     if (result?.success) {
       revalidatePath("/sections", "page");
+      revalidatePath("/", "layout");
       return { success: true };
     }
 
@@ -77,15 +80,15 @@ export const deleteSection = async (id: string) => {
     throw new Error("Failed to delete section");
   }
 };
-
 export const getSections = async () => {
   try {
     return await makeApiCall<any>("/section", {
-      next: { tags: ["SECTION"] },
+      method: "GET",
+      next: { revalidate: false, tags: ["sections"] }, // ISR - only revalidate on-demand
     });
   } catch (error) {
     console.error("Error fetching sections:", error);
-    return [];
+    return { data: [] };
   }
 };
 

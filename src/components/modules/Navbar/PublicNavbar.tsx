@@ -109,6 +109,9 @@ const Navbar = async () => {
   console.log("SERVER SESSION:", userInfo);
   // const userInfo: any = await getSession();
   // console.log("SERVER SESSION:", userInfo);
+  // const canAccessDashboard =
+  //   userInfo?.user?.role === "SUPER_ADMIN" || userInfo?.user?.role === "ADMIN";
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#ca428b] backdrop-blur">
       <div className="container mx-auto px-4">
@@ -136,16 +139,6 @@ const Navbar = async () => {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            {/* Search */}
-            {/* <Button
-              variant="ghost"
-              size="icon"
-              className="hidden sm:inline-flex text-white hover:bg-[#ca428b] hover:text-white border border-white/30 hover:border-white bg-transparent"
-            >
-              <Search className="h-5 w-5" />
-            </Button> */}
-
-            {/* User Account */}
             <Button
               variant="ghost"
               size="icon"

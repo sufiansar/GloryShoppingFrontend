@@ -2,7 +2,10 @@ import { Suspense } from "react";
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllProductByCategoryBySlug, fetchAllCategories } from "@/action/categories/categories.action";
+import {
+  getAllProductByCategoryBySlug,
+  fetchAllCategories,
+} from "@/action/categories/categories.action";
 import CategoryProductsContent from "@/components/modules/Categorys/CategoryProductsContent";
 
 interface CategoryPageProps {
@@ -53,9 +56,10 @@ export default async function CategoryPage(props: CategoryPageProps) {
       notFound();
     }
 
-    // Fetch all categories for sidebar
-    const categoriesResult = await fetchAllCategories("limit=100");
-    const allCategories = categoriesResult?.data || [];
+    // Fetch all categories to show in the filter sidebar
+    const categoriesResult = await fetchAllCategories();
+    const allCategories =
+      categoriesResult?.data?.data || categoriesResult?.data || [];
 
     return (
       <Suspense fallback={<CategoryLoadingSkeleton />}>
@@ -63,7 +67,6 @@ export default async function CategoryPage(props: CategoryPageProps) {
           category={category}
           searchParams={searchParams}
           categories={allCategories}
-          currentCategorySlug={slug}
         />
       </Suspense>
     );

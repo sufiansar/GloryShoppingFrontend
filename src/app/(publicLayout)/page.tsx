@@ -4,8 +4,6 @@ import { Filter, Grid, List } from "lucide-react";
 import { fetchAllCategories } from "@/action/categories/categories.action";
 import CategoryShowcase from "@/components/modules/CategoryShowcase/CategoryShowcase";
 
-export const dynamic = "force-dynamic";
-
 const PublicPage = async () => {
   // Define the 5 category slugs to display (in order of preference)
   const preferredCategorySlugs = [
