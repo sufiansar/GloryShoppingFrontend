@@ -27,6 +27,13 @@ interface CategoryProductsContentProps {
   category: Category;
   searchParams: { [key: string]: string | string[] | undefined };
   categories?: Category[];
+  brands?: {
+    id: string;
+    name: string;
+    slug?: string;
+    createdAt: string | Date;
+    updatedAt: string | Date;
+  }[];
   currentCategorySlug?: string;
 }
 
@@ -34,6 +41,7 @@ export default function CategoryProductsContent({
   category,
   searchParams,
   categories = [],
+  brands = [],
   currentCategorySlug,
 }: CategoryProductsContentProps) {
   const router = useRouter();
@@ -264,6 +272,7 @@ export default function CategoryProductsContent({
                 minPrice: minPrice ? parseInt(minPrice) : undefined,
                 maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
               }}
+              brands={brands}
             />
           </SheetContent>
         </Sheet>
@@ -300,6 +309,7 @@ export default function CategoryProductsContent({
                 minPrice: minPrice ? parseInt(minPrice) : undefined,
                 maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
               }}
+              brands={brands}
             />
           </div>
 

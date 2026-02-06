@@ -10,7 +10,7 @@ export const getMyProfile = async () => {
 };
 
 export const registerUser = async (data: any) => {
-  const result = await makeApiCall("/user/register", {
+  const result = await makeApiCall("/user/create-user", {
     method: "POST",
     body: JSON.stringify(data),
   });

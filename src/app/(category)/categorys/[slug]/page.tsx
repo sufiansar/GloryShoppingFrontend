@@ -6,6 +6,7 @@ import {
   getAllProductByCategoryBySlug,
   fetchAllCategories,
 } from "@/action/categories/categories.action";
+import { getAllBrand } from "@/action/brand/brand.action";
 import CategoryProductsContent from "@/components/modules/Categorys/CategoryProductsContent";
 
 interface CategoryPageProps {
@@ -61,12 +62,16 @@ export default async function CategoryPage(props: CategoryPageProps) {
     const allCategories =
       categoriesResult?.data?.data || categoriesResult?.data || [];
 
+    const brandsResult = await getAllBrand("page=1&limit=200");
+    const allBrands = brandsResult?.data?.data || brandsResult?.data || [];
+
     return (
       <Suspense fallback={<CategoryLoadingSkeleton />}>
         <CategoryProductsContent
           category={category}
           searchParams={searchParams}
           categories={allCategories}
+          brands={allBrands}
         />
       </Suspense>
     );

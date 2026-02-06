@@ -8,6 +8,7 @@ import {
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuTrigger,
+  NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { Search, User, Menu } from "lucide-react";
@@ -20,6 +21,20 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/helpers/authOptions";
 
 const NavDropdown = ({ item }: { item: NavItem }) => {
+  // If no subitems, render simple link without dropdown
+  if (!item.subItems || item.subItems.length === 0) {
+    return (
+      <NavigationMenuItem>
+        <Link
+          href={item.href}
+          className="px-4 py-2 hover:bg-[#ca428b] rounded-md transition-colors text-white border border-white/30 hover:border-white bg-transparent inline-flex items-center text-sm font-medium h-10"
+        >
+          {item.title}
+        </Link>
+      </NavigationMenuItem>
+    );
+  }
+
   // Calculate grid columns based on number of subitems
   const subItemCount = item.subItems?.length || 0;
   let gridCols = "grid-cols-2";
@@ -43,45 +58,6 @@ const NavDropdown = ({ item }: { item: NavItem }) => {
       </NavigationMenuTrigger>
       <NavigationMenuContent className="bg-[#6b205a] border-[#6b205a] text-white overflow-hidden">
         <div className={`grid gap-3 p-6 ${dropdownWidth}`}>
-          {/* View All link for main category */}
-          {!item.title.includes("BRAND") && (
-            <>
-              <Link
-                href={item.href}
-                className="block space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white/10 focus:bg-white/10 col-span-full border-2 border-white/30 font-semibold"
-              >
-                <div className="text-sm font-bold leading-none text-white">
-                  View All {item.title} Products
-                </div>
-                <p className="line-clamp-2 text-sm leading-snug text-white/80">
-                  Browse all products in this category
-                </p>
-              </Link>
-
-              {item.featured && item.featured.length > 0 && (
-                <>
-                  <div className="flex gap-3 col-span-full">
-                    {item.featured.map((featuredItem) => (
-                      <Link
-                        key={featuredItem.title}
-                        href={featuredItem.href}
-                        className="flex-1 block space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white/10 focus:bg-white/10"
-                      >
-                        <div className="text-sm font-medium leading-none text-white">
-                          {featuredItem.title}
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-white/80">
-                          {featuredItem.description}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="h-px bg-white/20 col-span-full" />
-                </>
-              )}
-            </>
-          )}
-
           {/* Grid layout for all subitems */}
           <div
             className={`col-span-full grid ${gridCols} gap-2 ${subItemCount > 15 ? "max-h-100 overflow-y-auto pr-2" : ""}`}

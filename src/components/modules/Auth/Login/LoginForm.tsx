@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import Password from "@/components/ui/Password";
 import { login } from "@/action/auth/login.action";
+import Image from "next/image";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address." }),
@@ -142,12 +143,12 @@ export function LoginForm({
               </Field>
 
               {/* Separator */}
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
-              </FieldSeparator>
+              </FieldSeparator> */}
 
               {/* Social Login Buttons */}
-              <Field>
+              {/* <Field>
                 <Button
                   variant="outline"
                   type="button"
@@ -166,9 +167,9 @@ export function LoginForm({
                   </svg>
                   Login with GitHub
                 </Button>
-              </Field>
+              </Field> */}
 
-              <Field>
+              {/* <Field>
                 <Button
                   variant="outline"
                   type="button"
@@ -187,7 +188,7 @@ export function LoginForm({
                   </svg>
                   Login with Google
                 </Button>
-              </Field>
+              </Field> */}
 
               {/* Sign up link */}
               <FieldDescription className="text-center">
@@ -205,10 +206,12 @@ export function LoginForm({
 
         {/* Image Section */}
         <div className="bg-muted relative hidden md:block">
-          <img
-            src="/placeholder.svg"
-            alt="Glory Shopping Login"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          <Image
+            src="/assets/login-image.jpg"
+            alt="Login image"
+            fill
+            className="object-cover"
+            priority
           />
         </div>
       </CardContent>

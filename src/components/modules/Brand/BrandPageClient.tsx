@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import ProductCard from "@/components/modules/PublicProduct/ProductCard";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Brand {
   id: string;
   name: string;
+  slug?: string;
   logoUrl?: string | null;
 }
 
@@ -25,25 +26,46 @@ interface BrandPageClientProps {
 }
 
 export default function BrandPageClient({ brands }: BrandPageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const brandSlug = searchParams.get("brand");
+
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
 
+  useEffect(() => {
+    if (!brandSlug || brands.length === 0) {
+      setSelectedBrand(null);
+      return;
+    }
+
+    const matchedBrand = brands.find(
+      (brand) => (brand.slug || generateSlug(brand.name)) === brandSlug,
+    );
+
+    setSelectedBrand(matchedBrand || null);
+  }, [brandSlug, brands]);
+
   // Fetch products for selected brand
   useEffect(() => {
-    if (!selectedBrand) return;
+    if (!selectedBrand) {
+      setProducts([]);
+      return;
+    }
 
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const API_BASE = process.env.NEXT_PUBLIC_BASE_API;
+        const slug = selectedBrand.slug || generateSlug(selectedBrand.name);
         const response = await fetch(
-          `${API_BASE}/product?page=1&limit=20&searchTerm=${encodeURIComponent(selectedBrand.name)}`,
+          `${API_BASE}/brand/slug/${slug}?page=1&limit=20`,
           { credentials: "include" },
         );
         const data = await response.json();
-        setProducts(data?.data || []);
+        setProducts(data?.data?.data?.products || []);
       } catch (error) {
         console.error("Failed to fetch products:", error);
         setProducts([]);
@@ -77,6 +99,16 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
       .replace(/&/g, "and");
   };
 
+  const handleBrandClick = (brand: Brand | null) => {
+    setSelectedBrand(brand);
+    if (brand) {
+      const slug = brand.slug || generateSlug(brand.name);
+      router.push(`/categorys/brand?brand=${slug}`, { scroll: false });
+    } else {
+      router.push("/categorys/brand", { scroll: false });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-12">
@@ -100,7 +132,7 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
               </h2>
               <div className="space-y-1">
                 <button
-                  onClick={() => setSelectedBrand(null)}
+                  onClick={() => handleBrandClick(null)}
                   className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
                     selectedBrand === null
                       ? "bg-[#ca428b] text-white font-semibold"
@@ -112,7 +144,7 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
                 {brands.map((brand) => (
                   <button
                     key={brand.id}
-                    onClick={() => setSelectedBrand(brand)}
+                    onClick={() => handleBrandClick(brand)}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-xs ${
                       selectedBrand?.id === brand.id
                         ? "bg-[#ca428b] text-white font-semibold"
@@ -201,7 +233,7 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
                   {brands.map((brand) => (
                     <button
                       key={brand.id}
-                      onClick={() => setSelectedBrand(brand)}
+                      onClick={() => handleBrandClick(brand)}
                       className="shrink-0 group"
                     >
                       <div className="w-24 h-24 bg-white rounded-lg shadow-md hover:shadow-xl transition-all flex items-center justify-center p-3 hover:scale-105">

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardOverview from "@/components/modules/Admin/Stats/DashboardOverview";
@@ -24,12 +24,27 @@ import {
 } from "@/action/stats/stats.action";
 
 export default async function AdminDashboardPage() {
+  await getorderStats();
+
   const [orderStats, bestProducts, categoryStats, userStats] =
     await Promise.all([
-      getorderStats().catch((err) => {
-        console.error("Failed to load order stats:", err);
-        return null;
-      }),
+      (async () => {
+        try {
+          const res = await getorderStats();
+          if (!res) {
+            console.error("No order stats data found", res);
+            return null;
+          }
+          if (res.error) {
+            console.error("Error fetching order stats:", res.error);
+            return null;
+          }
+          return res?.data;
+        } catch (e) {
+          console.error("Failed to load order stats:", e);
+          return null;
+        }
+      })(),
       // best products
       (async () => {
         try {
@@ -44,7 +59,7 @@ export default async function AdminDashboardPage() {
         try {
           const res = await getCategoryStats();
           if (!res) {
-            console.error("No category stats data found");
+            console.error("No category stats data found", res);
             return null;
           }
           if (res.error) {
@@ -78,42 +93,57 @@ export default async function AdminDashboardPage() {
     ]);
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your store's performance and analytics
-        </p>
+      <div className="relative overflow-hidden rounded-3xl border bg-linear-to-br from-emerald-50 via-white to-slate-50 p-6">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,0.12),transparent_40%)]" />
+        <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-emerald-200/60 blur-3xl" />
+        <div className="absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-slate-200/70 blur-3xl" />
+        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border bg-white/70 px-3 py-1 text-xs font-medium text-emerald-700 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Live store insights
+            </div>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight">
+              Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+              Plan, prioritize, and track your store performance
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button className="rounded-full shadow-sm">+ Add Project</Button>
+            <Button variant="outline" className="rounded-full bg-white/70">
+              Import Data
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardOverview />
       </Suspense>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="rounded-3xl border bg-white/80 shadow-sm backdrop-blur">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
                 <CardTitle>Order Statistics</CardTitle>
-                <CardDescription>
-                  Orders and revenue over time periods
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Suspense fallback={<ChartSkeleton />}>
-                  <OrderStatsChart data={orderStats} />
-                </Suspense>
-              </CardContent>
-            </Card>
+                <CardDescription>Orders and revenue over time</CardDescription>
+              </div>
+              <div className="rounded-full border bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                Weekly trend
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Suspense fallback={<ChartSkeleton />}>
+                <OrderStatsChart data={orderStats} />
+              </Suspense>
+            </CardContent>
+          </Card>
 
-            <Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="rounded-3xl border bg-white/80 shadow-sm backdrop-blur">
               <CardHeader>
                 <CardTitle>Best Selling Products</CardTitle>
                 <CardDescription>Top 5 products by sales</CardDescription>
@@ -124,46 +154,23 @@ export default async function AdminDashboardPage() {
                 </Suspense>
               </CardContent>
             </Card>
+
+            <Card className="rounded-3xl border bg-white/80 shadow-sm backdrop-blur">
+              <CardHeader>
+                <CardTitle>Category Performance</CardTitle>
+                <CardDescription>Sales by category</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Suspense fallback={<ChartSkeleton />}>
+                  <CategoryStatsChart data={categoryStats} />
+                </Suspense>
+              </CardContent>
+            </Card>
           </div>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="products" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Analytics</CardTitle>
-              <CardDescription>
-                Performance metrics for products
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Suspense fallback={<ChartSkeleton />}>
-                  <BestProductsChart data={bestProducts} />
-                </Suspense>
-                <Suspense fallback={<ChartSkeleton />}>
-                  <CancelledProductsList />
-                </Suspense>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="categories" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Category Performance</CardTitle>
-              <CardDescription>Sales by category</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<ChartSkeleton />}>
-                <CategoryStatsChart data={categoryStats} />
-              </Suspense>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-4">
-          <Card>
+        <div className="space-y-6">
+          <Card className="rounded-3xl border bg-white/80 shadow-sm backdrop-blur">
             <CardHeader>
               <CardTitle>User Statistics</CardTitle>
               <CardDescription>User distribution and growth</CardDescription>
@@ -174,8 +181,20 @@ export default async function AdminDashboardPage() {
               </Suspense>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+
+          <Card className="rounded-3xl border bg-white/80 shadow-sm backdrop-blur">
+            <CardHeader>
+              <CardTitle>Most Cancelled Products</CardTitle>
+              <CardDescription>Top 5 cancellation trends</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Suspense fallback={<ChartSkeleton />}>
+                <CancelledProductsList />
+              </Suspense>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

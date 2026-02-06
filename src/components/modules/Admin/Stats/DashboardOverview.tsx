@@ -45,8 +45,15 @@ export default async function DashboardOverview() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat) => (
-        <Card key={stat.title}>
+      {stats.map((stat, index) => (
+        <Card
+          key={stat.title}
+          className={`rounded-3xl border shadow-sm ${
+            index === 0
+              ? "bg-linear-to-br from-emerald-50 via-white to-emerald-50 border-emerald-100"
+              : "bg-white/80"
+          }`}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
             <div className={`p-2 rounded-full ${stat.bgColor}`}>
@@ -54,8 +61,13 @@ export default async function DashboardOverview() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">{stat.description}</p>
+            <div className="text-2xl font-bold tracking-tight">
+              {stat.value}
+            </div>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-full border bg-white/70 px-2.5 py-1 text-[11px] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {stat.description}
+            </div>
           </CardContent>
         </Card>
       ))}
