@@ -1,8 +1,13 @@
+import { getSections } from "@/action/section/section.action";
+import { fetchAllCategories } from "@/action/categories/categories.action";
+import CategoryMarquee from "@/components/modules/category.marqieu";
+import CategoryShowcase from "@/components/modules/CategoryShowcase/CategoryShowcase";
+import HeroSliderWrapper from "@/components/modules/Sections/HeroSectionSlider";
+import { SkincareMarquee } from "@/components/SkincareMarquee";
 import { Button } from "@/components/ui/button";
 import ProductsPage from "./product/page";
 import { Filter, Grid, List } from "lucide-react";
-import { fetchAllCategories } from "@/action/categories/categories.action";
-import CategoryShowcase from "@/components/modules/CategoryShowcase/CategoryShowcase";
+import { Section } from "@/types/section.interface";
 
 const PublicPage = async () => {
   // Define the 5 category slugs to display (in order of preference)
@@ -15,6 +20,9 @@ const PublicPage = async () => {
   ];
 
   try {
+    const sectionsResponse = await getSections();
+    const allSections = sectionsResponse?.data || [];
+
     // Fetch all categories
     const allCategoriesResult = await fetchAllCategories("limit=100");
     const allCategories = allCategoriesResult?.data || [];
@@ -38,6 +46,22 @@ const PublicPage = async () => {
       })),
     );
 
+    const heroSections = allSections
+      .filter(
+        (section: Section) =>
+          section.type === "HERO" &&
+          section.isVisible !== false &&
+          section.images &&
+          section.images.length > 0,
+      )
+      .sort((a: Section, b: Section) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA; // Newest first
+      });
+
+    const heroSection: Section | undefined = heroSections[0];
+
     let searchParams = new Promise<{
       page?: string;
       limit?: string;
@@ -52,6 +76,34 @@ const PublicPage = async () => {
 
     return (
       <div>
+        {heroSection ? (
+          <section className="hidden md:block p-2">
+            <div className="container mx-auto">
+              <HeroSliderWrapper
+                section={heroSection}
+                autoPlay={true}
+                autoPlayInterval={6000}
+                showNavigation={true}
+                showDots={true}
+                pauseOnHover={true}
+                height="400px"
+                className="shadow-2xl"
+                showText={false}
+              />
+            </div>
+          </section>
+        ) : (
+          <section className="hidden md:block p-2">
+            <div className="container mx-auto h-100 bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+              <p className="text-gray-500">No hero slides available</p>
+            </div>
+          </section>
+        )}
+        <div className="hidden md:block">
+          <SkincareMarquee />
+        </div>
+        <CategoryMarquee categories={allCategories} />
+
         {/* Category Showcases - Display 5 Specific Categories */}
         <div className="container mx-auto px-4 py-12">
           {preferredCategorySlugs.map((slug) => {

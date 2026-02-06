@@ -124,6 +124,36 @@ export const getBrandBySlug = async (slug: string) => {
   }
 };
 
+export const getBrandBySlugWithProducts = async (
+  queryString: any,
+  slug: string,
+) => {
+  try {
+    const searchParams = new URLSearchParams(queryString);
+    const page = searchParams.get("page") || "1";
+    const limit = searchParams.get("limit") || "10";
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const searchTerm = searchParams.get("searchTerm") || "";
+    let builtQueryString = `?page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    if (searchTerm) {
+      builtQueryString += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+    }
+
+    const result = await makeApiCall<any>(
+      `/brand/slug/${slug}?${builtQueryString}`,
+      {
+        method: "GET",
+      },
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching brand with products:", error);
+    throw new Error("Failed to fetch brand with products");
+  }
+};
+
 export const getBrandById = async (id: string) => {
   const result = await makeApiCall<any>(`/brand/${id}`, {
     method: "GET",

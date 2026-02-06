@@ -118,18 +118,9 @@ export const getAllProductByCategoryBySlug = async (
 ) => {
   try {
     const searchParams = new URLSearchParams(queryString || "");
-    const page = searchParams.get("page") || "1";
-    const limit = searchParams.get("limit") || "10";
-    const searchTerm = searchParams.get("searchTerm") || "";
-
-    let builtQueryString = "";
-    if (searchTerm) {
-      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
-        searchTerm,
-      )}`;
-    } else {
-      builtQueryString = `page=${page}&limit=${limit}`;
-    }
+    if (!searchParams.get("page")) searchParams.set("page", "1");
+    if (!searchParams.get("limit")) searchParams.set("limit", "10");
+    const builtQueryString = searchParams.toString();
     const result = await makeApiCall<any>(
       `/category/slug/${slug}/products?${builtQueryString}`,
       {
@@ -164,18 +155,9 @@ export const getProductByCategory = async (
 ) => {
   try {
     const searchParams = new URLSearchParams(queryString || "");
-    const page = searchParams.get("page") || "1";
-    const limit = searchParams.get("limit") || "10";
-    const searchTerm = searchParams.get("searchTerm") || "";
-
-    let builtQueryString = "";
-    if (searchTerm) {
-      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
-        searchTerm,
-      )}`;
-    } else {
-      builtQueryString = `page=${page}&limit=${limit}`;
-    }
+    if (!searchParams.get("page")) searchParams.set("page", "1");
+    if (!searchParams.get("limit")) searchParams.set("limit", "10");
+    const builtQueryString = searchParams.toString();
     const result = await makeApiCall<any>(
       `/category/${categoryId}/products?${builtQueryString}`,
       {

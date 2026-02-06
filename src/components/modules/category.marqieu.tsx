@@ -10,7 +10,6 @@ import {
   Orbit,
   Waves,
   Palette,
-  Infinity,
   Heart,
   Leaf,
   Droplets,
@@ -24,10 +23,6 @@ interface CategoryMarqueeProps {
 }
 
 export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
-  const [isPaused, setIsPaused] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState<"forward" | "reverse">(
-    "forward",
-  );
   const [activeIndex, setActiveIndex] = useState(0);
   const marqueeRef = useRef<HTMLDivElement>(null);
 
@@ -55,11 +50,6 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
     const interval = setInterval(createParticle, 400);
     return () => clearInterval(interval);
   }, []);
-
-  // Interactive scroll direction toggle
-  const toggleDirection = () => {
-    setScrollDirection((prev) => (prev === "forward" ? "reverse" : "forward"));
-  };
 
   // Unique floating bubbles effect
   const FloatingBubbles = () => (
@@ -540,45 +530,15 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
       {/* Header Section */}
       <div className="marquee-header">
         <h2>✨ Explore Our Collections</h2>
-        <p>Premium skincare for every skin type</p>
-      </div>
-
-      {/* Control Panel */}
-      <div className="absolute top-6 right-6 z-50 flex gap-2">
-        <button
-          onClick={toggleDirection}
-          className="skincare-control-button"
-          title="Reverse scroll direction"
-        >
-          <Infinity size={16} />
-        </button>
-        <button
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          className="skincare-control-button"
-          title="Pause on hover"
-        >
-          ⏸️
-        </button>
-      </div>
-
-      {/* Active Category Display */}
-      <div className="absolute top-6 left-6 z-50">
-        <div className="skincare-active-indicator bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm">
-          <span className="text-gray-700 text-sm">Now viewing:</span>
-          <span className="text-purple-600 font-bold ml-2">
-            {categories[activeIndex % categories.length]?.name}
-          </span>
-        </div>
       </div>
 
       {/* Enhanced Marquee */}
       <div className="relative py-10 px-4">
         <div
           ref={marqueeRef}
-          className={`flex gap-6 ${isPaused ? "paused" : ""}`}
+          className="flex gap-6"
           style={{
-            animation: `marquee-scroll-${scrollDirection} 40s linear infinite`,
+            animation: `marquee-scroll-left-to-right 45s linear infinite`,
             paddingLeft: "50px",
           }}
         >
@@ -614,47 +574,15 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           ))}
         </div>
       </div>
-
-      {/* Info Text */}
-      <div className="text-center pb-6 text-xs text-gray-500">
-        💡 Hover to pause • Click to explore
-      </div>
     </div>
   );
 }
 
 // Add these additional styles
 const marqueeStyles = `
-  @keyframes marquee-scroll-forward {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-33.33%); }
-  }
-
-  @keyframes marquee-scroll-reverse {
-    0% { transform: translateX(-33.33%); }
-    100% { transform: translateX(0); }
-  }
-
-  .skincare-control-button {
-    background: white;
-    border: 1px solid #E5E7EB;
-    color: #6B7280;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  .skincare-control-button:hover {
-    background: #F9FAFB;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    color: #8B5CF6;
+  @keyframes marquee-scroll-left-to-right {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 
   .skincare-dimension-tracker {
@@ -678,9 +606,6 @@ const marqueeStyles = `
     box-shadow: 0 0 8px var(--dot-color);
   }
 
-  .paused {
-    animation-play-state: paused !important;
-  }
 `;
 
 // Inject additional styles

@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import { getBrandBySlug, getBrandById } from "@/action/brand/brand.action";
-import { getAllProducts } from "@/action/product/product.action";
+import { getBrandBySlugWithProducts } from "@/action/brand/brand.action";
 import ProductCard from "@/components/modules/PublicProduct/ProductCard";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 // Generate static params for all known brands
 export async function generateStaticParams() {
@@ -99,37 +99,35 @@ export default async function BrandPage({
   const currentPage = parseInt(page || "1", 10);
   const limit = 12;
 
-  // Convert slug to brand name (e.g., "beauty-of-joseon" -> "Beauty of Joseon")
-  const brandName = slug
-    .split("-")
-    .map((word) => {
-      // Handle special cases
-      if (word === "co") return "Co.";
-      if (word === "and") return "&";
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ")
-    .replace(/' S /g, "'s ")
-    .replace(/Aplb/, "APLB")
-    .replace(/Vt/, "VT")
-    .replace(/Isntree/, "ISNTREE")
-    .replace(/3w/, "3W");
+  // Fetch brand with products using the new API
+  const queryString = `page=${currentPage}&limit=${limit}`;
 
-  // Fetch products by brand name
-  const queryString = `page=${currentPage}&limit=${limit}&searchTerm=${encodeURIComponent(
-    brandName,
-  )}`;
-  const productsData = await getAllProducts(queryString);
+  console.log("🔍 Fetching brand with slug:", slug);
+  console.log("📊 Query string:", queryString);
+
+  const brandData = await getBrandBySlugWithProducts(queryString, slug);
+
+  console.log("✅ Brand data received:", JSON.stringify(brandData, null, 2));
+
+  // Extract brand info and products from nested structure
+  const brand = brandData?.data?.data;
+  const products = brand?.products || [];
+  const meta = brandData?.data?.meta || {};
+  const totalProducts = meta.total || 0;
+
+  console.log("🏷️ Brand:", brand);
+  console.log("📦 Products count:", products.length);
+  console.log("📈 Total products:", totalProducts);
 
   // Fallback empty state
-  if (!productsData?.data || productsData.data.length === 0) {
+  if (!brand || products.length === 0) {
     return (
       <div className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100">
         <div className="container mx-auto px-4 py-12">
           {/* Brand Header */}
           <div className="mb-12">
             <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              {brandName}
+              {brand?.name || slug}
             </h1>
             <div className="h-1 w-24 bg-linear-to-r from-purple-600 to-pink-600 rounded-full"></div>
           </div>
@@ -155,7 +153,8 @@ export default async function BrandPage({
               No Products Found
             </h2>
             <p className="text-gray-600 mb-8">
-              We don't have any products from {brandName} at the moment.
+              We don't have any products from {brand?.name || slug} at the
+              moment.
             </p>
             <Link href="/">
               <Button className="bg-linear-to-r from-purple-600 to-pink-600 hover:shadow-lg">
@@ -168,24 +167,44 @@ export default async function BrandPage({
     );
   }
 
-  const totalPages = Math.ceil((productsData.total || 0) / limit);
+  const totalPages = Math.ceil(totalProducts / limit);
 
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100">
       <div className="container mx-auto px-4 py-12">
-        {/* Brand Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            {brandName}
-          </h1>
-          <div className="h-1 w-24 bg-linear-to-r from-purple-600 to-pink-600 rounded-full mb-4"></div>
-          <p className="text-gray-600">{productsData.total} products found</p>
+        {/* Brand Header with Logo */}
+        <div className="mb-12 flex flex-col md:flex-row items-start md:items-center gap-6">
+          {/* Brand Logo */}
+          {brand.logoUrl && (
+            <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden shadow-lg bg-white p-2">
+              <Image
+                src={brand.logoUrl}
+                alt={brand.name}
+                fill
+                className="object-contain"
+              />
+            </div>
+          )}
+
+          {/* Brand Info */}
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+              {brand.name}
+            </h1>
+            <div className="h-1 w-24 bg-linear-to-r from-purple-600 to-pink-600 rounded-full mb-4"></div>
+            {brand.country && (
+              <p className="text-gray-600 mb-2">
+                <span className="font-medium">Country:</span> {brand.country}
+              </p>
+            )}
+            <p className="text-gray-600">{totalProducts} products available</p>
+          </div>
         </div>
 
         {/* Products Grid */}
         <Suspense fallback={<ProductsGridSkeleton />}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {productsData.data.map((product: any) => (
+            {products.map((product: any) => (
               <div key={product.id} className="h-full">
                 <ProductCard product={product} />
               </div>
@@ -197,7 +216,9 @@ export default async function BrandPage({
             <div className="mt-12 flex justify-center">
               <div className="flex items-center gap-2 flex-wrap justify-center">
                 {currentPage > 1 && (
-                  <Link href={`/brand/${slug}?page=${currentPage - 1}`}>
+                  <Link
+                    href={`/categorys/brand/${slug}?page=${currentPage - 1}`}
+                  >
                     <Button
                       variant="outline"
                       className="border-purple-200 hover:bg-purple-50"
@@ -219,7 +240,7 @@ export default async function BrandPage({
                       return (
                         <Link
                           key={pageNum}
-                          href={`/brand/${slug}?page=${pageNum}`}
+                          href={`/categorys/brand/${slug}?page=${pageNum}`}
                         >
                           <Button
                             variant={
@@ -255,7 +276,9 @@ export default async function BrandPage({
                 )}
 
                 {currentPage < totalPages && (
-                  <Link href={`/brand/${slug}?page=${currentPage + 1}`}>
+                  <Link
+                    href={`/categorys/brand/${slug}?page=${currentPage + 1}`}
+                  >
                     <Button className="bg-linear-to-r from-purple-600 to-pink-600 hover:shadow-lg">
                       Next
                     </Button>

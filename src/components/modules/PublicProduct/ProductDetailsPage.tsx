@@ -347,6 +347,9 @@ export default function ProductDetailsPage({
                 </Badge>
               )}
             </div>
+            {/* <div>
+              <h1>Add Review</h1>
+            </div> */}
           </div>
 
           {/* Product Info */}
@@ -354,7 +357,7 @@ export default function ProductDetailsPage({
             <div className="space-y-6 lg:sticky lg:top-24">
               {/* Product Name and SKU */}
               <div>
-                <h1 className="text-5xl font-bold leading-tight mb-3">
+                <h1 className="text-3xl text-gray-700 font-bold leading-tight mb-3">
                   {product?.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
@@ -378,12 +381,12 @@ export default function ProductDetailsPage({
                 <CardContent className="p-5">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-4xl font-extrabold text-slate-900">
-                      ৳{displayPrice?.toFixed(2) || "0.00"}
+                      ৳{(displayPrice * quantity)?.toFixed(2) || "0.00"}
                     </span>
                     {originalPrice && originalPrice > displayPrice && (
                       <>
                         <span className="text-xl text-muted-foreground line-through">
-                          ৳{originalPrice.toFixed(2)}
+                          ৳{(originalPrice * quantity).toFixed(2)}
                         </span>
                         <Badge variant="destructive" className="text-xs px-3">
                           Save {product?.discount}%

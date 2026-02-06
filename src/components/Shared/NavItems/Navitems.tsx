@@ -14,7 +14,7 @@ export interface NavLink {
 
 export const navItems: NavItem[] = [
   {
-    title: "H O M E",
+    title: "HOME",
     href: "/",
   },
   {

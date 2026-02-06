@@ -178,7 +178,7 @@ export function CheckoutForm({
       const deliveryData: DeliveryInput = {
         name: values.name,
         phone: values.phone,
-        email: values.email,
+        email: values.email || "example@example.com",
         address: values.address,
         city: values?.city || "",
         postalCode: values.postalCode || "",
@@ -335,7 +335,7 @@ export function CheckoutForm({
                               </p>
                             </div>
                             <p className="text-2xl font-bold text-pink-700">
-                              ${availableVariants[0].price}
+                              ৳{availableVariants[0].price}
                             </p>
                           </div>
                           <p className="text-sm text-pink-600 bg-white/50 inline-block px-3 py-1 rounded-full">
@@ -363,7 +363,7 @@ export function CheckoutForm({
                                       {variant.productName} - {variant.name}
                                     </span>
                                     <span className="text-muted-foreground">
-                                      ${variant.price}
+                                      ৳{variant.price}
                                     </span>
                                   </div>
                                 </SelectItem>
@@ -442,10 +442,10 @@ export function CheckoutForm({
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-xl text-indigo-700">
-                              ${((item.price || 0) * item.quantity).toFixed(2)}
+                              ৳{((item.price || 0) * item.quantity).toFixed(2)}
                             </p>
                             <p className="text-sm text-indigo-600 mt-1">
-                              Qty: {item.quantity} × ${item.price?.toFixed(2)}
+                              Qty: {item.quantity} × ৳{item.price?.toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -582,7 +582,7 @@ export function CheckoutForm({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email Address *</FormLabel>
+                        <FormLabel>Email Address (Optional) </FormLabel>
                         <FormControl>
                           <Input
                             type="email"
@@ -619,7 +619,7 @@ export function CheckoutForm({
                       name="city"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>City (Optional)</FormLabel>
+                          <FormLabel>City</FormLabel>
                           <FormControl>
                             <Input placeholder="Dhaka" {...field} />
                           </FormControl>
@@ -715,7 +715,7 @@ export function CheckoutForm({
                           : "Outside Dhaka"}
                         )
                       </span>
-                      <span>${deliveryCharge.toFixed(2)}</span>
+                      <span>৳{deliveryCharge.toFixed(2)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">

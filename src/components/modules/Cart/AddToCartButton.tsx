@@ -90,7 +90,7 @@ export default function AddToCartButton({
           ? "bg-green-600 hover:bg-green-700"
           : isOutOfStock
             ? "bg-gray-400 cursor-not-allowed"
-            : ""
+            : "bg-[#ca428b] hover:bg-[#b93a7e] text-white"
       }`}
     >
       {isLoading ? (
