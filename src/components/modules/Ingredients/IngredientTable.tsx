@@ -178,11 +178,11 @@ export default function IngredientTable({
                     {ingredient.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   {ingredient.createdAt
                     ? new Date(ingredient.createdAt).toLocaleDateString()
                     : "-"}
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

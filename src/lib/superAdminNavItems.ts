@@ -77,12 +77,6 @@ export const superAdminNavItems: NavSection[] = [
         roles: ["SUPER_ADMIN"],
       },
       {
-        title: "User Roles",
-        href: "/admin/dashboard/roles",
-        icon: "ShieldCheck",
-        roles: ["SUPER_ADMIN"],
-      },
-      {
         title: "Categories Management",
         href: "/admin/dashboard/categories-management",
         icon: "Tag",
@@ -117,13 +111,6 @@ export const superAdminNavItems: NavSection[] = [
         title: "Order Management",
         href: "/admin/dashboard/orders-management",
         icon: "ShoppingCart",
-        roles: ["SUPER_ADMIN"],
-      },
-
-      {
-        title: "System Settings",
-        href: "/admin/dashboard/settings",
-        icon: "Settings",
         roles: ["SUPER_ADMIN"],
       },
     ],

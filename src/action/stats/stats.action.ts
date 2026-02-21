@@ -7,7 +7,7 @@ export const getorderStats = async () => {
     const result = await makeApiCall<any>("/stats/orders-stats", {
       method: "GET",
     });
-
+    console.log(result);
     return result;
   } catch (error) {
     console.error("Error fetching order stats:", error);
@@ -20,6 +20,8 @@ export const bestProucts = async () => {
     const result = await makeApiCall<any>("/stats/best-products", {
       method: "GET",
     });
+
+    console.log("bestProducs", result);
 
     return result;
   } catch (error) {
@@ -59,6 +61,7 @@ export const getCategoryStats = async () => {
     const result = await makeApiCall<any>("/stats/category-stats", {
       method: "GET",
     });
+    console.log("getCategory", result);
 
     return result;
   } catch (error) {

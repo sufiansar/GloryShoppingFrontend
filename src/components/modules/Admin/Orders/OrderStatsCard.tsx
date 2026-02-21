@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Loader2, Package, CheckCircle, XCircle, Clock } from "lucide-react";
-import { orderStats } from "@/action/stats/stats.action";
+import { getorderStats } from "@/action/stats/stats.action";
 
 interface OrderStats {
   totalOrders: number;
@@ -26,7 +26,7 @@ const OrderStatsCard = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const result = await orderStats();
+      const result = await getorderStats();
       setStats(result);
     } catch (error) {
       console.error("Error fetching order stats:", error);

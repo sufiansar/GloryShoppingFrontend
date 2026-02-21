@@ -4,17 +4,18 @@ import { getSession } from "next-auth/react";
 export const login = async (data: FieldValues) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(data),
   });
-  console.log(res);
+
+  const result = await res.json();
+
   if (!res.ok) {
-    throw new Error(`Failed to login: ${res.statusText}`);
+    throw new Error(result.message || "Login failed");
   }
 
-  return await res.json();
+  return result;
 };
 
 export const logout = async () => {

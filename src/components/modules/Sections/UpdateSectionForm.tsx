@@ -26,22 +26,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Plus, X, Image as ImageIcon, Save, Eye } from "lucide-react";
+import { Plus, X, Image as ImageIcon, Save, Eye, Upload } from "lucide-react";
 import { Section } from "@/types/section.interface";
 import { updateSection } from "@/action/section/section.action";
 import { toast } from "sonner";
+import Image from "next/image";
 
 // Simplified update schema
 const updateSchema = z.object({
-  images: z
-    .array(
-      z.string().url({
-        message: "Please enter a valid URL for each image.",
-      })
-    )
-    .min(1, {
-      message: "At least one image is required.",
-    }),
+  images: z.array(z.string()).min(1, {
+    message: "At least one image is required.",
+  }),
   title: z.string().optional(),
   description: z.string().optional(),
   icons: z.string().optional(),
@@ -59,7 +54,7 @@ interface UpdateSectionFormProps {
 export default function UpdateSectionForm({ section }: UpdateSectionFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [newImage, setNewImage] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Initialize form with section data
   const form = useForm<z.infer<typeof updateSchema>>({
@@ -85,55 +80,84 @@ export default function UpdateSectionForm({ section }: UpdateSectionFormProps) {
     try {
       const formData = new FormData();
 
-      // Only send non-empty fields
+      // Handle existing images
+      if (values.images && values.images.length > 0) {
+        formData.append("images", JSON.stringify(values.images));
+      }
+
+      // Handle new image files
+      for (const file of selectedFiles) {
+        formData.append("images", file);
+      }
+
+      // Send other fields
       Object.entries(values).forEach(([key, value]) => {
-        if (value !== undefined && value !== "") {
-          if (Array.isArray(value)) {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, String(value));
-          }
+        if (value !== undefined && value !== "" && key !== "images") {
+          formData.append(key, String(value));
         }
       });
 
       await updateSection(section.id, formData);
 
-      toast("✅ Section updated!");
+      toast.success("✅ Section updated!");
 
       router.refresh();
     } catch (error) {
-      toast("❌ Failed to update section. Please try again.");
+      toast.error("❌ Failed to update section. Please try again.");
     } finally {
       setIsLoading(false);
     }
   }
 
-  const handleAddImage = () => {
-    if (newImage.trim()) {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setSelectedFiles((prev) => [...prev, ...filesArray]);
+
+      // Create preview URLs for the new files
+      const newImageUrls = filesArray.map((file) => URL.createObjectURL(file));
       const currentImages = form.getValues("images");
-      form.setValue("images", [...currentImages, newImage.trim()], {
+      form.setValue("images", [...currentImages, ...newImageUrls], {
         shouldValidate: true,
       });
-      setNewImage("");
     }
   };
 
   const handleRemoveImage = (index: number) => {
     const currentImages = form.getValues("images");
+    const isNewImage = currentImages[index]?.startsWith("blob:");
+
+    if (isNewImage) {
+      // Revoke the blob URL to free memory
+      URL.revokeObjectURL(currentImages[index]);
+      // Remove from selectedFiles if it's a new file
+      setSelectedFiles((prev) =>
+        prev.filter(
+          (_, i) => i !== index - (images.length - selectedFiles.length),
+        ),
+      );
+    }
+
     form.setValue(
       "images",
       currentImages.filter((_, i) => i !== index),
       {
         shouldValidate: true,
-      }
+      },
     );
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddImage();
-    }
+  const handleRemoveAllNewImages = () => {
+    // Revoke all blob URLs
+    images.forEach((image, index) => {
+      if (image.startsWith("blob:")) {
+        URL.revokeObjectURL(image);
+      }
+    });
+    setSelectedFiles([]);
+    // Keep only existing images (non-blob URLs)
+    const existingImages = images.filter((img) => !img.startsWith("blob:"));
+    form.setValue("images", existingImages);
   };
 
   return (
@@ -176,39 +200,67 @@ export default function UpdateSectionForm({ section }: UpdateSectionFormProps) {
                   </FormLabel>
 
                   <div className="space-y-4">
-                    {/* Image Input */}
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter image URL"
-                        value={newImage}
-                        onChange={(e) => setNewImage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleAddImage}
-                        variant="secondary"
-                        className="gap-2"
+                    {/* Image Upload Area */}
+                    <div className="flex flex-col items-center justify-center w-full">
+                      <label
+                        htmlFor="image-upload"
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted transition-colors"
                       >
-                        <Plus className="h-4 w-4" />
-                        Add Image
-                      </Button>
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
+                          <p className="mb-2 text-sm text-muted-foreground">
+                            <span className="font-semibold">
+                              Click to upload
+                            </span>{" "}
+                            or drag and drop
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            PNG, JPG or WEBP (MAX. 5MB each)
+                          </p>
+                        </div>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileSelect}
+                        />
+                      </label>
                     </div>
+
+                    {/* Selected Files Info */}
+                    {selectedFiles.length > 0 && (
+                      <div className="flex items-center justify-between bg-muted/50 p-2 rounded-md">
+                        <span className="text-sm text-muted-foreground">
+                          {selectedFiles.length} new file
+                          {selectedFiles.length !== 1 ? "s" : ""} selected
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRemoveAllNewImages}
+                          className="h-8 text-destructive hover:text-destructive"
+                        >
+                          Remove all
+                        </Button>
+                      </div>
+                    )}
 
                     {/* Images Preview Grid */}
                     {images.length > 0 && (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {images.map((image, index) => (
                           <div key={index} className="relative group">
-                            <div className="aspect-square rounded-lg overflow-hidden border">
+                            <div className="aspect-square rounded-lg overflow-hidden border bg-muted">
                               <img
                                 src={image}
                                 alt={`Image ${index + 1}`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).src =
-                                    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23999"><rect width="100" height="100"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="10">Image</text></svg>';
+                                    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23999"><rect width="100" height="100"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="10">Error</text></svg>';
                                 }}
                               />
                             </div>
@@ -223,8 +275,15 @@ export default function UpdateSectionForm({ section }: UpdateSectionFormProps) {
                             </Button>
                             {index === 0 && (
                               <div className="absolute top-2 left-2">
-                                <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded">
+                                <span className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded shadow-sm">
                                   Main
+                                </span>
+                              </div>
+                            )}
+                            {image.startsWith("blob:") && (
+                              <div className="absolute bottom-2 left-2">
+                                <span className="px-2 py-1 bg-green-500 text-white text-xs rounded shadow-sm">
+                                  New
                                 </span>
                               </div>
                             )}
@@ -235,8 +294,8 @@ export default function UpdateSectionForm({ section }: UpdateSectionFormProps) {
                   </div>
 
                   <FormDescription>
-                    Drag and drop to reorder images. The first image is
-                    displayed as primary.
+                    Upload new images or remove existing ones. The first image
+                    will be displayed as primary.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -17,6 +17,20 @@ export const navItems: NavItem[] = [
     title: "HOME",
     href: "/",
   },
+  // {
+  //   title: "Skin Type",
+  //   href: "/skin-type",
+  //   subItems: [
+  //     {
+  //       title: "SKINCARE",
+  //       href: "/categorys/skin-care",
+  //     },
+  //     {
+  //       title: "skin concerns",
+  //       href: "/categorys/skin-concerns",
+  //     },
+  //   ],
+  // },
   {
     title: "SKINCARE",
     href: "/categorys/skin-care",
@@ -79,6 +93,10 @@ export const navItems: NavItem[] = [
       {
         title: "Powder",
         href: "/categorys/powder",
+      },
+      {
+        title: "All Skin Types",
+        href: "/categorys/all-skin-types",
       },
       {
         title: "Japanese",
@@ -161,102 +179,9 @@ export const navItems: NavItem[] = [
     ],
   },
   {
-    title: "HEALTH & BEAUTY",
-    href: "/categorys/health-beauty",
-    subItems: [
-      {
-        title: "Facewash",
-        href: "/categorys/facewash",
-      },
-      {
-        title: "Moisturizer",
-        href: "/categorys/moisturizer",
-      },
-      {
-        title: "Sunscreen",
-        href: "/categorys/sunscreen",
-      },
-      {
-        title: "Ampoule",
-        href: "/categorys/ampoule",
-      },
-      {
-        title: "Toner",
-        href: "/categorys/toner",
-      },
-      {
-        title: "Essence",
-        href: "/categorys/essence",
-      },
-      {
-        title: "Face Mask",
-        href: "/categorys/face-mask",
-      },
-      {
-        title: "Serum",
-        href: "/categorys/serum",
-      },
-      {
-        title: "Special Treatments",
-        href: "/categorys/special-treatments",
-      },
-      {
-        title: "Double Cleansing",
-        href: "/categorys/double-cleansing",
-      },
-      {
-        title: "Powder",
-        href: "/categorys/powder",
-      },
-      {
-        title: "Japanese",
-        href: "/categorys/japanese",
-      },
-      {
-        title: "Try & Glow",
-        href: "/categorys/try-and-glow",
-      },
-      {
-        title: "Skin Care Combo",
-        href: "/categorys/skin-care-combo",
-      },
-      {
-        title: "Blush",
-        href: "/categorys/blush",
-      },
-      {
-        title: "Highlighter",
-        href: "/categorys/highlighter",
-      },
-      {
-        title: "BB & CC Cream",
-        href: "/categorys/bb-cc-cream",
-      },
-      {
-        title: "Makeup Brush",
-        href: "/categorys/makeup-brush",
-      },
-      {
-        title: "Makeup Setting Spray",
-        href: "/categorys/makeup-setting-spray",
-      },
-      {
-        title: "Cosmetics Pads + Makeup Sponge",
-        href: "/categorys/cosmetics-pads-makeup-sponge",
-      },
-      {
-        title: "False Nail",
-        href: "/categorys/false-nail",
-      },
-      {
-        title: "Nail Polish",
-        href: "/categorys/nail-polish",
-      },
-      {
-        title: "Nail Polish Remover",
-        href: "/categorys/nail-polish-remover",
-      },
-    ],
+    title: "SUPPLEMENT",
+    href: "/categorys/supplement",
+    subItems: [],
   },
   {
     title: "HAIR AND BEAUTY",
@@ -275,6 +200,11 @@ export const navItems: NavItem[] = [
         title: "Hair Special Treatment",
         href: "/categorys/hair-special-treatment",
       },
+      {
+        title: "Hair Color",
+        href: "/categorys/hair-color",
+      },
+
       { title: "Hair Serum", href: "/categorys/hair-serum" },
       { title: "Hair Combo", href: "/categorys/hair-combo" },
     ],
@@ -317,6 +247,42 @@ export const navItems: NavItem[] = [
         title: "Face Rollers & Gua Sha",
         href: "/categorys/face-rollers-gua-sha",
         description: "Massage tools for facial care",
+      },
+      {
+        title: "Blush",
+        href: "/categorys/blush",
+      },
+      {
+        title: "Highlighter",
+        href: "/categorys/highlighter",
+      },
+      {
+        title: "BB & CC Cream",
+        href: "/categorys/bb-cc-cream",
+      },
+      {
+        title: "Makeup Brush",
+        href: "/categorys/makeup-brush",
+      },
+      {
+        title: "Makeup Setting Spray",
+        href: "/categorys/makeup-setting-spray",
+      },
+      {
+        title: "Cosmetics Pads + Makeup Sponge",
+        href: "/categorys/cosmetics-pads-makeup-sponge",
+      },
+      {
+        title: "False Nail",
+        href: "/categorys/false-nail",
+      },
+      {
+        title: "Nail Polish",
+        href: "/categorys/nail-polish",
+      },
+      {
+        title: "Nail Polish Remover",
+        href: "/categorys/nail-polish-remover",
       },
     ],
     featured: [

@@ -81,7 +81,11 @@ export const getProductBySlug = async (slug: string) => {
   try {
     const result = await makeApiCall<any>(`/product/slug/${slug}`, {
       method: "GET",
+      cache: "no-store",
+      next: { revalidate: 0 },
     });
+
+    console.log("slug from server action", slug);
 
     return result;
   } catch (error) {

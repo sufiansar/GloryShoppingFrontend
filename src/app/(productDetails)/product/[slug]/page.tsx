@@ -11,19 +11,19 @@ interface ProductPageProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  try {
-    const result = await getAllProducts("");
-    const products = result?.data || [];
+// export async function generateStaticParams() {
+//   try {
+//     const result = await getAllProducts("");
+//     const products = result?.data || [];
 
-    return products.slice(0, 30).map((product: any) => ({
-      slug: product.slug,
-    }));
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return [];
-  }
-}
+//     return products.slice(0, 30).map((product: any) => ({
+//       slug: product.slug,
+//     }));
+//   } catch (error) {
+//     console.error("Error generating static params:", error);
+//     return [];
+//   }
+// }
 
 export async function generateMetadata({
   params,
@@ -48,6 +48,7 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
+  console.log("slug", slug);
   const product = await getProductBySlug(slug);
 
   if (!product?.data) {
@@ -75,6 +76,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     console.error("Error fetching related products:", error);
   }
 
+  console.log("Product:", product);
   return (
     <ProductDetailsPage
       product={product.data}

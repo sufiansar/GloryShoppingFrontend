@@ -12,9 +12,7 @@ export const makeApiCall = async <T>(
     session = await getServerSession(authOptions);
   } catch (error) {
     // This happens during static generation when there's no request context
-    console.warn(
-      "⚠️ No request context available (likely during static generation)",
-    );
+
     session = null;
   }
 
@@ -26,30 +24,15 @@ export const makeApiCall = async <T>(
     const cookieHeader = cookieStore.toString();
     if (cookieHeader) {
       headers.set("Cookie", cookieHeader);
-      console.log(
-        "[makeApiCall] Cookie header set:",
-        cookieHeader.substring(0, 100),
-      );
     }
 
     // Extract sessionId from cookies and send in header for cart endpoints
     const sessionIdFromCookie = cookieStore.get("sessionId")?.value;
     if (sessionIdFromCookie) {
       headers.set("x-session-id", sessionIdFromCookie);
-      console.log(
-        "[makeApiCall] ✅ Sending sessionId in x-session-id header:",
-        sessionIdFromCookie,
-      );
     } else {
-      console.log("[makeApiCall] ⚠️  No sessionId found in cookies");
     }
-  } catch (error) {
-    // cookies() may throw outside request context; ignore
-    console.log(
-      "[makeApiCall] Cookie read failed (likely during static generation):",
-      error,
-    );
-  }
+  } catch (error) {}
 
   if (session?.accessToken) {
     headers.set("Authorization", `Bearer ${session.accessToken}`);
@@ -202,7 +185,6 @@ export const makeApiCall = async <T>(
     // Default: return original parsed data
     return data as T;
   } catch (err) {
-    console.warn("[makeApiCall] Response normalization failed:", err);
     return data as T;
   }
 };

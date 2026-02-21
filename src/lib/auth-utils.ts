@@ -39,7 +39,7 @@ export const isAuthRoute = (pathname: string) => {
 
 export const isRouteMatches = (
   pathname: string,
-  routes: RouteConfig
+  routes: RouteConfig,
 ): boolean => {
   if (routes.exact.includes(pathname)) {
     return true;
@@ -49,7 +49,7 @@ export const isRouteMatches = (
 };
 
 export const getRouteOwner = (
-  pathname: string
+  pathname: string,
 ): "SUPER_ADMIN" | "ADMIN" | "USER" | "COMMON" | null => {
   if (isRouteMatches(pathname, superAdminProtectedRoutes)) {
     return "SUPER_ADMIN";
@@ -71,17 +71,17 @@ export const getDefaultDashboardRoute = (role: UserRole): string => {
     return "/admin/dashboard";
   }
   if (role === "ADMIN") {
-    return "/admin/users";
+    return "/admin/dashboard";
   }
   if (role === "USER") {
-    return "/dashboard";
+    return "/";
   }
   return "/";
 };
 
 export const isValidRedirectForRole = (
   redirectPath: string,
-  role: UserRole
+  role: UserRole,
 ): boolean => {
   const routeOwner = getRouteOwner(redirectPath);
 

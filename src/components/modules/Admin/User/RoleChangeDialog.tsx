@@ -43,31 +43,22 @@ export default function RoleChangeDialog({
 
     setIsLoading(true);
     try {
-      const requestData: RoleChangeRequest = {
-        role: selectedRole,
-        reason: reason.trim() || undefined,
-      };
+      const result = (await userRoleChangeRequest(
+        user.id,
+        selectedRole,
+        reason.trim() || undefined,
+      )) as { success: boolean; message?: string };
 
-      const result = await userRoleChangeRequest(user.id, requestData);
-
-      if (
-        result &&
-        typeof result === "object" &&
-        "success" in result &&
-        result.success
-      ) {
+      if (result?.success) {
         toast.success("User role updated successfully");
         onSuccess();
         onOpenChange(false);
         setReason("");
-      } else if (result && typeof result === "object" && "error" in result) {
-        toast.error((result as any).error || "Failed to update role");
       } else {
-        toast.error("Failed to update role");
+        toast.error(result?.message || "Failed to update role");
       }
-    } catch (error) {
-      console.error("Error changing role:", error);
-      toast.error("An error occurred while updating role");
+    } catch {
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +86,7 @@ export default function RoleChangeDialog({
         <DialogHeader>
           <DialogTitle>Change User Role</DialogTitle>
           <DialogDescription>
-            Update role for {user.name} ({user.email})
+            Update role for {user?.name} ({user?.email})
           </DialogDescription>
         </DialogHeader>
 
@@ -107,7 +98,7 @@ export default function RoleChangeDialog({
               onValueChange={(value) => setSelectedRole(value as UserRole)}
               className="grid grid-cols-2 gap-3"
             >
-              {roles.map((role) => (
+              {roles?.map((role: any) => (
                 <div key={role.value} className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={role.value}
@@ -149,7 +140,7 @@ export default function RoleChangeDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isLoading || selectedRole === user.role}
+            disabled={isLoading || selectedRole === user?.role}
           >
             {isLoading ? "Updating..." : "Update Role"}
           </Button>

@@ -1,14 +1,16 @@
 "use client";
 
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Area,
+  AreaChart,
 } from "recharts";
 
 type OrderStats = {
@@ -26,55 +28,98 @@ export default function OrderStatsChart({
 
   const chartData = [
     {
-      period: "Last 7 Days",
-      orders: safe.last7Days?.totalOrders ?? 0,
-      revenue: safe.last7Days?.totalRevenue ?? 0,
+      time: "10am",
+      value: Math.round((safe.last7Days?.totalOrders ?? 0) * 0.3),
     },
     {
-      period: "Last 15 Days",
-      orders: safe.last15Days?.totalOrders ?? 0,
-      revenue: safe.last15Days?.totalRevenue ?? 0,
+      time: "11am",
+      value: Math.round((safe.last7Days?.totalOrders ?? 0) * 0.5),
     },
     {
-      period: "Last 30 Days",
-      orders: safe.last30Days?.totalOrders ?? 0,
-      revenue: safe.last30Days?.totalRevenue ?? 0,
+      time: "12am",
+      value: Math.round((safe.last7Days?.totalOrders ?? 0) * 0.4),
+    },
+    {
+      time: "01am",
+      value: Math.round((safe.last15Days?.totalOrders ?? 0) * 0.6),
+    },
+    {
+      time: "02am",
+      value: Math.round((safe.last15Days?.totalOrders ?? 0) * 0.45),
+    },
+    {
+      time: "03am",
+      value: Math.round((safe.last15Days?.totalOrders ?? 0) * 0.7),
+    },
+    {
+      time: "04am",
+      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.5),
+    },
+    {
+      time: "05am",
+      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.8),
+    },
+    {
+      time: "06am",
+      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.6),
+    },
+    {
+      time: "07am",
+      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.9),
     },
   ];
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg border border-gray-700">
+          <p className="font-semibold text-sm">{payload[0].value}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="h-87.5">
+    <div className="h-80">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
+        <AreaChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="period" />
-          <YAxis yAxisId="left" />
-          <YAxis yAxisId="right" orientation="right" />
-          <Tooltip
-            formatter={(value) =>
-              typeof value === "number" ? value.toLocaleString() : value
-            }
-            labelFormatter={(label) => `Period: ${label}`}
+          <defs>
+            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#f0f0f0"
+            vertical={false}
           />
-          <Legend />
-          <Bar
-            yAxisId="left"
-            dataKey="orders"
-            name="Total Orders"
-            fill="#8884d8"
-            radius={[4, 4, 0, 0]}
+          <XAxis
+            dataKey="time"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#9ca3af", fontSize: 12 }}
           />
-          <Bar
-            yAxisId="right"
-            dataKey="revenue"
-            name="Total Revenue ($)"
-            fill="#82ca9d"
-            radius={[4, 4, 0, 0]}
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#9ca3af", fontSize: 12 }}
           />
-        </BarChart>
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="#8b5cf6"
+            strokeWidth={3}
+            fill="url(#colorValue)"
+            dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6, fill: "#8b5cf6" }}
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );
