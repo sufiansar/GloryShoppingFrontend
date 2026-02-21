@@ -14,7 +14,7 @@ import LogoutButton from "../Navbar/Logout";
 export default function UserMenu({ user: session }: { user: any }) {
   const router = useRouter();
 
-  const user = session?.user; // ✅ THIS is the key line
+  const user = session?.user;
 
   console.log(user?.name);
 

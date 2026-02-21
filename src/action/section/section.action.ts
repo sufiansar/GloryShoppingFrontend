@@ -27,39 +27,26 @@ export const createSection = async (data: FormData) => {
 };
 
 export const updateSection = async (id: string, data: FormData) => {
-  const sectionInfo = Object.fromEntries(data.entries());
-
-  const modify = {
-    ...sectionInfo,
-    images: sectionInfo.images ? JSON.parse(sectionInfo.images as string) : [],
-    isVisible:
-      sectionInfo.isVisible === "true" || sectionInfo.isVisible === "on",
-  };
-
-  console.log("Updating section:", id, modify);
-
   try {
     const result = await makeApiCall<any>(`/section/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(modify),
+      body: data,
     });
 
-    if (result?.id) {
-      revalidatePath("/sections", "page");
-      revalidatePath("/", "layout");
-      redirect("/sections");
+    if (!result?.success) {
+      throw new Error(result?.message || "Failed to update section");
     }
 
+    revalidatePath("/sections");
+    revalidatePath("/");
+
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating section:", error);
-    throw new Error("Failed to update section");
+
+    throw new Error(error?.message || "Failed to update section");
   }
 };
-
 export const deleteSection = async (id: string) => {
   console.log("Deleting section:", id);
 

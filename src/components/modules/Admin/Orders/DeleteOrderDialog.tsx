@@ -11,8 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IOrder } from "@/types/checkout.interface";
+
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { IOrder } from "@/types/order.interface";
 
 interface DeleteOrderDialogProps {
   order: IOrder;

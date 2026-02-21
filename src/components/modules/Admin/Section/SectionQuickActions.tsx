@@ -1,4 +1,3 @@
-// components/section/SectionQuickActions.tsx
 "use client";
 
 import React from "react";

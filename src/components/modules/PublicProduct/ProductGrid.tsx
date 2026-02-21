@@ -1,4 +1,3 @@
-// components/public/ProductGrid.tsx
 "use client";
 
 import Pagination from "@/components/Shared/Pagination";
@@ -51,7 +50,7 @@ export default function ProductGrid({
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-8">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

@@ -83,10 +83,6 @@ const Navbar = async () => {
   // const pathname = usePathname();
   const userInfo = await getServerSession(authOptions);
   console.log("SERVER SESSION:", userInfo);
-  // const userInfo: any = await getSession();
-  // console.log("SERVER SESSION:", userInfo);
-  // const canAccessDashboard =
-  //   userInfo?.user?.role === "SUPER_ADMIN" || userInfo?.user?.role === "ADMIN";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-[#ca428b] backdrop-blur">

@@ -47,14 +47,26 @@ export default function UsersManagementPage() {
       const result = await getAllUsers(
         `?page=${page}&limit=${pagination.limit}&searchTerm=${searchQuery}`,
       );
+      console.log("userMManagement", result);
+
       if (result.success && result.data) {
-        setUsers(result.data.users);
-        setFilteredUsers(result.data.users);
+        // The data is directly an array from your API response
+        const usersData = result.data;
+
+        setUsers(usersData);
+        setFilteredUsers(usersData);
+
+        // Update pagination based on response
         setPagination({
-          page: result.data.page,
-          limit: result.data.limit,
-          total: result.data.total,
-          totalPages: Math.ceil(result.data.total / result.data.limit),
+          page: result.page || page,
+          limit: result.limit || pagination.limit,
+          total: result.total || usersData.length,
+          totalPages:
+            result.totalPages ||
+            Math.ceil(
+              (result.total || usersData.length) /
+                (result.limit || pagination.limit),
+            ),
         });
       } else {
         toast.error("Failed to fetch users");
@@ -72,14 +84,14 @@ export default function UsersManagementPage() {
   }, []);
 
   useEffect(() => {
-    let filtered = users;
+    let filtered = [...users];
 
     // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(
         (user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.phone?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
@@ -103,11 +115,12 @@ export default function UsersManagementPage() {
     setFilteredUsers(filtered);
   }, [searchQuery, statusFilter, roleFilter, users]);
 
+  // Calculate stats with safe checks
   const stats = {
-    total: users?.length,
-    active: users?.filter((u) => u?.isActive).length,
-    admins: users?.filter((u) => u?.role === "ADMIN").length,
-    pending: users?.filter((u) => !u?.isVerified).length,
+    total: users?.length || 0,
+    active: users?.filter((u) => u?.isActive).length || 0,
+    admins: users?.filter((u) => u?.role === "ADMIN").length || 0,
+    pending: users?.filter((u) => !u?.isVerified).length || 0,
   };
 
   return (
@@ -140,9 +153,9 @@ export default function UsersManagementPage() {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.total}</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
-              {stats?.active} active users
+              {stats.active} active users
             </p>
           </CardContent>
         </Card>
@@ -155,7 +168,7 @@ export default function UsersManagementPage() {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.admins}</div>
+            <div className="text-2xl font-bold">{stats.admins}</div>
             <p className="text-xs text-muted-foreground">
               System administrators
             </p>
@@ -168,9 +181,12 @@ export default function UsersManagementPage() {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.active}</div>
+            <div className="text-2xl font-bold">{stats.active}</div>
             <p className="text-xs text-muted-foreground">
-              {((stats?.active / stats?.total) * 100 || 0).toFixed(1)}% of total
+              {stats.total > 0
+                ? ((stats.active / stats.total) * 100).toFixed(1)
+                : 0}
+              % of total
             </p>
           </CardContent>
         </Card>
@@ -183,7 +199,7 @@ export default function UsersManagementPage() {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.pending}</div>
+            <div className="text-2xl font-bold">{stats.pending}</div>
             <p className="text-xs text-muted-foreground">
               Need email verification
             </p>
@@ -254,10 +270,16 @@ export default function UsersManagementPage() {
                 </div>
               ) : (
                 <>
-                  <UsersTable
-                    users={filteredUsers}
-                    onUserUpdated={fetchUsers}
-                  />
+                  {filteredUsers.length > 0 ? (
+                    <UsersTable
+                      users={filteredUsers}
+                      onUserUpdated={fetchUsers}
+                    />
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">No users found</p>
+                    </div>
+                  )}
 
                   {/* Pagination */}
                   <div className="flex items-center justify-between">

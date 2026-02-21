@@ -28,6 +28,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Password from "@/components/ui/Password";
 import { login } from "@/action/auth/login.action";
 import Image from "next/image";
+import { Mail, Lock, LogIn, Sparkles } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address." }),
@@ -54,6 +55,7 @@ export function LoginForm({
   });
 
   const router = useRouter();
+  const baseColor = "oklch(52.801% 0.15987 344.323)";
 
   async function onSubmit(values: FieldValues) {
     try {
@@ -63,6 +65,7 @@ export function LoginForm({
         callbackUrl: callbackUrl,
         redirect: true,
       });
+
       toast.success("✅ Logged in successfully!");
     } catch (error) {
       console.log("Login error:", error);
@@ -71,141 +74,179 @@ export function LoginForm({
   }
 
   return (
-    <Card className="overflow-hidden p-0">
-      <CardContent className="grid p-0 md:grid-cols-2">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-6 md:p-8"
-            {...props}
-          >
-            <FieldGroup>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">
-                  Login to your Glory Shopping account
-                </p>
-              </div>
+    <Card className="overflow-hidden p-0 border-0 shadow-2xl rounded-3xl">
+      <CardContent className="grid p-0 md:grid-cols-2 min-h-150">
+        {/* Left side - Form */}
+        <div className="relative bg-white p-8 md:p-10 flex items-center">
+          {/* Decorative background pattern */}
+          <div
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, ${baseColor} 1px, transparent 0)`,
+              backgroundSize: "40px 40px",
+            }}
+          />
 
-              {/* Email Field */}
-              <Field>
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
-                      <FormControl>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="m@example.com"
-                          required
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs mt-1" />
-                    </FormItem>
-                  )}
-                />
-              </Field>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full max-w-sm mx-auto space-y-6 relative z-10"
+              {...props}
+            >
+              <FieldGroup>
+                {/* Welcome Header with Icon */}
+                <div className="flex flex-col items-center gap-2 text-center mb-2">
+                  <div className="inline-flex p-3 bg-linear-to-br from-pink-50 to-purple-50 rounded-2xl mb-2 border border-pink-100">
+                    <LogIn
+                      className="w-6 h-6"
+                      style={{ color: baseColor }}
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                  <h1 className="text-3xl font-bold text-slate-800">
+                    Welcome back
+                  </h1>
+                  <p className="text-slate-500 text-sm">
+                    Login to your Glory Shopping account
+                  </p>
+                </div>
 
-              {/* Password Field */}
-              <Field>
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center">
-                        <FieldLabel htmlFor="password">Password</FieldLabel>
-                        <Link
-                          href="/forgot-password"
-                          className="ml-auto text-sm underline-offset-2 hover:underline"
+                {/* Email Field */}
+                <Field>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FieldLabel
+                          htmlFor="email"
+                          className="text-sm font-semibold text-slate-700"
                         >
-                          Forgot your password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Password id="password" required {...field} />
-                      </FormControl>
-                      <FormMessage className="text-xs mt-1" />
-                    </FormItem>
-                  )}
-                />
-              </Field>
+                          Email Address
+                        </FieldLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail
+                              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
+                              strokeWidth={1.5}
+                            />
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="m@example.com"
+                              className={cn(
+                                "pl-9 h-11 bg-slate-50 border-slate-200 rounded-lg focus:ring-2 transition-all",
+                                fieldState.error
+                                  ? "border-red-300 focus:ring-red-200"
+                                  : "focus:ring-2",
+                              )}
+                              style={
+                                {
+                                  // No custom focusRing property; use only valid CSS properties
+                                }
+                              }
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs mt-1 text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </Field>
 
-              {/* Submit Button */}
-              <Field>
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
-              </Field>
+                {/* Password Field */}
+                <Field>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <FieldLabel
+                            htmlFor="password"
+                            className="text-sm font-semibold text-slate-700"
+                          >
+                            Password
+                          </FieldLabel>
+                          <Link
+                            href="/forgot-password"
+                            className="text-xs hover:underline transition-all"
+                            style={{ color: baseColor }}
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock
+                              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
+                              strokeWidth={1.5}
+                            />
+                            <Password
+                              id="password"
+                              className={cn(
+                                "pl-9 h-11 bg-slate-50 border-slate-200 rounded-lg focus:ring-2 transition-all",
+                                fieldState.error
+                                  ? "border-red-300 focus:ring-red-200"
+                                  : "",
+                              )}
+                              style={{
+                                ...(fieldState.error
+                                  ? {}
+                                  : { focusRing: `2px solid ${baseColor}40` }),
+                              }}
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs mt-1 text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </Field>
 
-              {/* Separator */}
-              {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Or continue with
-              </FieldSeparator> */}
-
-              {/* Social Login Buttons */}
-              {/* <Field>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => signIn("github", { callbackUrl: "/" })}
-                  className="w-full"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    className="w-4 h-4 mr-2"
+                {/* Submit Button */}
+                <Field>
+                  <Button
+                    type="submit"
+                    className="w-full h-11 rounded-lg font-semibold text-white transition-all hover:opacity-90 shadow-md hover:shadow-lg"
+                    style={{
+                      background: `linear-gradient(135deg, ${baseColor}, oklch(45% 0.14 344.323))`,
+                    }}
                   >
-                    <path
-                      d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login with GitHub
-                </Button>
-              </Field> */}
+                    Login
+                  </Button>
+                </Field>
 
-              {/* <Field>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => signIn("google", { callbackUrl: "/" })}
-                  className="w-full"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    className="w-4 h-4 mr-2"
+                {/* Sign up link */}
+                <FieldDescription className="text-center text-sm">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/register"
+                    className="font-medium inline-flex items-center gap-1 hover:gap-2 transition-all"
+                    style={{ color: baseColor }}
                   >
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login with Google
-                </Button>
-              </Field> */}
+                    Sign up
+                    <Sparkles className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  </Link>
+                </FieldDescription>
+              </FieldGroup>
+            </form>
+          </Form>
+        </div>
 
-              {/* Sign up link */}
-              <FieldDescription className="text-center">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/register"
-                  className="underline underline-offset-2 hover:no-underline"
-                >
-                  Sign up
-                </Link>
-              </FieldDescription>
-            </FieldGroup>
-          </form>
-        </Form>
+        {/* Right side - Image with overlay */}
+        <div className="relative hidden md:block overflow-hidden bg-linear-to-br from-pink-100 to-purple-100">
+          {/* Gradient overlay */}
+          <div
+            className="absolute inset-0 z-10 mix-blend-multiply"
+            style={{
+              background: `linear-gradient(135deg, ${baseColor}40, ${baseColor}80)`,
+            }}
+          />
 
-        {/* Image Section */}
-        <div className="bg-muted relative hidden md:block">
+          {/* Image */}
           <Image
             src="/assets/login-image.jpg"
             alt="Login image"
@@ -213,6 +254,18 @@ export function LoginForm({
             className="object-cover"
             priority
           />
+
+          {/* Quote overlay */}
+          <div className="absolute bottom-6 left-6 right-6 z-20 text-white">
+            <blockquote className="space-y-1">
+              <p className="text-sm font-medium italic">
+                "The best shopping experience starts here"
+              </p>
+              <footer className="text-xs text-white/70">
+                — Glory Shopping Team
+              </footer>
+            </blockquote>
+          </div>
         </div>
       </CardContent>
     </Card>

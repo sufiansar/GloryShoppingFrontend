@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { Section } from "@/types/section.interface";
+import { useKeenSlider } from "keen-slider/react";
+import "keen-slider/keen-slider.min.css";
 
 interface HeroSliderWrapperProps {
   section: Section;
@@ -29,28 +31,70 @@ export default function HeroSliderWrapper({
   showText = false,
 }: HeroSliderWrapperProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const images = section.images || [];
 
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+    initial: 0,
+    loop: true,
+    slides: {
+      perView: 1,
+    },
+    slideChanged(slider) {
+      setCurrentIndex(slider.track.details.rel);
+    },
+    drag: true,
+    // Add animation options for smoother transitions
+    renderMode: "performance", // Use performance mode for smoother animations
+    // move(slider) {
+    //   // Optional: Add any custom move logic
+    // },
+    created(slider) {
+      // Optional: Add any creation logic
+    },
+  });
+
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  }, [images.length]);
+    instanceRef.current?.next();
+  }, [instanceRef]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  }, [images.length]);
+    instanceRef.current?.prev();
+  }, [instanceRef]);
 
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const goToSlide = useCallback(
+    (index: number) => {
+      instanceRef.current?.moveToIdx(index);
+    },
+    [instanceRef],
+  );
 
+  // Auto-play functionality
   useEffect(() => {
-    if (!autoPlay || isPaused || images.length <= 1) return;
+    if (!autoPlay || paused || images.length <= 1) return;
 
-    const interval = setInterval(nextSlide, autoPlayInterval);
-    return () => clearInterval(interval);
-  }, [autoPlay, isPaused, autoPlayInterval, nextSlide, images.length]);
+    const startAutoPlay = () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        nextSlide();
+      }, autoPlayInterval);
+    };
+
+    startAutoPlay();
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [autoPlay, paused, autoPlayInterval, nextSlide, images.length]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
 
   if (images.length === 0) {
     return (
@@ -63,25 +107,27 @@ export default function HeroSliderWrapper({
     );
   }
 
-  const currentImage = images[currentIndex];
-
   return (
     <div
       className={`relative w-full overflow-hidden rounded-xl ${className}`}
       style={{ height }}
-      onMouseEnter={() => pauseOnHover && setIsPaused(true)}
-      onMouseLeave={() => pauseOnHover && setIsPaused(false)}
+      onMouseEnter={() => pauseOnHover && setPaused(true)}
+      onMouseLeave={() => pauseOnHover && setPaused(false)}
     >
-      {/* Full-width Image */}
-      <div className="absolute inset-0 transition-opacity duration-500">
-        <Image
-          src={currentImage}
-          alt={section.title || "Hero image"}
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
+      {/* Keen-Slider Container */}
+      <div ref={sliderRef} className="keen-slider h-full">
+        {images.map((image, index) => (
+          <div key={index} className="keen-slider__slide relative h-full">
+            <Image
+              src={image}
+              alt={section.title || `Hero image ${index + 1}`}
+              fill
+              className="object-cover"
+              priority={index === 0}
+              sizes="100vw"
+            />
+          </div>
+        ))}
       </div>
 
       {showNavigation && images.length > 1 && (

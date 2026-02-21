@@ -62,7 +62,7 @@ const formSchema = z.object({
   checkoutType: z.enum(["CART", "DIRECT"]),
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(10, "Please enter a valid phone number"),
-  email: z.string().email("Please enter a valid email"),
+  email: z.string().email("Please enter a valid email").optional(),
   address: z.string().min(5, "Address must be at least 5 characters"),
   city: z.string().optional(),
   postalCode: z.string().optional(),
@@ -178,12 +178,11 @@ export function CheckoutForm({
       const deliveryData: DeliveryInput = {
         name: values.name,
         phone: values.phone,
-        email: values.email || "example@example.com",
+        email: values?.email || "example@example.com",
         address: values.address,
         city: values?.city || "",
         postalCode: values.postalCode || "",
         deliveryCharge,
-        // Add delivery zone to delivery data if your backend expects it
         deliveryZone: values.deliveryZone,
       };
 
@@ -576,7 +575,6 @@ export function CheckoutForm({
                       )}
                     />
                   </div>
-
                   <FormField
                     control={form.control}
                     name="email"

@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { makeApiCall } from "../apiClinet";
+import { RoleChangeRequest } from "@/types/User.interface";
+import { UserRole } from "@/lib/navItems.confiq";
 
 export const getMyProfile = async () => {
   return makeApiCall("/user/my-profile", {
@@ -57,17 +59,29 @@ export const getuserById = async (id: any) => {
   });
 };
 
-export const userRoleChangeRequest = async (id: any, UserRole: any) => {
-  const result = await makeApiCall(`/user/role-update/${id}`, {
-    method: "POST",
-    body: JSON.stringify(UserRole),
+export const userRoleChangeRequest = async (
+  userId: string,
+  role: UserRole,
+  reason?: string,
+) => {
+  const result = await makeApiCall("/user/role-update", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+      role,
+      reason,
+    }),
   });
+
   revalidatePath("/", "layout");
   return result;
 };
 
 export const deleteUserAccount = async (id: any) => {
-  const result = await makeApiCall("/user/create-user", {
+  const result = await makeApiCall(`/user/${id}`, {
     method: "DELETE",
   });
   revalidatePath("/", "layout");

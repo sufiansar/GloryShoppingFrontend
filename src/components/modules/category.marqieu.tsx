@@ -529,7 +529,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
       {/* Header Section */}
       <div className="marquee-header">
-        <h2>✨ Explore Our Collections</h2>
+        <h2>Explore Our Collections</h2>
       </div>
 
       {/* Enhanced Marquee */}
