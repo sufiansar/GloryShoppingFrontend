@@ -1,5 +1,4 @@
 "use client";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +34,7 @@ import {
   IconCategory,
   IconCertificate,
 } from "@tabler/icons-react";
+import { ReviewForm } from "../Review/CreateReview";
 
 interface Variant {
   id?: string;
@@ -47,22 +47,33 @@ interface Variant {
   stock?: number;
 }
 
+interface ReviewItem {
+  id?: string;
+  rating?: number;
+  comment?: string;
+  createdAt?: string;
+  user?: {
+    name?: string;
+    fullName?: string;
+    email?: string;
+  };
+  userId?: string;
+}
+
 interface ProductDetailsPageProps {
   product: Product;
   relatedProducts: Product[];
   variants?: Variant[];
+  reviews?: ReviewItem[];
 }
 
 export default function ProductDetailsPage({
   product,
   relatedProducts,
   variants = [],
+  reviews = [],
 }: ProductDetailsPageProps) {
   const router = useRouter();
-
-  if (!product) {
-    return <div>Product not found</div>;
-  }
 
   const productVariants =
     variants.length > 0 ? variants : product?.variants || [];
@@ -90,6 +101,7 @@ export default function ProductDetailsPage({
     skinTypes: boolean;
     concerns: boolean;
     reviews: boolean;
+    createReview: boolean;
     faq: boolean;
   }>({
     description: false,
@@ -98,6 +110,7 @@ export default function ProductDetailsPage({
     skinTypes: false,
     concerns: false,
     reviews: false,
+    createReview: false,
     faq: false,
   });
 
@@ -162,6 +175,10 @@ export default function ProductDetailsPage({
 
     setMousePosition({ x, y });
   };
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-rose-50/30 via-white to-pink-50/30">
@@ -398,7 +415,16 @@ export default function ProductDetailsPage({
             <div className="space-y-7 lg:sticky lg:top-24">
               {/* Enhanced Product Name and SKU */}
               <div className="space-y-4">
-                <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900">
+                <h1
+                  className="text-xl lg:text-3xl font-bold leading-tight"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, oklch(52.801% 0.15987 344.323), #db2777)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
                   {product?.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -424,12 +450,12 @@ export default function ProductDetailsPage({
               <Card className="border-0 bg-rose-50/50 shadow-xl rounded-2xl overflow-hidden">
                 <CardContent className="p-6">
                   <div className="flex flex-wrap items-baseline gap-4 mb-3">
-                    <span className="text-5xl font-black text-gray-900">
+                    <span className="text-3xl font-black text-gray-900">
                       ৳{(displayPrice * quantity)?.toFixed(2) || "0.00"}
                     </span>
                     {originalPrice && originalPrice > displayPrice && (
                       <>
-                        <span className="text-2xl text-gray-400 line-through font-medium">
+                        <span className="text-xl text-gray-400 line-through font-medium">
                           ৳{(originalPrice * quantity).toFixed(2)}
                         </span>
                         <Badge className="bg-red-600 text-white text-sm px-4 py-1 rounded-full shadow-md">
@@ -980,7 +1006,129 @@ export default function ProductDetailsPage({
                 </div>  */}
 
                 {/* Reviews Accordion */}
-                <div className="border-2 border-rose-100/80 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+
+                {/* Reviews Accordion */}
+                <div className="border-2 border-rose-100/80 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow mt-8">
+                  <button
+                    onClick={() => toggleSection("reviews")}
+                    className="w-full flex items-center justify-between p-5 hover:bg-rose-50/50 transition-all duration-300"
+                  >
+                    <span className="font-bold text-gray-900 text-left">
+                      REVIEWS ({product?.reviewCount || 0})
+                    </span>
+                    <div
+                      className={`rounded-full p-1 transition-all duration-300 ${
+                        expandedSections.reviews
+                          ? "text-white"
+                          : "bg-rose-100 text-gray-600"
+                      }`}
+                      style={
+                        expandedSections.reviews
+                          ? {
+                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                            }
+                          : {}
+                      }
+                    >
+                      {expandedSections.reviews ? (
+                        <Minus className="h-5 w-5" />
+                      ) : (
+                        <Plus className="h-5 w-5" />
+                      )}
+                    </div>
+                  </button>
+                  {expandedSections.reviews && (
+                    <div className="px-5 pb-5 border-t-2 border-rose-50 bg-rose-50/30">
+                      <div className="pt-5">
+                        <div className="flex items-center gap-3 mb-4 bg-amber-50 rounded-xl p-4">
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className="h-5 w-5 fill-amber-400 text-amber-400"
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-amber-900 font-semibold">
+                            {product?.reviewCount || reviews.length || 0}{" "}
+                            reviews
+                          </span>
+                        </div>
+
+                        <div className="mb-4">
+                          <Button
+                            className="text-white hover:opacity-90 transition-all"
+                            style={{
+                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                            }}
+                            onClick={() => toggleSection("createReview")}
+                          >
+                            Create Review
+                          </Button>
+                        </div>
+
+                        {expandedSections.createReview && (
+                          <div className="mb-4">
+                            <ReviewForm productId={product.id ?? ""} />
+                          </div>
+                        )}
+
+                        {reviews.length > 0 ? (
+                          <div className="space-y-4">
+                            {reviews.map((review) => (
+                              <div
+                                key={review.id}
+                                className="bg-white rounded-lg p-4 border border-rose-100"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex items-center">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          className={`h-4 w-4 ${
+                                            star <= (review.rating || 0)
+                                              ? "fill-amber-400 text-amber-400"
+                                              : "text-slate-300"
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-xs text-slate-500">
+                                      {review.rating || 0} / 5
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-slate-400">
+                                    {review.createdAt
+                                      ? new Date(
+                                          review.createdAt,
+                                        ).toDateString()
+                                      : ""}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-800 mb-2">
+                                  {review.comment || "No comment provided."}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {review.user?.name ||
+                                    review.user?.fullName ||
+                                    review.user?.email ||
+                                    "Anonymous"}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600 bg-white rounded-lg p-4 border border-rose-100">
+                            No reviews yet. Be the first to review this product!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* <div className="border-2 border-rose-100/80 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                   <button
                     onClick={() => toggleSection("reviews")}
                     className="w-full flex items-center justify-between p-5 hover:bg-rose-50/50 transition-all duration-300"
@@ -1020,14 +1168,19 @@ export default function ProductDetailsPage({
                           <span className="text-sm text-amber-900 font-semibold">
                             {product?.reviewCount || 0} reviews
                           </span>
-                        </div>
-                        <p className="text-sm text-gray-600 bg-white rounded-lg p-4 border border-rose-100">
+                        </div> */}
+
+                {/* <div className="mb-4">
+                          <ReviewForm productId={product.id ?? ""} />
+                        </div> */}
+
+                {/* <p className="text-sm text-gray-600 bg-white rounded-lg p-4 border border-rose-100">
                           No reviews yet. Be the first to review this product!
                         </p>
                       </div>
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 {/* FAQ Accordion */}
                 <div className="border-2 border-rose-100/80 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">

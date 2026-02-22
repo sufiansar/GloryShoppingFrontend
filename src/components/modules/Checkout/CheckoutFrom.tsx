@@ -42,6 +42,10 @@ import {
   CreditCard,
   Truck,
   MapPin,
+  Home,
+  Phone,
+  Mail,
+  User,
 } from "lucide-react";
 import {
   CheckoutInput,
@@ -62,7 +66,11 @@ const formSchema = z.object({
   checkoutType: z.enum(["CART", "DIRECT"]),
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(10, "Please enter a valid phone number"),
-  email: z.string().email("Please enter a valid email").optional(),
+  email: z
+    .string()
+    .email("Please enter a valid email")
+    .optional()
+    .or(z.literal("")),
   address: z.string().min(5, "Address must be at least 5 characters"),
   city: z.string().optional(),
   postalCode: z.string().optional(),
@@ -105,6 +113,8 @@ export function CheckoutForm({
   );
   const [directQuantity, setDirectQuantity] = useState(initialDirectQuantity);
 
+  const baseColor = "oklch(52.801% 0.15987 344.323)";
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -116,7 +126,7 @@ export function CheckoutForm({
       address: "",
       city: "",
       postalCode: "",
-      deliveryZone: "INSIDE_DHAKA", // Default to Inside Dhaka
+      deliveryZone: "INSIDE_DHAKA",
       quantity: initialDirectQuantity,
     },
   });
@@ -213,9 +223,7 @@ export function CheckoutForm({
       });
 
       toast("Your order has been successfully placed!", {
-        description: `Order #${order.id} - Total: $${
-          order.amount?.toFixed(2) || grandTotal.toFixed(2)
-        }`,
+        description: `Order #${order.id} - Total: ৳${order.amount?.toFixed(2) || grandTotal.toFixed(2)}`,
       });
 
       if (onOrderSuccess) {
@@ -234,14 +242,45 @@ export function CheckoutForm({
       <form
         id="checkout-form"
         onSubmit={form.handleSubmit(onSubmit)}
-        className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 py-12 px-4"
+        className="min-h-screen py-12 px-4"
+        style={{
+          background: `linear-gradient(135deg, #fdf2f8, #fff1f2, #fef3c7)`,
+        }}
       >
         <div className="max-w-6xl mx-auto">
+          {/* Back to Home Indicator */}
+          <div className="mb-8">
+            <a
+              href="/"
+              className="group inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 border border-slate-200"
+              style={{
+                boxShadow: `0 4px 12px ${baseColor}20`,
+              }}
+            >
+              <Home
+                className="w-4 h-4 transition-transform group-hover:-translate-x-1"
+                style={{ color: baseColor }}
+                strokeWidth={2}
+              />
+              <span className="text-sm font-medium text-slate-700">
+                Back to Home
+              </span>
+            </a>
+          </div>
+
           <div className="mb-10 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-3">
+            <h1
+              className="text-4xl md:text-5xl font-bold mb-3"
+              style={{
+                background: `linear-gradient(135deg, ${baseColor}, #db2777, #2563eb)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
               Complete Your Order
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-slate-600 text-lg">
               Just a few more details to finalize your purchase
             </p>
           </div>
@@ -251,9 +290,15 @@ export function CheckoutForm({
             <div className="lg:col-span-2 space-y-6">
               {/* Checkout Type Selector - Only show if both modes are available */}
               {cartItems.length > 0 && availableVariants.length === 0 && (
-                <Card className="shadow-lg border-purple-100 bg-white/80 backdrop-blur">
-                  <CardHeader className="bg-linear-to-r from-purple-50 to-pink-50">
-                    <CardTitle className="text-purple-900">
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur overflow-hidden">
+                  <div
+                    className="h-2 w-full"
+                    style={{
+                      background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                    }}
+                  />
+                  <CardHeader>
+                    <CardTitle style={{ color: baseColor }}>
                       Checkout Method
                     </CardTitle>
                     <CardDescription>
@@ -279,7 +324,10 @@ export function CheckoutForm({
                                   className="cursor-pointer"
                                 >
                                   <div className="flex items-center gap-2">
-                                    <ShoppingCart className="h-4 w-4" />
+                                    <ShoppingCart
+                                      className="h-4 w-4"
+                                      style={{ color: baseColor }}
+                                    />
                                     <span>Checkout from Cart</span>
                                     {cartItems.length > 0 && (
                                       <Badge variant="secondary">
@@ -296,7 +344,10 @@ export function CheckoutForm({
                                   className="cursor-pointer"
                                 >
                                   <div className="flex items-center gap-2">
-                                    <Package className="h-4 w-4" />
+                                    <Package
+                                      className="h-4 w-4"
+                                      style={{ color: baseColor }}
+                                    />
                                     <span>Direct Purchase</span>
                                   </div>
                                 </Label>
@@ -314,30 +365,48 @@ export function CheckoutForm({
               {/* Product Selection for Direct Checkout */}
               {watchCheckoutType === "DIRECT" &&
                 availableVariants.length > 0 && (
-                  <Card className="shadow-lg border-pink-100 bg-white/80 backdrop-blur">
-                    <CardHeader className="bg-linear-to-r from-pink-50 to-rose-50">
-                      <CardTitle className="text-pink-900">
+                  <Card className="shadow-lg border-0 bg-white/80 backdrop-blur overflow-hidden">
+                    <div
+                      className="h-2 w-full"
+                      style={{
+                        background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                      }}
+                    />
+                    <CardHeader>
+                      <CardTitle style={{ color: baseColor }}>
                         Product Details
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {availableVariants.length === 1 ? (
                         // Single variant - show as display only
-                        <div className="p-5 border-2 rounded-xl bg-linear-to-br from-pink-50 to-rose-50 border-pink-200">
+                        <div
+                          className="p-5 border-2 rounded-xl"
+                          style={{
+                            background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
+                            borderColor: `${baseColor}30`,
+                          }}
+                        >
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <p className="font-bold text-xl text-pink-900">
+                              <p
+                                className="font-bold text-xl"
+                                style={{ color: baseColor }}
+                              >
                                 {availableVariants[0].productName}
                               </p>
-                              <p className="text-sm text-pink-700 mt-1">
+                              <p className="text-sm text-slate-600 mt-1">
                                 {availableVariants[0].name}
                               </p>
                             </div>
-                            <p className="text-2xl font-bold text-pink-700">
+                            <p
+                              className="text-2xl font-bold"
+                              style={{ color: baseColor }}
+                            >
                               ৳{availableVariants[0].price}
                             </p>
                           </div>
-                          <p className="text-sm text-pink-600 bg-white/50 inline-block px-3 py-1 rounded-full">
+                          <p className="text-sm text-slate-500 bg-white/50 inline-block px-3 py-1 rounded-full">
                             Stock: {availableVariants[0].stock} available
                           </p>
                         </div>
@@ -361,7 +430,7 @@ export function CheckoutForm({
                                     <span>
                                       {variant.productName} - {variant.name}
                                     </span>
-                                    <span className="text-muted-foreground">
+                                    <span className="text-slate-500">
                                       ৳{variant.price}
                                     </span>
                                   </div>
@@ -418,9 +487,15 @@ export function CheckoutForm({
 
               {/* Cart Items Display for Cart Checkout */}
               {watchCheckoutType === "CART" && cartItems.length > 0 && (
-                <Card className="shadow-lg border-indigo-100 bg-white/80 backdrop-blur">
-                  <CardHeader className="bg-linear-to-r from-indigo-50 to-purple-50">
-                    <CardTitle className="text-indigo-900">
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur overflow-hidden">
+                  <div
+                    className="h-2 w-full"
+                    style={{
+                      background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                    }}
+                  />
+                  <CardHeader>
+                    <CardTitle style={{ color: baseColor }}>
                       Cart Items
                     </CardTitle>
                   </CardHeader>
@@ -429,21 +504,31 @@ export function CheckoutForm({
                       {cartItems.map((item, index) => (
                         <div
                           key={item.variantId || index}
-                          className="flex items-center justify-between p-4 border-2 rounded-xl bg-linear-to-r from-indigo-50/50 to-purple-50/50 border-indigo-100 hover:border-indigo-300 transition-all"
+                          className="flex items-center justify-between p-4 border-2 rounded-xl"
+                          style={{
+                            background: `linear-gradient(135deg, ${baseColor}05, #fdf2f8)`,
+                            borderColor: `${baseColor}20`,
+                          }}
                         >
                           <div>
-                            <p className="font-bold text-indigo-900">
+                            <p
+                              className="font-bold"
+                              style={{ color: baseColor }}
+                            >
                               {item.productName || "Product"}
                             </p>
-                            <p className="text-sm text-indigo-600 mt-1">
+                            <p className="text-sm text-slate-600 mt-1">
                               Variant ID: {item.variantId?.slice(0, 13)}...
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-xl text-indigo-700">
+                            <p
+                              className="font-bold text-xl"
+                              style={{ color: baseColor }}
+                            >
                               ৳{((item.price || 0) * item.quantity).toFixed(2)}
                             </p>
-                            <p className="text-sm text-indigo-600 mt-1">
+                            <p className="text-sm text-slate-600 mt-1">
                               Qty: {item.quantity} × ৳{item.price?.toFixed(2)}
                             </p>
                           </div>
@@ -455,9 +540,18 @@ export function CheckoutForm({
               )}
 
               {/* Delivery Zone Selection */}
-              <Card className="shadow-lg border-blue-100 bg-white/80 backdrop-blur">
-                <CardHeader className="bg-linear-to-r from-blue-50 to-cyan-50">
-                  <CardTitle className="flex items-center gap-2 text-blue-900">
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur overflow-hidden">
+                <div
+                  className="h-2 w-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle
+                    className="flex items-center gap-2"
+                    style={{ color: baseColor }}
+                  >
                     <MapPin className="h-5 w-5" />
                     Delivery Zone
                   </CardTitle>
@@ -489,14 +583,17 @@ export function CheckoutForm({
                                 >
                                   <div>
                                     <p className="font-medium">Inside Dhaka</p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-slate-500">
                                       Dhaka City Corporation areas
                                     </p>
                                   </div>
                                 </Label>
                               </div>
                               <div className="text-right">
-                                <p className="font-semibold">
+                                <p
+                                  className="font-semibold"
+                                  style={{ color: baseColor }}
+                                >
                                   ৳{DELIVERY_CHARGES.INSIDE_DHAKA}
                                 </p>
                               </div>
@@ -514,14 +611,17 @@ export function CheckoutForm({
                                 >
                                   <div>
                                     <p className="font-medium">Outside Dhaka</p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-slate-500">
                                       Other cities and districts
                                     </p>
                                   </div>
                                 </Label>
                               </div>
                               <div className="text-right">
-                                <p className="font-semibold">
+                                <p
+                                  className="font-semibold"
+                                  style={{ color: baseColor }}
+                                >
                                   ৳{DELIVERY_CHARGES.OUTSIDE_DHAKA}
                                 </p>
                               </div>
@@ -536,9 +636,15 @@ export function CheckoutForm({
               </Card>
 
               {/* Delivery Information Form */}
-              <Card className="shadow-lg border-green-100 bg-white/80 backdrop-blur">
-                <CardHeader className="bg-linear-to-r from-green-50 to-emerald-50">
-                  <CardTitle className="text-green-900">
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur overflow-hidden">
+                <div
+                  className="h-2 w-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle style={{ color: baseColor }}>
                     Delivery Information
                   </CardTitle>
                   <CardDescription>
@@ -554,7 +660,14 @@ export function CheckoutForm({
                         <FormItem>
                           <FormLabel>Full Name *</FormLabel>
                           <FormControl>
-                            <Input placeholder="John Doe" {...field} />
+                            <div className="relative">
+                              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                              <Input
+                                placeholder="John Doe"
+                                className="pl-9"
+                                {...field}
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -568,25 +681,42 @@ export function CheckoutForm({
                         <FormItem>
                           <FormLabel>Phone Number *</FormLabel>
                           <FormControl>
-                            <Input placeholder="+1 (555) 123-4567" {...field} />
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                              <Input
+                                placeholder="017XXXXXXXX"
+                                className="pl-9"
+                                {...field}
+                              />
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email Address (Optional) </FormLabel>
+                        <FormLabel>
+                          Email Address{" "}
+                          <span className="text-slate-400 text-xs font-normal">
+                            (Optional)
+                          </span>
+                        </FormLabel>
                         <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="john@example.com"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                            <Input
+                              type="email"
+                              placeholder="john@example.com"
+                              className="pl-9"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -600,11 +730,14 @@ export function CheckoutForm({
                       <FormItem>
                         <FormLabel>Delivery Address *</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="123 Main St, Apt 4B"
-                            className="min-h-20"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Home className="absolute left-3 top-3 text-slate-400 w-4 h-4" />
+                            <Textarea
+                              placeholder="123 Main St, Apt 4B"
+                              className="min-h-20 pl-9"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -631,7 +764,12 @@ export function CheckoutForm({
                       name="postalCode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Postal Code (Optional)</FormLabel>
+                          <FormLabel>
+                            Postal Code{" "}
+                            <span className="text-slate-400 text-xs font-normal">
+                              (Optional)
+                            </span>
+                          </FormLabel>
                           <FormControl>
                             <Input placeholder="1212" {...field} />
                           </FormControl>
@@ -646,9 +784,15 @@ export function CheckoutForm({
 
             {/* Right Column - Order Summary */}
             <div className="space-y-6">
-              <Card className="shadow-xl border-purple-200 bg-white/90 backdrop-blur sticky top-6">
-                <CardHeader className="bg-linear-to-r from-purple-50 to-pink-50">
-                  <CardTitle className="text-purple-900">
+              <Card className="shadow-xl border-0 bg-white/90 backdrop-blur overflow-hidden sticky top-6">
+                <div
+                  className="h-2 w-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle style={{ color: baseColor }}>
                     Order Summary
                   </CardTitle>
                 </CardHeader>
@@ -669,7 +813,7 @@ export function CheckoutForm({
                             >
                               <span className="truncate max-w-37.5">
                                 {item.productName || "Product"}
-                                <span className="text-muted-foreground ml-1">
+                                <span className="text-slate-500 ml-1">
                                   ×{item.quantity}
                                 </span>
                               </span>
@@ -687,7 +831,7 @@ export function CheckoutForm({
                                     (v) => v.id === selectedVariant,
                                   )?.productName
                                 }
-                                <span className="text-muted-foreground ml-1">
+                                <span className="text-slate-500 ml-1">
                                   ×{directQuantity}
                                 </span>
                               </span>
@@ -718,12 +862,14 @@ export function CheckoutForm({
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>৳{grandTotal.toFixed(2)}</span>
+                      <span style={{ color: baseColor }}>
+                        ৳{grandTotal.toFixed(2)}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="bg-muted p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <p className="text-sm text-slate-600">
                       By placing this order, you agree to our terms and
                       conditions. Order confirmation will be sent to your email.
                     </p>
@@ -733,8 +879,11 @@ export function CheckoutForm({
                   <Button
                     type="submit"
                     form="checkout-form"
-                    className="w-full bg-linear-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="w-full shadow-lg hover:shadow-xl transition-all duration-300"
                     size="lg"
+                    style={{
+                      background: `linear-gradient(135deg, ${baseColor}, #db2777)`,
+                    }}
                     disabled={
                       isLoading ||
                       (watchCheckoutType === "CART" &&
@@ -758,16 +907,25 @@ export function CheckoutForm({
               </Card>
 
               {/* Delivery Info Card */}
-              <Card className="shadow-lg border-blue-100 bg-white/80 backdrop-blur">
-                <CardHeader className="bg-linear-to-r from-blue-50 to-cyan-50">
-                  <CardTitle className="flex items-center gap-2 text-blue-900">
+              <Card className="shadow-lg border-0 bg-white/80 backdrop-blur overflow-hidden">
+                <div
+                  className="h-2 w-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle
+                    className="flex items-center gap-2"
+                    style={{ color: baseColor }}
+                  >
                     <Truck className="h-5 w-5" />
                     Delivery Info
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Zone</span>
+                    <span className="text-slate-500">Zone</span>
                     <span>
                       {watchDeliveryZone === "INSIDE_DHAKA"
                         ? "Inside Dhaka"
@@ -775,13 +933,11 @@ export function CheckoutForm({
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Charge</span>
+                    <span className="text-slate-500">Charge</span>
                     <span>৳{deliveryCharge.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Estimated Time
-                    </span>
+                    <span className="text-slate-500">Estimated Time</span>
                     <span>
                       {watchDeliveryZone === "INSIDE_DHAKA"
                         ? "1-2 business days"
@@ -789,7 +945,7 @@ export function CheckoutForm({
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tracking</span>
+                    <span className="text-slate-500">Tracking</span>
                     <span>Available after shipping</span>
                   </div>
                 </CardContent>

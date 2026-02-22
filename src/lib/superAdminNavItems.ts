@@ -28,12 +28,7 @@ export const superAdminNavItems: NavSection[] = [
         icon: "Package",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
-      // {
-      //   title: "Brands",
-      //   href: "/admin/dashboard/brand/brand-management",
-      //   icon: "Trademark",
-      //   roles: ["SUPER_ADMIN", "ADMIN"],
-      // },
+
       {
         title: "Product Ingredients",
         href: "/admin/dashboard/ingredients",
@@ -43,7 +38,7 @@ export const superAdminNavItems: NavSection[] = [
       {
         title: "skin-management",
         href: "/admin/dashboard/skin-management",
-        icon: "Skin",
+        icon: "Tag",
         roles: ["SUPER_ADMIN", "ADMIN"],
       },
 
@@ -105,6 +100,12 @@ export const superAdminNavItems: NavSection[] = [
         href: " /admin/dashboard/section-management",
         icon: "Layers",
         roles: ["SUPER_ADMIN", "ADMIN"],
+      },
+      {
+        title: "Review Management",
+        href: "/admin/dashboard/reviews",
+        icon: "Star",
+        roles: ["SUPER_ADMIN"],
       },
 
       {

@@ -1,4 +1,3 @@
-// components/footer/EcommerceFooter.tsx
 "use client";
 
 import { useState } from "react";
@@ -46,26 +45,26 @@ const Footer = () => {
   };
 
   const quickLinks = [
-    { label: "New Arrivals", href: "/new-arrivals" },
-    { label: "Best Sellers", href: "/best-sellers" },
-    { label: "Sale", href: "/sale", badge: "HOT" },
-    { label: "Limited Edition", href: "/limited" },
+    { label: "New Arrivals", href: "/" },
+    { label: "Best Sellers", href: "/" },
+    { label: "Sale", href: "/", badge: "HOT" },
+    { label: "Limited Edition", href: "/" },
   ];
 
   const supportLinks = [
-    { label: "Contact Us", href: "/contact" },
-    { label: "FAQ", href: "/faq" },
-    { label: "Shipping Info", href: "/shipping" },
-    { label: "Returns & Exchanges", href: "/returns" },
-    { label: "Size Guide", href: "/size-guide" },
+    { label: "Contact Us", href: "#" },
+    { label: "FAQ", href: "#" },
+    { label: "Shipping Info", href: "#" },
+    { label: "Returns & Exchanges", href: "#" },
+    { label: "Size Guide", href: "#" },
   ];
 
   const companyLinks = [
-    { label: "About Us", href: "/about" },
-    { label: "Careers", href: "/careers" },
-    { label: "Press", href: "/press" },
-    { label: "Sustainability", href: "/sustainability" },
-    { label: "Store Locator", href: "/stores" },
+    { label: "About Us", href: "#" },
+    { label: "Careers", href: "#" },
+    { label: "Press", href: "#" },
+    { label: "Sustainability", href: "#" },
+    { label: "Store Locator", href: "#" },
   ];
 
   const trustBadges = [
@@ -92,33 +91,34 @@ const Footer = () => {
   ];
 
   return (
-    <footer
-      className="relative text-white border-t border-white/20"
-      style={{ backgroundColor: "oklch(55% 0.08 345)" }}
-    >
-      <div className="relative container mx-auto px-4 py-12">
+    <footer className="relative bg-white border-t border-gray-200">
+      <div className="container mx-auto px-4 py-12">
         {/* Top Section - Trust Badges */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {trustBadges.map((badge, index) => (
             <div
               key={index}
-              className="flex items-center justify-center gap-3 p-4 rounded-xl bg-white/10 shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 border border-gray-100"
             >
-              <badge.icon className="w-6 h-6 text-white" />
-              <span className="font-medium text-sm">{badge.label}</span>
+              <badge.icon className="w-6 h-6 text-[#ca428b]" />
+              <span className="font-medium text-sm text-gray-700">
+                {badge.label}
+              </span>
             </div>
           ))}
         </div>
 
-        <Separator className="my-8" />
+        <Separator className="my-8 bg-gray-200" />
 
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Newsletter Column */}
           <div className="lg:col-span-2">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Stay Updated</h2>
-              <p className="text-sm text-white/80">
+              <h2 className="text-2xl font-bold mb-2 text-gray-800">
+                Stay Updated
+              </h2>
+              <p className="text-sm text-gray-600">
                 Get exclusive deals and early access to new collections
               </p>
             </div>
@@ -135,12 +135,12 @@ const Footer = () => {
                       email: e.target.value,
                     }))
                   }
-                  className="flex-1 bg-white/90 text-gray-900 border-white/40 placeholder:text-gray-500"
+                  className="flex-1 bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-[#ca428b] focus:border-transparent"
                   required
                 />
                 <Button
                   type="submit"
-                  className="gap-2 bg-white text-[#ca428b] hover:bg-white/90"
+                  className="gap-2 bg-[#ca428b] text-white hover:bg-[#b03a7a] hover:scale-105 transition-all duration-300 font-semibold"
                 >
                   <Send className="w-4 h-4" />
                   Join
@@ -148,7 +148,7 @@ const Footer = () => {
               </div>
 
               {newsletter.subscribed && (
-                <div className="p-3 rounded-lg bg-white/15 text-white">
+                <div className="p-3 rounded-lg bg-green-50 text-green-700 border border-green-200">
                   Thanks for subscribing! Check your email for confirmation.
                 </div>
               )}
@@ -157,18 +157,24 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-bold text-lg mb-4">Shop</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-800 relative inline-block">
+              Shop
+              <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#ca428b] rounded-full"></span>
+            </h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-white/85 hover:text-white transition-colors"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#ca428b] transition-all hover:translate-x-1"
                   >
-                    <ChevronRight className="w-3 h-3" />
+                    <ChevronRight className="w-3 h-3 text-[#ca428b]" />
                     {link.label}
                     {link.badge && (
-                      <Badge variant="destructive" className="ml-2 text-xs">
+                      <Badge
+                        variant="destructive"
+                        className="ml-2 text-xs bg-red-500 hover:bg-red-600"
+                      >
                         {link.badge}
                       </Badge>
                     )}
@@ -180,13 +186,16 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h3 className="font-bold text-lg mb-4">Support</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-800 relative inline-block">
+              Support
+              <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#ca428b] rounded-full"></span>
+            </h3>
             <ul className="space-y-2">
               {supportLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white/85 hover:text-white transition-colors"
+                    className="text-sm text-gray-600 hover:text-[#ca428b] transition-all hover:translate-x-1 inline-block"
                   >
                     {link.label}
                   </Link>
@@ -197,13 +206,16 @@ const Footer = () => {
 
           {/* Company */}
           <div>
-            <h3 className="font-bold text-lg mb-4">Company</h3>
+            <h3 className="font-bold text-lg mb-4 text-gray-800 relative inline-block">
+              Company
+              <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#ca428b] rounded-full"></span>
+            </h3>
             <ul className="space-y-2">
               {companyLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-white/85 hover:text-white transition-colors"
+                    className="text-sm text-gray-600 hover:text-[#ca428b] transition-all hover:translate-x-1 inline-block"
                   >
                     {link.label}
                   </Link>
@@ -213,29 +225,33 @@ const Footer = () => {
           </div>
         </div>
 
-        <Separator className="my-8" />
+        <Separator className="my-8 bg-gray-200" />
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Brand & Contact */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-white/20"></div>
-              <span className="text-xl font-bold">NEXTSHOP</span>
+              <div className="w-10 h-10 rounded-full bg-linear-to-r from-[#ca428b] to-[#a52a6e] flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                GS
+              </div>
+              <span className="text-2xl font-bold text-gray-800">
+                Glory Shopping BD
+              </span>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-white/80">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2 hover:text-[#ca428b] transition-colors">
                 <Phone className="w-3 h-3" />
-                <span>+1 (555) 123-4567</span>
+                <span>+8801577437554</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 hover:text-[#ca428b] transition-colors">
                 <Mail className="w-3 h-3" />
-                <span>support@nextshop.com</span>
+                <span>gloryshopingbd@gmail.com</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 hover:text-[#ca428b] transition-colors">
                 <MapPin className="w-3 h-3" />
-                <span>New York, NY</span>
+                <span>Dhaka, Bangladesh</span>
               </div>
             </div>
           </div>
@@ -243,16 +259,16 @@ const Footer = () => {
           {/* Social & Payment */}
           <div className="flex flex-col items-center md:items-end gap-4">
             {/* Social Links */}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {socialLinks.map((social) => (
                 <Button
                   key={social.label}
                   variant="ghost"
                   size="icon"
-                  className="rounded-full hover:bg-white/15"
+                  className="rounded-full hover:bg-[#ca428b] hover:text-white transition-all duration-300 border border-gray-300 text-gray-600"
                   aria-label={social.label}
                 >
-                  <social.icon className="w-5 h-5" />
+                  <social.icon className="w-4 h-4" />
                 </Button>
               ))}
             </div>
@@ -262,7 +278,7 @@ const Footer = () => {
               {paymentMethods.map((method) => (
                 <div
                   key={method}
-                  className="px-3 py-1 rounded text-xs font-medium bg-white/15"
+                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-[#ca428b] hover:text-white transition-colors cursor-default"
                 >
                   {method}
                 </div>
@@ -272,20 +288,46 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-6 border-t border-white/20 text-center text-sm text-white/70">
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>© {new Date().getFullYear()} NextShop. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} Glory Shopping BD. All rights
+              reserved.
+            </p>
+            <p>
+              Designed and developed by{" "}
+              <Link
+                href="
+                https://www.mdabusufian.me"
+                className="text-[#ca428b] hover:underline transition-colors font-medium"
+              >
+                Md. Abu sufian
+              </Link>
+              .
+            </p>
             <div className="flex gap-6">
-              <Link href="/privacy" className="hover:underline">
+              <Link
+                href="#"
+                className="hover:text-[#ca428b] hover:underline transition-colors"
+              >
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="hover:underline">
+              <Link
+                href="#"
+                className="hover:text-[#ca428b] hover:underline transition-colors"
+              >
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="hover:underline">
+              <Link
+                href="#"
+                className="hover:text-[#ca428b] hover:underline transition-colors"
+              >
                 Cookie Policy
               </Link>
-              <Link href="/sitemap" className="hover:underline">
+              <Link
+                href="#"
+                className="hover:text-[#ca428b] hover:underline transition-colors"
+              >
                 Sitemap
               </Link>
             </div>

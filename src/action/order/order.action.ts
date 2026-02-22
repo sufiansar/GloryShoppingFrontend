@@ -106,7 +106,7 @@ export const updateOrderStatus = async (id: string, status: string) => {
 
 export const cancelOrder = async (id: string) => {
   try {
-    return await makeApiCall<OrderResponse>(`${ORDER_BASE}/${id}/cancel`, {
+    return await makeApiCall<OrderResponse>(`${ORDER_BASE}/cancel/${id}`, {
       method: "PATCH",
     });
   } catch (error) {
