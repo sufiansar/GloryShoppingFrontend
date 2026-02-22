@@ -175,7 +175,7 @@ const AdminOrdersDashboard = () => {
             variant="outline"
             className="bg-blue-50 text-blue-700 border-blue-200"
           >
-            Processing
+            Paid
           </Badge>
         );
       case OrderStatus.SHIPPED:

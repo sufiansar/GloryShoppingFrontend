@@ -8,15 +8,17 @@ import { Button } from "@/components/ui/button";
 import ProductsPage from "./product/page";
 import { Filter, Grid, List } from "lucide-react";
 import { Section } from "@/types/section.interface";
+import BestProductSlider from "@/components/modules/PublicProduct/NewArrivals";
 
 const PublicPage = async () => {
   // Define the 5 category slugs to display (in order of preference)
   const preferredCategorySlugs = [
     "skin-care",
     "mom-baby",
-    "health-beauty",
     "hair-beauty",
+    "supplement",
     "accessories",
+    "perfume",
   ];
 
   try {
@@ -27,11 +29,6 @@ const PublicPage = async () => {
     const allCategoriesResult = await fetchAllCategories("limit=100");
     const allCategories = allCategoriesResult?.data || [];
 
-    console.log("📌 All categories fetched:", allCategories.length);
-    console.log(
-      "📌 Categories:",
-      allCategories.map((c: any) => ({ id: c.id, name: c.name, slug: c.slug })),
-    );
     let categoriesToShow = preferredCategorySlugs
       .map((slug) => allCategories.find((cat: any) => cat.slug === slug))
       .filter((cat) => cat !== undefined);
@@ -82,7 +79,7 @@ const PublicPage = async () => {
               <HeroSliderWrapper
                 section={heroSection}
                 autoPlay={true}
-                autoPlayInterval={6000}
+                autoPlayInterval={3000}
                 showNavigation={true}
                 showDots={true}
                 pauseOnHover={true}
@@ -105,7 +102,9 @@ const PublicPage = async () => {
         <CategoryMarquee categories={allCategories} />
 
         {/* Category Showcases - Display 5 Specific Categories */}
+
         <div className="container mx-auto px-4 py-12">
+          <BestProductSlider />
           {preferredCategorySlugs.map((slug) => {
             const category = allCategories.find(
               (cat: any) => cat.slug === slug,

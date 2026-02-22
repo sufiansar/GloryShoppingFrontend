@@ -37,7 +37,7 @@ export const navItems: NavItem[] = [
     subItems: [
       {
         title: "All Products",
-        href: "/categorys/skin-care",
+        href: "/product",
         description: "Explore our full skincare range",
       },
       {

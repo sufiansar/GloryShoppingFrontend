@@ -5,8 +5,18 @@ import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Mail, Package, Printer, Home, Clock } from "lucide-react";
-
+import {
+  CheckCircle,
+  Mail,
+  Package,
+  Printer,
+  Home,
+  Clock,
+  Phone,
+  MapPin,
+  User,
+  Truck,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Order } from "@/types/checkout.interface";
@@ -18,6 +28,8 @@ interface OrderSuccessProps {
 }
 
 export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
+  const baseColor = "oklch(52.801% 0.15987 344.323)";
+
   useEffect(() => {
     toast("Order Successful!", {
       description: `Your order #${order.id} has been placed successfully.`,
@@ -27,17 +39,17 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
   const getStatusColor = (status: Order["status"]) => {
     switch (status) {
       case "COMPLETED":
-        return "bg-green-100 text-green-800";
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
       case "SHIPPED":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-100 text-amber-800 border-amber-200";
       case "CANCELLED":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border-red-200";
       case "PAID":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-slate-100 text-slate-800 border-slate-200";
     }
   };
 
@@ -46,55 +58,148 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-50 via-blue-50 to-purple-50 py-12 px-4">
+    <div
+      className="min-h-screen py-12 px-4"
+      style={{
+        background: `linear-gradient(135deg, #fdf2f8, #fce7f3, #fbcfe8)`,
+      }}
+    >
       <div className="container mx-auto max-w-5xl">
-        <Card className="border-2 border-green-200 shadow-2xl backdrop-blur bg-white/90 print:shadow-none print:border">
-          <CardHeader className="text-center print:pt-0 pb-8">
+        {/* Back to Home Indicator */}
+        <div className="mb-6">
+          <a
+            href="/"
+            className="group inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 border border-slate-200"
+            style={{
+              boxShadow: `0 4px 12px ${baseColor}20`,
+            }}
+          >
+            <Home
+              className="w-4 h-4 transition-transform group-hover:-translate-x-1"
+              style={{ color: baseColor }}
+              strokeWidth={2}
+            />
+            <span className="text-sm font-medium text-slate-700">
+              Back to Home
+            </span>
+          </a>
+        </div>
+
+        <Card className="border-0 shadow-2xl backdrop-blur bg-white/90 rounded-3xl overflow-hidden print:shadow-none print:border">
+          {/* Decorative header */}
+          <div
+            className="h-2 w-full"
+            style={{
+              background: `linear-gradient(90deg, ${baseColor}, #db2777, #2563eb)`,
+            }}
+          />
+
+          <CardHeader className="text-center print:pt-0 pb-8 pt-12">
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-green-400 rounded-full blur-xl opacity-50 animate-pulse"></div>
-                <CheckCircle className="relative h-24 w-24 text-green-500" />
+                <div
+                  className="absolute inset-0 rounded-full blur-xl opacity-50 animate-pulse"
+                  style={{ backgroundColor: baseColor }}
+                ></div>
+                <CheckCircle
+                  className="relative h-24 w-24"
+                  style={{ color: baseColor }}
+                />
               </div>
             </div>
-            <CardTitle className="text-4xl md:text-5xl font-bold bg-linear-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <CardTitle
+              className="text-4xl md:text-5xl font-bold mb-3"
+              style={{
+                background: `linear-gradient(135deg, ${baseColor}, #db2777, #2563eb)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
               Order Confirmed!
             </CardTitle>
-            <p className="text-muted-foreground mt-4 text-lg">
+            <p className="text-slate-600 mt-4 text-lg">
               Thank you for your purchase. A confirmation has been sent to{" "}
-              <strong className="text-green-600">
+              <strong style={{ color: baseColor }}>
                 {order.delivery?.email}
               </strong>
             </p>
           </CardHeader>
-          <CardContent className="space-y-8 print:space-y-4">
+
+          <CardContent className="space-y-8 print:space-y-4 px-6 pb-8">
             {/* Order Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 print:grid-cols-4">
-              <div className="bg-linear-to-br from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200 shadow-sm">
-                <p className="text-sm font-medium text-blue-700 mb-2">
+              <div
+                className="p-5 rounded-xl shadow-sm border"
+                style={{
+                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
+                  borderColor: `${baseColor}30`,
+                }}
+              >
+                <p
+                  className="text-sm font-medium mb-2"
+                  style={{ color: baseColor }}
+                >
                   Order ID
                 </p>
-                <p className="font-mono text-sm font-bold text-blue-900 break-all">
+                <p className="font-mono text-sm font-bold text-slate-900 break-all">
                   {order.id.slice(0, 13)}...
                 </p>
               </div>
-              <div className="bg-linear-to-br from-purple-50 to-purple-100 p-5 rounded-xl border border-purple-200 shadow-sm">
-                <p className="text-sm font-medium text-purple-700 mb-2">
+
+              <div
+                className="p-5 rounded-xl shadow-sm border"
+                style={{
+                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
+                  borderColor: `${baseColor}30`,
+                }}
+              >
+                <p
+                  className="text-sm font-medium mb-2"
+                  style={{ color: baseColor }}
+                >
                   Status
                 </p>
-                <Badge className={`mt-1 ${getStatusColor(order.status)}`}>
+                <Badge
+                  className={`mt-1 border ${getStatusColor(order.status)}`}
+                >
                   {order.status}
                 </Badge>
               </div>
-              <div className="bg-linear-to-br from-pink-50 to-pink-100 p-5 rounded-xl border border-pink-200 shadow-sm">
-                <p className="text-sm font-medium text-pink-700 mb-2">Date</p>
-                <p className="text-base font-semibold text-pink-900">
+
+              <div
+                className="p-5 rounded-xl shadow-sm border"
+                style={{
+                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
+                  borderColor: `${baseColor}30`,
+                }}
+              >
+                <p
+                  className="text-sm font-medium mb-2"
+                  style={{ color: baseColor }}
+                >
+                  Date
+                </p>
+                <p className="text-base font-semibold text-slate-900">
                   {format(new Date(order.createdAt), "MMM dd, yyyy")}
                 </p>
               </div>
-              <div className="bg-linear-to-br from-green-50 to-green-100 p-5 rounded-xl border border-green-200 shadow-sm">
-                <p className="text-sm font-medium text-green-700 mb-2">Total</p>
-                <p className="text-2xl font-bold text-green-700">
-                  ${order.amount.toFixed(2)}
+
+              <div
+                className="p-5 rounded-xl shadow-sm border"
+                style={{
+                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
+                  borderColor: `${baseColor}30`,
+                }}
+              >
+                <p
+                  className="text-sm font-medium mb-2"
+                  style={{ color: baseColor }}
+                >
+                  Total
+                </p>
+                <p className="text-2xl font-bold" style={{ color: baseColor }}>
+                  ৳{order.amount.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -102,49 +207,85 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 print:grid-cols-2">
               {/* Delivery Information */}
-              <Card className="shadow-lg border-blue-100">
-                <CardHeader className="bg-linear-to-r from-blue-50 to-cyan-50">
-                  <CardTitle className="flex items-center gap-2 text-blue-900">
+              <Card className="shadow-lg border-0 overflow-hidden">
+                <div
+                  className="h-1.5 w-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle
+                    className="flex items-center gap-2"
+                    style={{ color: baseColor }}
+                  >
                     <Package className="h-5 w-5" />
                     Delivery Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{order.delivery?.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium">{order.delivery?.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{order.delivery?.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Address</p>
-                    <p className="font-medium">{order.delivery?.address}</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">City</p>
-                      <p className="font-medium">{order.delivery?.city}</p>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <User className="h-4 w-4 text-slate-400" />
+                      <div>
+                        <p className="text-xs text-slate-500">Name</p>
+                        <p className="font-medium text-sm">
+                          {order.delivery?.name}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Postal Code
+
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <Phone className="h-4 w-4 text-slate-400" />
+                      <div>
+                        <p className="text-xs text-slate-500">Phone</p>
+                        <p className="font-medium text-sm">
+                          {order.delivery?.phone}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <Mail className="h-4 w-4 text-slate-400" />
+                      <div>
+                        <p className="text-xs text-slate-500">Email</p>
+                        <p className="font-medium text-sm">
+                          {order.delivery?.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <MapPin className="h-4 w-4 text-slate-400" />
+                      <div>
+                        <p className="text-xs text-slate-500">Address</p>
+                        <p className="font-medium text-sm">
+                          {order.delivery?.address}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="p-3 bg-slate-50 rounded-lg">
+                      <p className="text-xs text-slate-500">City</p>
+                      <p className="font-medium text-sm">
+                        {order.delivery?.city}
                       </p>
-                      <p className="font-medium">
+                    </div>
+                    <div className="p-3 bg-slate-50 rounded-lg">
+                      <p className="text-xs text-slate-500">Postal Code</p>
+                      <p className="font-medium text-sm">
                         {order.delivery?.postalCode}
                       </p>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
+
+                  <div className="pt-2">
+                    <p className="text-xs text-slate-500 mb-2">
                       Delivery Status
                     </p>
-                    <Badge variant="outline" className="mt-1">
+                    <Badge variant="outline" className="border-slate-200">
                       {order.delivery?.status}
                     </Badge>
                   </div>
@@ -152,33 +293,50 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
               </Card>
 
               {/* Order Items */}
-              <Card className="shadow-lg border-purple-100">
-                <CardHeader className="bg-linear-to-r from-purple-50 to-pink-50">
-                  <CardTitle className="text-purple-900">Order Items</CardTitle>
+              <Card className="shadow-lg border-0 overflow-hidden">
+                <div
+                  className="h-1.5 w-full"
+                  style={{
+                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle style={{ color: baseColor }}>
+                    Order Items
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {order.items.map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-start justify-between p-3 border rounded-lg"
+                        className="flex items-start justify-between p-4 border rounded-xl"
+                        style={{
+                          background: `linear-gradient(135deg, ${baseColor}05, #fdf2f8)`,
+                          borderColor: `${baseColor}20`,
+                        }}
                       >
                         <div className="flex-1">
-                          <p className="font-semibold">{item.product}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Variant: {item.productVariantId.slice(0, 8)}
+                          <p
+                            className="font-semibold"
+                            style={{ color: baseColor }}
+                          >
+                            {item.product}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Variant ID: {item.productVariantId.slice(0, 8)}
                           </p>
                           <div className="flex items-center gap-4 mt-2">
-                            <span className="text-sm">
+                            <span className="text-xs bg-slate-100 px-2 py-1 rounded-full">
                               Qty: {item.quantity}
                             </span>
-                            <span className="text-sm">
-                              Price: ৳{item.price.toFixed(2)}
+                            <span className="text-xs bg-slate-100 px-2 py-1 rounded-full">
+                              ৳{item.price.toFixed(2)} each
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold">
+                          <p className="font-bold" style={{ color: baseColor }}>
                             ৳{(item.quantity * item.price).toFixed(2)}
                           </p>
                         </div>
@@ -187,22 +345,26 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
                   </div>
 
                   {/* Price Summary */}
-                  <div className="mt-6 space-y-2 pt-4 border-t">
-                    <div className="flex justify-between">
-                      <span>Subtotal</span>
-                      <span>
+                  <div className="mt-6 space-y-2 pt-4 border-t border-slate-200">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600">Subtotal</span>
+                      <span className="font-medium">
                         ৳
                         {order.productTotal?.toFixed(2) ||
                           order.amount.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Delivery Charge</span>
-                      <span>৳{order.deliveryCharge?.toFixed(2) || "0.00"}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-600">Delivery Charge</span>
+                      <span className="font-medium">
+                        ৳{order.deliveryCharge?.toFixed(2) || "0.00"}
+                      </span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-slate-200">
                       <span>Total</span>
-                      <span>৳{order.amount.toFixed(2)}</span>
+                      <span style={{ color: baseColor }}>
+                        ৳{order.amount.toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -210,39 +372,65 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
             </div>
 
             {/* Next Steps */}
-            <Card>
+            <Card className="border-0 overflow-hidden">
+              <div
+                className="h-1.5 w-full"
+                style={{
+                  background: `linear-gradient(90deg, ${baseColor}, #db2777, #2563eb)`,
+                }}
+              />
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle
+                  className="flex items-center gap-2"
+                  style={{ color: baseColor }}
+                >
                   <Clock className="h-5 w-5" />
                   What Happens Next?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-blue-600 font-bold">1</span>
+                  <div className="text-center p-6 border rounded-xl bg-slate-50/50">
+                    <div
+                      className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                      style={{ background: `${baseColor}20` }}
+                    >
+                      <span className="font-bold" style={{ color: baseColor }}>
+                        1
+                      </span>
                     </div>
-                    <h3 className="font-semibold mb-2">Order Processing</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-semibold mb-2 text-sm">
+                      Order Processing
+                    </h3>
+                    <p className="text-xs text-slate-500">
                       We're preparing your items for shipment
                     </p>
                   </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-green-600 font-bold">2</span>
+                  <div className="text-center p-6 border rounded-xl bg-slate-50/50">
+                    <div
+                      className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                      style={{ background: `${baseColor}20` }}
+                    >
+                      <span className="font-bold" style={{ color: baseColor }}>
+                        2
+                      </span>
                     </div>
-                    <h3 className="font-semibold mb-2">Shipping</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-semibold mb-2 text-sm">Shipping</h3>
+                    <p className="text-xs text-slate-500">
                       Your order will be shipped within 24-48 hours
                     </p>
                   </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-purple-600 font-bold">3</span>
+                  <div className="text-center p-6 border rounded-xl bg-slate-50/50">
+                    <div
+                      className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                      style={{ background: `${baseColor}20` }}
+                    >
+                      <span className="font-bold" style={{ color: baseColor }}>
+                        3
+                      </span>
                     </div>
-                    <h3 className="font-semibold mb-2">Delivery</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="font-semibold mb-2 text-sm">Delivery</h3>
+                    <p className="text-xs text-slate-500">
                       Expected delivery in 3-5 business days
                     </p>
                   </div>
@@ -251,32 +439,42 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 print:hidden">
+            <div className="flex flex-col sm:flex-row gap-4 print:hidden pt-4">
               <Button
                 variant="outline"
                 size="lg"
-                className="flex-1 border-2 hover:bg-blue-50 hover:border-blue-300"
+                className="flex-1 border-2 hover:bg-slate-50 transition-all"
+                style={{ borderColor: `${baseColor}40` }}
                 onClick={handlePrint}
               >
-                <Printer className="mr-2 h-5 w-5" />
+                <Printer
+                  className="mr-2 h-5 w-5"
+                  style={{ color: baseColor }}
+                />
                 Print Receipt
               </Button>
+
               <Button
                 variant="outline"
                 size="lg"
-                className="flex-1 border-2 hover:bg-purple-50 hover:border-purple-300"
+                className="flex-1 border-2 hover:bg-slate-50 transition-all"
+                style={{ borderColor: `${baseColor}40` }}
                 asChild
               >
                 <a
                   href={`mailto:${order.delivery?.email}?subject=Order Inquiry #${order.id}`}
                 >
-                  <Mail className="mr-2 h-5 w-5" />
+                  <Mail className="mr-2 h-5 w-5" style={{ color: baseColor }} />
                   Contact Support
                 </a>
               </Button>
+
               <Button
                 size="lg"
-                className="flex-1 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                className="flex-1 text-white transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${baseColor}, #db2777)`,
+                }}
                 onClick={onContinueShopping}
               >
                 <Home className="mr-2 h-5 w-5" />
@@ -284,11 +482,19 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
               </Button>
             </div>
 
-            <p className="text-center text-sm text-muted-foreground pt-6 border-t">
-              Need help? Contact our customer support at{" "}
-              <strong className="text-green-600">support@gloryshop.com</strong>{" "}
-              or call <strong className="text-green-600"></strong>
-            </p>
+            {/* Support Footer */}
+            <div className="text-center pt-6 border-t border-slate-200">
+              <p className="text-sm text-slate-500">
+                Need help? Contact our customer support at{" "}
+                <a
+                  href="mailto:support@gloryshop.com"
+                  className="font-medium hover:underline"
+                  style={{ color: baseColor }}
+                >
+                  support@gloryshop.com
+                </a>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -2,6 +2,7 @@ import {
   getAllProducts,
   getProductBySlug,
 } from "@/action/product/product.action";
+import { getReviewsByProduct } from "@/action/review/review.action";
 import ProductDetailsPage from "@/components/modules/PublicProduct/ProductDetailsPage";
 import { notFound } from "next/navigation";
 
@@ -55,6 +56,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const reviews = await getReviewsByProduct(product.data.id);
+
   // Fetch related products (same category)
   let relatedProducts = [];
   try {
@@ -81,6 +84,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <ProductDetailsPage
       product={product.data}
       relatedProducts={relatedProducts}
+      reviews={reviews}
     />
   );
 }

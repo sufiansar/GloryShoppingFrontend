@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
   // Rule 1: User is logged in and trying to access auth route. Redirect to default dashboard
   if (token && isAuth) {
     return NextResponse.redirect(
-      new URL(getDefaultDashboardRoute(userRole as UserRole), request.url)
+      new URL(getDefaultDashboardRoute(userRole as UserRole), request.url),
     );
   }
 
@@ -48,24 +48,24 @@ export async function proxy(request: NextRequest) {
   }
 
   if (routerOwner === "SUPER_ADMIN") {
-    // Only SUPER_ADMIN can access SUPER_ADMIN routes
-    if (userRole !== "SUPER_ADMIN") {
+    // Both SUPER_ADMIN and ADMIN can access SUPER_ADMIN routes (like /admin/dashboard)
+    if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
       return NextResponse.redirect(
-        new URL(getDefaultDashboardRoute(userRole as UserRole), request.url)
+        new URL(getDefaultDashboardRoute(userRole as UserRole), request.url),
       );
     }
   } else if (routerOwner === "ADMIN") {
-    // SUPER_ADMIN and ADMIN can access ADMIN routes
+    // Only ADMIN and SUPER_ADMIN can access ADMIN routes
     if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
       return NextResponse.redirect(
-        new URL(getDefaultDashboardRoute(userRole as UserRole), request.url)
+        new URL(getDefaultDashboardRoute(userRole as UserRole), request.url),
       );
     }
   } else if (routerOwner === "USER") {
     // Only USER can access USER routes
     if (userRole !== "USER") {
       return NextResponse.redirect(
-        new URL(getDefaultDashboardRoute(userRole as UserRole), request.url)
+        new URL(getDefaultDashboardRoute(userRole as UserRole), request.url),
       );
     }
   }
