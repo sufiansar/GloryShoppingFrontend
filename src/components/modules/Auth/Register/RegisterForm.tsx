@@ -351,11 +351,11 @@ export function SignupForm({
             />
 
             {/* Image */}
-            <img
+            {/* <img
               src="/placeholder.svg"
               alt="Signup"
               className="absolute inset-0 h-full w-full object-cover"
-            />
+            /> */}
 
             {/* Quote overlay */}
             <div className="absolute bottom-6 left-6 right-6 z-20 text-white">

@@ -259,13 +259,13 @@ export function LoginForm({
           />
 
           {/* Image */}
-          <Image
+          {/* <Image
             src="/assets/login-image.jpg"
             alt="Login image"
             fill
             className="object-cover"
             priority
-          />
+          /> */}
 
           {/* Quote overlay */}
           <div className="absolute bottom-6 left-6 right-6 z-20 text-white">
