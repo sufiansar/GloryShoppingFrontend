@@ -10,12 +10,6 @@ export const userNavItems: NavSection[] = [
         icon: "Activity",
         roles: ["USER"],
       },
-      {
-        title: "Support",
-        href: "/dashboard/support",
-        icon: "LifeBuoy",
-        roles: ["USER"],
-      },
     ],
   },
 ];

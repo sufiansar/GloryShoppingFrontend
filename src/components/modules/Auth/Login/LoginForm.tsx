@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -25,6 +25,10 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  getDefaultDashboardRoute,
+  isValidRedirectForRole,
+} from "@/lib/auth-utils";
 import Password from "@/components/ui/Password";
 import { login } from "@/action/auth/login.action";
 import Image from "next/image";
@@ -43,9 +47,7 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const searchParams = useSearchParams();
   const callbackUrl =
-    searchParams.get("redirect") ||
-    searchParams.get("callbackUrl") ||
-    "/dashboard";
+    searchParams.get("redirect") || searchParams.get("callbackUrl") || "";
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,13 +61,24 @@ export function LoginForm({
 
   async function onSubmit(values: FieldValues) {
     try {
-      // Use NextAuth to handle cookies and redirect automatically
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         ...values,
-        callbackUrl: callbackUrl,
-        redirect: true,
+        callbackUrl: callbackUrl || "/",
+        redirect: false,
       });
 
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      const session = await getSession();
+      const role = session?.user?.role || "USER";
+      const target =
+        callbackUrl && isValidRedirectForRole(callbackUrl, role)
+          ? callbackUrl
+          : getDefaultDashboardRoute(role);
+
+      router.push(target);
       toast.success("✅ Logged in successfully!");
     } catch (error) {
       console.log("Login error:", error);
