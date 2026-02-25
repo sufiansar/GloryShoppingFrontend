@@ -30,7 +30,6 @@ import {
   isValidRedirectForRole,
 } from "@/lib/auth-utils";
 import Password from "@/components/ui/Password";
-import { login } from "@/action/auth/login.action";
 import Image from "next/image";
 import { Mail, Lock, LogIn, Sparkles } from "lucide-react";
 

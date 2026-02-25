@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
               email: credentials.email,
               password: credentials.password,
             }),
-          }
+          },
         );
 
         if (!res.ok) {
@@ -109,6 +109,8 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
+      console.log("JWT Callback - User:", user);
+      console.log("JWT Callback - Token before:", token);
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -116,16 +118,17 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken = (user as any).refreshToken;
       } else {
       }
-
+      console.log("JWT Callback - Token after:", token);
       return token;
     },
 
     async session({ session, token }) {
+      console.log("Session Callback - Token:", token);
       session.user.id = token.id as string;
       session.user.role = token.role as any;
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
-
+      console.log("Session Callback - Session:", session);
       return session;
     },
   },
