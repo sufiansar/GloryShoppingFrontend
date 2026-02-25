@@ -79,7 +79,7 @@ const PublicPage = async () => {
               <HeroSliderWrapper
                 section={heroSection}
                 autoPlay={true}
-                autoPlayInterval={3000}
+                autoPlayInterval={5000}
                 showNavigation={true}
                 showDots={true}
                 pauseOnHover={true}

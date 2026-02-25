@@ -1,0 +1,40 @@
+name: CI/CD Pipeline for GloryShopping Frontend
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Ubuntu Server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+
+            echo "🔹 Go to project directory"
+            cd /home/gloryshop/GloryShoppingFrontend
+
+            echo "🔹 Pull latest code"
+            git pull origin development
+
+            echo "🔹 Install dependencies"
+            npm install
+
+            echo "🔹 Build Next.js app"
+            npm run build
+
+            echo "🔹 Restart PM2 with updated env"
+            pm2 restart glory-frontend --update-env
+
+            echo "✅ Deployment completed"
