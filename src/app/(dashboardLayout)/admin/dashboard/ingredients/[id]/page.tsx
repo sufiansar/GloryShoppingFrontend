@@ -11,15 +11,16 @@ import { getIngredientById } from "@/action/ingredian/ingrediant.action";
 import { BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 interface ViewIngredientPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ViewIngredientPage({
   params,
 }: ViewIngredientPageProps) {
-  const ingredient = await getIngredientById(params.id);
+  const { id } = await params;
+  const ingredient = await getIngredientById(id);
 
   if (!ingredient) {
     notFound();

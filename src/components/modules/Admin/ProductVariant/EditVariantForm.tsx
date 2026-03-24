@@ -44,9 +44,18 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
       formDataObj.append("stock", formData.stock);
       formDataObj.append("lowStockThreshold", formData.lowStockThreshold);
 
+      // Only send new image files
       images.forEach((file) => {
         formDataObj.append("images", file);
       });
+
+      // Send existing images as JSON array (for images we want to keep)
+      const existingImages = previewImages.filter(
+        (img) => !img.startsWith("blob:"), // Filter out blob URLs (new files)
+      );
+      if (existingImages.length > 0) {
+        formDataObj.append("existingImages", JSON.stringify(existingImages));
+      }
 
       const result = await updateProductVariant(variant.id, formDataObj);
       if (result.success) {

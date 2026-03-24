@@ -16,7 +16,8 @@ export default async function ProductDetailsPage({
 }: ProductDetailsPageProps) {
   const { id } = await params;
 
-  const product = await getProductById(id);
+  const response = await getProductById(id);
+  const product = response?.data;
 
   if (!product) {
     notFound();
@@ -27,7 +28,7 @@ export default async function ProductDetailsPage({
       <div className="mb-6 flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" asChild className="mb-2">
-            <Link href="/admin/products">
+            <Link href="/admin/dashboard/products">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Products
             </Link>
@@ -36,7 +37,7 @@ export default async function ProductDetailsPage({
           <p className="text-muted-foreground">SKU: {product.slug || "N/A"}</p>
         </div>
         <Button asChild>
-          <Link href={`/admin/products/${product.id}/edit`}>
+          <Link href={`/admin/dashboard/products/${product.id}/edit`}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Product
           </Link>

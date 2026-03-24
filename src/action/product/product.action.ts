@@ -19,30 +19,67 @@ export const createProduct = async (formData: FormData) => {
 };
 
 export const updateProduct = async (id: string, formData: FormData) => {
-  const productInfo = Object.fromEntries(formData.entries());
-
-  const modify = {
-    ...productInfo,
-    thumbleImage: productInfo.thumbleImage
-      ? JSON.parse(productInfo.thumbleImage as string)
-      : [],
-  };
-
-  console.log("Updating product:", id, modify);
-
   try {
-    const result = await makeApiCall<any>(`/product/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(modify),
-    });
+    // Get the entries
+    const entries = Object.fromEntries(formData.entries());
 
-    if (result?.id) {
-      revalidatePath("/product", "page");
-      revalidatePath("/", "layout");
-      redirect("/products");
+    // Build the product data with proper types
+    const productData = {
+      name: entries.name as string,
+      slug: entries.slug as string,
+      description: entries.description as string,
+      shortDesc: entries.shortDesc as string,
+      longDesc: entries.longDesc as string,
+      price: parseFloat(entries.price as string),
+      discount: parseFloat(entries.discount as string) || 0,
+      stock: parseInt(entries.stock as string),
+      isNew: entries.isNew === "true",
+      isFeatured: entries.isFeatured === "true",
+      isTrending: entries.isTrending === "true",
+      isBestSeller: entries.isBestSeller === "true",
+      isActive: entries.isActive === "true",
+      thumbleImage: entries.thumbleImage as string,
+    };
+
+    // Check if there's a file to upload
+    const thumbImage = formData.get("thumbleImage");
+    const hasFile = thumbImage instanceof File;
+
+    console.log("Updating product:", id, { productData, hasFile });
+
+    // If there's a file, use FormData for multipart upload
+    if (hasFile) {
+      const uploadFormData = new FormData();
+      uploadFormData.append("data", JSON.stringify(productData));
+      uploadFormData.append("thumbleImage", thumbImage as File);
+
+      const result = await makeApiCall<any>(`/product/${id}`, {
+        method: "PATCH",
+        body: uploadFormData,
+      });
+
+      if (result?.id || result?.success) {
+        revalidatePath("/product", "page");
+        revalidatePath("/admin/dashboard/products", "page");
+        revalidatePath("/", "layout");
+      }
+
+      return result;
+    } else {
+      // If no file, send as JSON
+      const result = await makeApiCall<any>(`/product/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(productData),
+      });
+
+      if (result?.id || result?.success) {
+        revalidatePath("/product", "page");
+        revalidatePath("/admin/dashboard/products", "page");
+        revalidatePath("/", "layout");
+      }
+
+      return result;
     }
-
-    return result;
   } catch (error) {
     console.error("Error updating product:", error);
     throw new Error("Failed to update product");

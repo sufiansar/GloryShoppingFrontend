@@ -1,4 +1,3 @@
-// components/admin/products/EditProductForm.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -82,17 +81,28 @@ export default function EditProductForm({ product }: EditProductFormProps) {
 
   useEffect(() => {
     // Initialize brand and category from product data
-    if (product.brandId) {
+    if (product.brand) {
+      setSelectedBrand({
+        id: product.brand.id || product.brandId || "",
+        name: product.brand.name,
+        country: product.brand.country || undefined,
+      });
+    } else if (product.brandId && product.brandName) {
       setSelectedBrand({
         id: product.brandId,
-        name: `Brand ${product.brandId}`,
+        name: product.brandName,
       });
     }
 
-    if (product.categoryId) {
+    if (product.category) {
+      setSelectedCategory({
+        id: product.category.id || product.categoryId || "",
+        name: product.category.name,
+      });
+    } else if (product.categoryId && product.categoryName) {
       setSelectedCategory({
         id: product.categoryId,
-        name: `Category ${product.categoryId}`,
+        name: product.categoryName,
       });
     }
   }, [product]);
@@ -106,27 +116,22 @@ export default function EditProductForm({ product }: EditProductFormProps) {
 
       const formDataObj = new FormData();
 
-      // Basic information
+      // Append all form fields directly
       formDataObj.append("name", formData.name);
       formDataObj.append("slug", formData.slug);
       formDataObj.append("description", formData.description);
       formDataObj.append("shortDesc", formData.shortDesc);
       formDataObj.append("longDesc", formData.longDesc);
-      //   formDataObj.append("faquestions", formData.faquestions);
-
-      // Pricing and stock
       formDataObj.append("price", formData.price);
       formDataObj.append("discount", formData.discount || "0");
       formDataObj.append("stock", formData.stock);
+      formDataObj.append("isNew", String(formData.isNew));
+      formDataObj.append("isFeatured", String(formData.isFeatured));
+      formDataObj.append("isTrending", String(formData.isTrending));
+      formDataObj.append("isBestSeller", String(formData.isBestSeller));
+      formDataObj.append("isActive", String(formData.isActive));
 
-      // Flags
-      formDataObj.append("isNew", formData.isNew.toString());
-      formDataObj.append("isFeatured", formData.isFeatured.toString());
-      formDataObj.append("isTrending", formData.isTrending.toString());
-      formDataObj.append("isBestSeller", formData.isBestSeller.toString());
-      formDataObj.append("isActive", formData.isActive.toString());
-
-      // Thumb image
+      // Handle image
       if (thumbImageFile) {
         formDataObj.append("thumbleImage", thumbImageFile);
       } else if (thumbImage) {
@@ -136,12 +141,13 @@ export default function EditProductForm({ product }: EditProductFormProps) {
       }
 
       const result = await updateProduct(product?.id!, formDataObj);
-      if (result.success) {
+
+      if (result?.success || result?.id) {
         toast.success("✅ Product updated successfully!");
         router.push("/admin/dashboard/products");
         router.refresh();
       } else {
-        toast.error(result.message || "Failed to update product");
+        toast.error(result?.message || "Failed to update product");
       }
     } catch (error) {
       console.error("Update error:", error);

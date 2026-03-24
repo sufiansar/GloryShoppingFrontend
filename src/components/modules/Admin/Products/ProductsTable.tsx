@@ -81,11 +81,11 @@ export default function ProductsTable({
   };
 
   const handleViewDetails = (product: Product) => {
-    router.push(`/admin/products/${product.id}`);
+    router.push(`/admin/dashboard/products/${product.id}`);
   };
 
   const handleEdit = (product: Product) => {
-    router.push(`/admin/products/${product.id}/edit`);
+    router.push(`/admin/dashboard/products/${product.id}/edit`);
   };
 
   const handleSearch = useDebouncedCallback((term: string) => {
@@ -97,7 +97,7 @@ export default function ProductsTable({
       params.delete("searchTerm");
     }
     params.set("page", "1");
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`/admin/dashboard/products?${params.toString()}`);
   }, 500);
 
   const handleClearSearch = () => {
@@ -105,20 +105,20 @@ export default function ProductsTable({
     const params = new URLSearchParams(searchParams);
     params.delete("searchTerm");
     params.set("page", "1");
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`/admin/dashboard/products?${params.toString()}`);
   };
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`/admin/dashboard/products?${params.toString()}`);
   };
 
   const handleItemsPerPageChange = (limit: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("limit", limit.toString());
     params.set("page", "1");
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`/admin/dashboard/products?${params.toString()}`);
   };
 
   const handleSortChange = (field: string) => {
@@ -133,7 +133,7 @@ export default function ProductsTable({
 
     params.set("sortBy", field);
     params.set("sortOrder", newSortOrder);
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`/admin/dashboard/products?${params.toString()}`);
   };
 
   const handleFilterChange = (filterName: string, value: string) => {
@@ -145,7 +145,7 @@ export default function ProductsTable({
       params.delete(filterName);
     }
     params.set("page", "1");
-    router.push(`/admin/products?${params.toString()}`);
+    router.push(`/admin/dashboard/products?${params.toString()}`);
   };
 
   const hasActiveFilters =
@@ -156,7 +156,9 @@ export default function ProductsTable({
       <div className="border rounded-lg p-8 text-center">
         <p className="text-muted-foreground">No products found</p>
         <Button className="mt-4" asChild>
-          <a href="/admin/products/create">Create Your First Product</a>
+          <a href="/admin/dashboard/products/create">
+            Create Your First Product
+          </a>
         </Button>
       </div>
     );
@@ -201,7 +203,7 @@ export default function ProductsTable({
                 initialIsActive === "true" ? "false" : "true",
               );
               params.set("page", "1");
-              router.push(`/admin/products?${params.toString()}`);
+              router.push(`/admin/dashboard/products?${params.toString()}`);
             }}
             className={initialIsActive ? "bg-accent" : ""}
           >
@@ -326,7 +328,7 @@ export default function ProductsTable({
                 const params = new URLSearchParams();
                 params.set("page", "1");
                 params.set("limit", itemsPerPage.toString());
-                router.push(`/admin/products?${params.toString()}`);
+                router.push(`/admin/dashboard/products?${params.toString()}`);
                 setLocalSearchTerm("");
               }}
             >

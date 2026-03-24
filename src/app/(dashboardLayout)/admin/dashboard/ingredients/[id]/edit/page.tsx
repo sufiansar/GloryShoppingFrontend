@@ -7,15 +7,16 @@ import { BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import IngredientForm from "@/components/modules/Ingredients/IngredientForm";
 
 interface EditIngredientPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditIngredientPage({
   params,
 }: EditIngredientPageProps) {
-  const ingredient = await getIngredientById(params.id);
+  const { id } = await params;
+  const ingredient = await getIngredientById(id);
 
   if (!ingredient) {
     notFound();

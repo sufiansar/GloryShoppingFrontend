@@ -24,6 +24,7 @@ interface CategoryMarqueeProps {
 
 export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isMarqueeHovered, setIsMarqueeHovered] = useState(false);
   const marqueeRef = useRef<HTMLDivElement>(null);
 
   // Add floating particles effect
@@ -192,9 +193,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
             </div>
 
             {/* Category Name */}
-            <h3 className="skincare-title font-bold text-gray-800 mb-2">
-              {category.name}
-            </h3>
+            <h3 className="skincare-title font-bold mb-2">{category.name}</h3>
 
             {/* Product Count (if available) */}
             {/* {category.name && (
@@ -263,9 +262,9 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
         .skincare-container {
           background: linear-gradient(
             135deg,
-            #fafafa 0%,
-            #f5f5f7 50%,
-            #f0f4ff 100%
+            #f8f9fa 0%,
+            #f0f3f8 50%,
+            #e8f1f8 100%
           );
           position: relative;
           overflow: hidden;
@@ -317,11 +316,12 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           width: 170px;
           height: 220px;
           border-radius: 20px;
-          background: white;
+          background: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(10px);
           cursor: pointer;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
         .skincare-card:hover {
@@ -513,7 +513,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
         .marquee-header h2 {
           font-size: 28px;
           font-weight: 700;
-          background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+          background: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           margin-bottom: 8px;
@@ -533,12 +533,16 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
       </div>
 
       {/* Enhanced Marquee */}
-      <div className="relative py-10 px-4">
+      <div
+        className="relative py-10 px-4"
+        onMouseEnter={() => setIsMarqueeHovered(true)}
+        onMouseLeave={() => setIsMarqueeHovered(false)}
+      >
         <div
           ref={marqueeRef}
           className="flex gap-6"
           style={{
-            animation: `marquee-scroll-left-to-right 45s linear infinite`,
+            animation: `marquee-scroll-left-to-right 8.5s linear ${isMarqueeHovered ? "paused" : "running"} infinite`,
             paddingLeft: "50px",
           }}
         >

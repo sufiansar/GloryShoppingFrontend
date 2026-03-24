@@ -108,7 +108,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     <Building2 className="h-4 w-4" />
                     <span>Brand</span>
                   </div>
-                  <Badge variant="outline">Brand-{product.brandId}</Badge>
+                  <Badge variant="outline">
+                    {product.brand?.name || product.brandName || "N/A"}
+                  </Badge>
                 </div>
 
                 <div className="space-y-2">
@@ -116,7 +118,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     <Folder className="h-4 w-4" />
                     <span>Category</span>
                   </div>
-                  <Badge variant="outline">Category-{product.categoryId}</Badge>
+                  <Badge variant="outline">
+                    {product.category?.name || product.categoryName || "N/A"}
+                  </Badge>
                 </div>
               </div>
 
@@ -169,7 +173,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                   <Calendar className="h-4 w-4" />
                   <span>Created</span>
                 </div>
-                <p>{new Date(product?.createdAt || "").toLocaleString()}</p>
+                <p>
+                  {product?.createdAt
+                    ? new Date(product.createdAt).toLocaleString()
+                    : "N/A"}
+                </p>
               </div>
             </div>
           </CardContent>

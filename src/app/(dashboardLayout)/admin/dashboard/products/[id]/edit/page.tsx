@@ -14,7 +14,8 @@ export default async function EditProductPage({
   const { id } = await params;
 
   // Fetch product data
-  const product = await getProductById(id);
+  const response = await getProductById(id);
+  const product = response?.data;
 
   if (!product) {
     notFound();
