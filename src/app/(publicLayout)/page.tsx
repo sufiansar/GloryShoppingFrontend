@@ -83,7 +83,7 @@ const PublicPage = async () => {
                 showNavigation={true}
                 showDots={true}
                 pauseOnHover={true}
-                height="400px"
+                height="calc(100vh - 280px)"
                 className="shadow-2xl"
                 showText={false}
               />

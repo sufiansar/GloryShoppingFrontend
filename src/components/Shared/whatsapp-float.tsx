@@ -55,12 +55,12 @@ export default function WhatsAppFloatEnhanced() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 left-6 z-40">
       {/* Expanded Panel */}
       {isOpen && (
         <div
           className={cn(
-            "absolute bottom-16 right-0 w-72 bg-white rounded-xl shadow-2xl p-4",
+            "absolute bottom-16 left-0 w-72 bg-white rounded-xl shadow-2xl p-4",
             "border border-gray-200 animate-in slide-in-from-bottom-5 duration-300",
           )}
         >

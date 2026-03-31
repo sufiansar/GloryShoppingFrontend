@@ -5,6 +5,12 @@ export const superAdminNavItems: NavSection[] = [
     title: "Creating Part",
     items: [
       {
+        title: "Chat Management",
+        href: "/admin/dashboard/chat",
+        icon: "MessageSquare",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
         title: "Create Section",
         href: "/admin/dashboard/create-section",
         icon: "FolderPlus",

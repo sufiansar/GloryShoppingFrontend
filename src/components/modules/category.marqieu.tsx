@@ -247,7 +247,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="skincare-container">
+      <div className="skincare-container hidden md:block">
         <div className="skincare-empty-state">
           <Sparkles className="animate-pulse" size={48} />
           <p className="text-gray-600">No categories available</p>
@@ -257,7 +257,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
   }
 
   return (
-    <div className="skincare-container">
+    <div className="skincare-container hidden md:block">
       <style jsx global>{`
         .skincare-container {
           background: linear-gradient(
@@ -313,15 +313,16 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
         }
 
         .skincare-card {
-          width: 170px;
-          height: 220px;
+          width: 200px;
+          height: 260px;
           border-radius: 20px;
-          background: rgba(255, 255, 255, 0.7);
+          background: rgba(255, 255, 255, 0.75);
           backdrop-filter: blur(10px);
           cursor: pointer;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.8);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.9);
+          flex-shrink: 0;
         }
 
         .skincare-card:hover {
@@ -388,10 +389,11 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
         .skincare-title {
           color: #1f2937;
-          font-size: 15px;
-          font-weight: 600;
+          font-size: 16px;
+          font-weight: 700;
           text-align: center;
-          line-height: 1.3;
+          line-height: 1.4;
+          letter-spacing: 0.3px;
         }
 
         .skincare-count {
@@ -527,23 +529,18 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
       <FloatingBubbles />
 
-      {/* Header Section */}
-      <div className="marquee-header">
-        <h2>Explore Our Collections</h2>
-      </div>
-
       {/* Enhanced Marquee */}
       <div
-        className="relative py-10 px-4"
+        className="relative py-12 px-4"
         onMouseEnter={() => setIsMarqueeHovered(true)}
         onMouseLeave={() => setIsMarqueeHovered(false)}
       >
         <div
           ref={marqueeRef}
-          className="flex gap-6"
+          className="flex gap-8"
           style={{
-            animation: `marquee-scroll-left-to-right 8.5s linear ${isMarqueeHovered ? "paused" : "running"} infinite`,
-            paddingLeft: "50px",
+            animation: `marquee-scroll-left-to-right 12s linear ${isMarqueeHovered ? "paused" : "running"} infinite`,
+            paddingLeft: "60px",
           }}
         >
           {[...categories, ...categories, ...categories].map(

@@ -34,7 +34,7 @@ export default function BestProductSlider() {
     breakpoints: {
       "(max-width: 1024px)": { slides: { perView: 3 } },
       "(max-width: 768px)": { slides: { perView: 2 } },
-      "(max-width: 480px)": { slides: { perView: 1 } },
+      "(max-width: 480px)": { slides: { perView: 2 } },
     },
     created(s) {
       startAutoPlay(s);

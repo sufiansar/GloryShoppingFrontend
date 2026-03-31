@@ -7,7 +7,7 @@ export function SkincareMarquee() {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <div className="w-full py-2 bg-pink-400 border-y  border-border/50">
+    <div className="w-full py-4 bg-linear-to-r from-[#ca428b] via-[#ca428b] to-[#ca428b] border-y border-[#b83a7d]/30 shadow-md">
       {/* Add CSS animation to global scope */}
       <style jsx global>{`
         @keyframes infiniteScroll {
@@ -32,43 +32,43 @@ export function SkincareMarquee() {
         onMouseLeave={() => setIsPaused(false)}
       >
         {/* Gradient overlays */}
-        <div className="absolute left-0 top-0 bottom-0 w-24  z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24  to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-linear-to-r from-[#ca428b] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-linear-to-l from-[#ca428b] to-transparent z-10 pointer-events-none" />
 
         {/* Single line marquee with proper animation */}
         <div
-          className="marquee-wrapper py-2"
+          className="marquee-wrapper py-3"
           style={{
             animation: `infiniteScroll 80s linear infinite`,
             animationPlayState: isPaused ? "paused" : "running",
           }}
         >
           {/* First set - Single line */}
-          <div className="flex items-center gap-6 md:gap-8 px-2">
+          <div className="flex items-center gap-6 md:gap-8 px-4">
             {skincareBrands.map((brand, index) => (
               <div
                 key={`set1-${index}`}
                 className="flex items-center gap-6 md:gap-8 shrink-0"
               >
-                <span className="text-lg md:text-xl font-semibold text-foreground whitespace-nowrap">
+                <span className="text-base md:text-lg font-bold text-white whitespace-nowrap drop-shadow-sm">
                   {brand}
                 </span>
-                <span className="text-xl text-gray-300">•</span>
+                <span className="text-lg text-white/70">•</span>
               </div>
             ))}
           </div>
 
           {/* Duplicate set for infinite loop */}
-          <div className="flex items-center gap-6 md:gap-8 px-2">
+          <div className="flex items-center gap-6 md:gap-8 px-4">
             {skincareBrands.map((brand, index) => (
               <div
                 key={`set2-${index}`}
                 className="flex items-center gap-6 md:gap-8 shrink-0"
               >
-                <span className="text-lg md:text-xl font-semibold text-foreground whitespace-nowrap">
+                <span className="text-base md:text-lg font-bold text-white whitespace-nowrap drop-shadow-sm">
                   {brand}
                 </span>
-                <span className="text-xl text-gray-300">•</span>
+                <span className="text-lg text-white/70">•</span>
               </div>
             ))}
           </div>

@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProviders from "@/providers/AuthProviders";
 import { CartProvider } from "@/providers/CartProvider";
+import { SocketProvider } from "@/providers/SocketProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { LayoutChat } from "@/components/LayoutChat";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,10 +32,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProviders>
-          <CartProvider>
-            {children}
-            <Toaster position="top-right" richColors />
-          </CartProvider>
+          <SocketProvider>
+            <CartProvider>
+              {children}
+              <Toaster position="top-right" richColors />
+              {/* Global Chat Button - Always Accessible */}
+              <LayoutChat />
+            </CartProvider>
+          </SocketProvider>
         </AuthProviders>
       </body>
     </html>
