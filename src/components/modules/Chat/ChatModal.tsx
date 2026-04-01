@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { storage } from "@/lib/storage-utils";
 import { ChatWindow } from "./ChatWindow";
 import { IChat } from "@/types/chat.interface";
 
@@ -50,8 +51,8 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
         const chatId = chatData.id || chatData.chatId;
         const guestIdFromResponse = chatData.guestId || guestId;
 
-        localStorage.setItem("guestId", guestIdFromResponse);
-        localStorage.setItem("guestName", "Guest User");
+        storage.local.set("guestId", guestIdFromResponse);
+        storage.local.set("guestName", "Guest User");
 
         const chatObject: IChat = {
           id: chatId,

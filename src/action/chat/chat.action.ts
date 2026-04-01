@@ -203,6 +203,32 @@ export async function getChatMessagesAsUser(chatId: string) {
   }
 }
 
+// Get all messages for authenticated user
+export async function getAllUserMessages() {
+  try {
+    const response = await makeApiCall<ApiResponse>("/chat/user/messages/all", {
+      method: "GET",
+    });
+
+    if (response?.success) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+
+    return {
+      success: false,
+      error: response?.message || "Failed to fetch all messages",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error?.message || "Something went wrong",
+    };
+  }
+}
+
 // Get all chats for admin
 export async function getAllChatsForAdmin(page = 1, limit = 10) {
   try {

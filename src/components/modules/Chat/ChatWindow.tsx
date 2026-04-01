@@ -21,6 +21,7 @@ import {
   Heart,
   Sparkles,
 } from "lucide-react";
+import { storage } from "@/lib/storage-utils";
 import { IChat, IMessage } from "@/types/chat.interface";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useChatSocket } from "@/hooks/use-chat-socket";
@@ -110,11 +111,11 @@ export function ChatWindow({
     }
   }, [chat.id, isAdmin]);
 
-  // Get guest info from localStorage only if no user session and mounted on client
+  // Get guest info from storage only if no user session and mounted on client
   const guestId =
-    hydrated && !session?.user ? localStorage.getItem("guestId") : null;
+    hydrated && !session?.user ? storage.local.get("guestId") : null;
   const guestName =
-    hydrated && !session?.user ? localStorage.getItem("guestName") : null;
+    hydrated && !session?.user ? storage.local.get("guestName") : null;
 
   // Determine if this is a guest chat
   const isGuestChat = !!chat.guestId;
@@ -223,13 +224,17 @@ export function ChatWindow({
     setMessages((prev) => [...prev, optimisticMessage]);
     messageIdsRef.current.add(optimisticMessage.id);
 
-    // Persist message to DB via HTTP API
+    // Persist message to DB via HTTP API and then emit via socket for real-time
     try {
       setIsLoading(true);
       if (isAdmin) {
-        console.log("📨 Sending admin message...");
+        console.log("📨 Sending admin message (HTTP)...");
         const result = await sendMessageAsAdmin(chat.id, messageContent);
-        console.log("✅ Admin message sent:", result);
+        console.log("✅ Admin message sent (HTTP):", result);
+        
+        // Also send via socket for real-time
+        sendAdminReply(messageContent, session?.user?.name || "Admin");
+
         // Update optimistic message with real ID from server
         if (result.data?.id) {
           setMessages((prev) =>
@@ -244,13 +249,17 @@ export function ChatWindow({
         }
       } else {
         if (senderType === "GUEST" && guestId) {
-          console.log("📨 Sending guest message...");
+          console.log("📨 Sending guest message (HTTP)...");
           const result = await sendMessageAsGuest(
             chat.id,
             messageContent,
             guestId,
           );
-          console.log("✅ Guest message sent:", result);
+          console.log("✅ Guest message sent (HTTP):", result);
+          
+          // Also send via socket for real-time
+          sendMessage(messageContent, "GUEST");
+
           if (result.data?.id) {
             setMessages((prev) =>
               prev.map((msg) =>
@@ -263,9 +272,13 @@ export function ChatWindow({
             messageIdsRef.current.add(result.data.id);
           }
         } else {
-          console.log("📨 Sending user message...");
+          console.log("📨 Sending user message (HTTP)...");
           const result = await sendMessageAsUser(chat.id, messageContent);
-          console.log("✅ User message sent:", result);
+          console.log("✅ User message sent (HTTP):", result);
+          
+          // Also send via socket for real-time
+          sendMessage(messageContent, "USER");
+
           if (result.data?.id) {
             setMessages((prev) =>
               prev.map((msg) =>

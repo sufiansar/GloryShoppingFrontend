@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { getAllChatsForAdmin } from "@/action/chat/chat.action";
 import { getSocketUrl } from "@/lib/url-utils";
+import { storage } from "@/lib/storage-utils";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -32,7 +33,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const guestId = hydrated ? localStorage.getItem("guestId") : null;
+    const guestId = hydrated ? storage.local.get("guestId") : null;
 
     const newSocket = io(BASE_URL, {
       auth: {
@@ -57,20 +58,30 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setIsConnected(false);
     });
 
-    // For admins - receive new messages from guests
+    // For admins - receive new messages from guests/users
     newSocket.on("new-message-admin", (data: any) => {
-      console.log("📨 New message for admin:", data);
-      const { chatId, message } = data;
+      console.log("📨 New message for admin received:", data);
+      const chatId = data.chatId || (data.message?.chatId);
+      const message = data.message || data;
+
+      if (!chatId) return;
 
       setChats((prevChats) => {
         const existingChat = prevChats[chatId];
+        // Deduplicate messages
+        const messages = existingChat?.messages || [];
+        const isDuplicate = messages.some((m: any) => m.id === message.id);
+        
+        if (isDuplicate) return prevChats;
+
         if (existingChat) {
           return {
             ...prevChats,
             [chatId]: {
               ...existingChat,
-              messages: [...(existingChat.messages || []), message],
+              messages: [...messages, message],
               updatedAt: new Date(),
+              lastMessage: message,
             },
           };
         } else {
@@ -80,6 +91,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
               id: chatId,
               messages: [message],
               updatedAt: new Date(),
+              lastMessage: message,
+              guestName: message.senderName || "Guest",
+              status: "ACTIVE"
             },
           };
         }
@@ -124,7 +138,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     return () => {
       newSocket.disconnect();
     };
-  }, [session?.user?.id, session?.user?.role]);
+  }, [session?.user?.id, session?.user?.role, hydrated]);
 
   // Fetch all chats for admin on component mount
   useEffect(() => {

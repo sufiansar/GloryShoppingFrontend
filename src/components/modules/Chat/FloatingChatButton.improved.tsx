@@ -7,12 +7,14 @@ import Image from "next/image";
 import { MessageCircle, X, Heart, Loader2, AlertCircle } from "lucide-react";
 import { ChatWindow } from "./ChatWindow";
 import { useHydrated } from "@/hooks/use-hydrated";
+import { storage } from "@/lib/storage-utils";
 import { IChat, IMessage } from "@/types/chat.interface";
 import {
   getChatMessagesAsGuest,
   getChatMessagesAsUser,
   startChatAsUser,
   startChatAsGuest,
+  getAllUserMessages,
 } from "@/action/chat/chat.action";
 import { toast } from "sonner";
 import logo from "@/components/Assets/Logo.png";
@@ -44,7 +46,7 @@ export function FloatingChatButtonImproved({
     window.addEventListener("openFloatingChat", handleOpenFloatingChat);
 
     // Auto-open if it was expanded before reload
-    if (sessionStorage.getItem("isChatExpanded") === "true") {
+    if (storage.session.get("isChatExpanded") === "true") {
       handleOpenChat();
     }
 
@@ -85,7 +87,7 @@ export function FloatingChatButtonImproved({
   const handleOpenChat = async () => {
     if (activeChat) {
       setIsExpanded(true);
-      sessionStorage.setItem("isChatExpanded", "true");
+      storage.session.set("isChatExpanded", "true");
       return;
     }
 
@@ -94,44 +96,47 @@ export function FloatingChatButtonImproved({
     try {
       // 1. Authenticated User Flow (PRIORITY)
       if (session?.user) {
-        let userChatId = localStorage.getItem(`userChatId_${session.user.id}`);
+        let userChatId = storage.local.get(`userChatId_${session.user.id}`);
 
         if (userChatId) {
           console.log("📖 Loading existing User chat:", userChatId);
-          const result = await getChatMessagesAsUser(userChatId);
+            const result = await getAllUserMessages();
 
-          if (result.success && result.data) {
-            const messagesData = result.data || [];
+            if (result.success && result.data) {
+              const messagesData = result.data.data || result.data || [];
 
-            const messages: IMessage[] = messagesData.map((msg: any) => ({
-              id: msg.id,
-              content: msg.content,
-              senderId: msg.senderId || null,
-              guestId: null,
-              senderType: msg.senderType,
-              senderName: msg.senderName || "Support",
-              createdAt: new Date(msg.createdAt),
-              isEdited: false,
-              type: msg.type || "TEXT",
-              url: msg.url || null,
-              isRead: msg.isRead || false,
-            }));
+              const messages: IMessage[] = messagesData.map((msg: any) => ({
+                id: msg.id,
+                content: msg.content,
+                senderId: msg.senderId || null,
+                guestId: null,
+                senderType: msg.senderType,
+                senderName: msg.senderName || (msg.senderType === "ADMIN" ? "Support" : "You"),
+                createdAt: new Date(msg.createdAt),
+                isEdited: false,
+                type: msg.type || "TEXT",
+                url: msg.url || null,
+                isRead: msg.isRead || false,
+              }));
 
-            const chatObject: IChat = {
-              id: userChatId,
-              status: "ACTIVE",
-              messages: messages,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
+              // Use the latest chatId for socket connection
+              const latestChatId = messagesData.length > 0 ? messagesData[messagesData.length - 1].chatId : null;
 
-            setActiveChat(chatObject);
-            setIsExpanded(true);
-            sessionStorage.setItem("isChatExpanded", "true");
-            setIsInitializing(false);
-            return;
+              const chatObject: IChat = {
+                id: (latestChatId as string) || `user-${session.user.id}`,
+                status: "ACTIVE",
+                messages: messages,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              };
+
+              setActiveChat(chatObject);
+              setIsExpanded(true);
+              storage.session.set("isChatExpanded", "true");
+              setIsInitializing(false);
+              return;
+            }
           }
-        }
 
         // Start a new User chat
         console.log("🆕 Starting new chat for logged-in User");
@@ -145,7 +150,7 @@ export function FloatingChatButtonImproved({
           userChatId = chatData.id || chatData.chatId;
 
           if (userChatId) {
-            localStorage.setItem(
+            storage.local.set(
               `userChatId_${session.user.id}`,
               userChatId as string,
             );
@@ -160,7 +165,7 @@ export function FloatingChatButtonImproved({
 
             setActiveChat(chatObject);
             setIsExpanded(true);
-            sessionStorage.setItem("isChatExpanded", "true");
+            storage.session.set("isChatExpanded", "true");
           }
         } else {
           toast.error("Could not start chat. Please try again.");
@@ -170,8 +175,8 @@ export function FloatingChatButtonImproved({
       }
 
       // 2. Guest User Flow
-      let guestId = localStorage.getItem("guestId");
-      let chatId = localStorage.getItem("chatId");
+      let guestId = storage.local.get("guestId");
+      let chatId = storage.local.get("chatId");
 
       // If we have existing chat, just load it
       if (chatId && guestId) {
@@ -211,18 +216,18 @@ export function FloatingChatButtonImproved({
         console.log("✅ Chat loaded with", messages.length, "messages");
         setActiveChat(chatObject);
         setIsExpanded(true);
-        sessionStorage.setItem("isChatExpanded", "true");
+        storage.session.set("isChatExpanded", "true");
         return;
       }
 
       // Create new chat
       console.log("🆕 Starting new chat for Guest");
-
+      
       // Generate or retrieve guestId
-      let newGuestId = localStorage.getItem("guestId");
+      let newGuestId = storage.local.get("guestId");
       if (!newGuestId) {
         newGuestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem("guestId", newGuestId);
+        storage.local.set("guestId", newGuestId);
       }
 
       const startResult = await startChatAsGuest({
@@ -233,6 +238,11 @@ export function FloatingChatButtonImproved({
       if (startResult.success && startResult.data) {
         const chatData = startResult.data.data || startResult.data;
         const chatId = chatData.id || chatData.chatId;
+
+        // Save chatId for persistence
+        if (chatId) {
+          storage.local.set("chatId", chatId);
+        }
 
         const chatObject: IChat = {
           id: chatId,
@@ -246,7 +256,7 @@ export function FloatingChatButtonImproved({
 
         setActiveChat(chatObject);
         setIsExpanded(true);
-        sessionStorage.setItem("isChatExpanded", "true");
+        storage.session.set("isChatExpanded", "true");
         toast.success("Connected to support!");
       } else {
         console.error("❌ Failed to create guest chat:", startResult.error);
@@ -338,7 +348,7 @@ export function FloatingChatButtonImproved({
           chat={activeChat}
           onClose={() => {
             setIsExpanded(false);
-            sessionStorage.setItem("isChatExpanded", "false");
+            storage.session.set("isChatExpanded", "false");
           }}
         />
       </div>
