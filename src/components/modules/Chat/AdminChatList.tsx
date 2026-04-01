@@ -11,6 +11,7 @@ import { MessageCircle, Search, Clock } from "lucide-react";
 import { ChatWindow } from "./ChatWindow";
 import { IChat, IMessage } from "@/types/chat.interface";
 import { useSocket } from "@/providers/SocketProvider";
+import { getAllChatsForAdmin } from "@/action/chat/chat.action";
 
 interface AdminChatListProps {
   onlineChats?: any[];
@@ -34,116 +35,50 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
   useEffect(() => {
     const fetchAdminChats = async (pageNum = 1) => {
       try {
-        const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+        const PAGE_LIMIT = 50;
         setIsLoading(pageNum === 1);
         setIsLoadingMore(pageNum > 1);
 
-        // Check if session and token are available
-        if (!session?.accessToken) {
-          console.warn("❌ No access token available, skipping chat fetch");
-          console.log("Session object:", session);
-          setChats([]);
-          setIsLoading(false);
-          setIsLoadingMore(false);
-          return;
-        }
+        console.log("🔍 Fetching admin chats via server action, page:", pageNum);
+        
+        const result = await getAllChatsForAdmin(pageNum, PAGE_LIMIT);
 
-        console.log(
-          "🔍 Fetching admin chats from:",
-          `${BASE_API}/chat/admin/all-chats?page=${pageNum}&limit=50`,
-        );
-        console.log("👤 Admin ID:", session?.user?.id);
-        console.log(
-          "🔑 Token:",
-          session?.accessToken?.substring(0, 20) + "...",
-        );
-
-        const response = await fetch(
-          `${BASE_API}/chat/admin/all-chats?page=${pageNum}&limit=50`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.accessToken}`,
-            },
-            credentials: "include",
-          },
-        );
-
-        console.log("📡 API Status:", response.status, response.statusText);
-        const data = await response.json();
-        console.log("📊 Admin chats response:", data);
-        console.log("📊 data.data:", data.data);
-        console.log("📊 data.meta:", data.meta);
-
-        if (response.ok) {
-          // Backend returns { data: [...chats], meta: {...} }
-          let chatArray = [];
-
-          console.log("🔍 Analyzing response structure:");
-          console.log("  - Is data.data array?", Array.isArray(data.data));
-          console.log("  - Is data array?", Array.isArray(data));
-          console.log("  - data.data type:", typeof data.data);
-          console.log("  - data type:", typeof data);
-          console.log("  - data.data?.data type:", typeof data.data?.data);
-
-          if (Array.isArray(data.data)) {
-            chatArray = data.data;
-            console.log("✅ Found chats in data.data");
-          } else if (Array.isArray(data)) {
-            chatArray = data;
-            console.log("✅ Found chats in data directly");
-          } else if (data.data && Array.isArray(data.data.data)) {
-            chatArray = data.data.data;
-            console.log("✅ Found chats in data.data.data");
-          } else {
-            console.log("⚠️ Could not find chats array in response");
-            console.log("  - Full data keys:", Object.keys(data));
-            if (data.data) {
-              console.log("  - data.data keys:", Object.keys(data.data));
-            }
-          }
+        if (result.success && result.data) {
+          // Flatten data if it's nested (makeApiCall already does some flattening)
+          const rawData = result.data.data || result.data;
+          const chatArray = Array.isArray(rawData) ? rawData : [];
 
           console.log("✅ Chats parsed successfully. Count:", chatArray.length);
 
-          if (chatArray.length > 0) {
-            const fetchedChats: IChat[] = chatArray.map((chat: any) => ({
-              id: chat.id,
-              userId: chat.userId || null,
-              guestId: chat.guestId || null,
-              guestName: chat.guestName || null,
-              guestEmail: chat.guestEmail || null,
-              status: chat.status || "ACTIVE",
-              messages: chat.messages || [],
-              createdAt: new Date(chat.createdAt || new Date()),
-              updatedAt: new Date(chat.updatedAt || new Date()),
-              lastMessage: chat.lastMessage || null,
-              senderInfo: chat.senderInfo || {
-                type: chat.guestId ? "GUEST" : "USER",
-                name: chat.guestName || "Guest",
-                email: chat.guestEmail || null,
-                id: chat.guestId || chat.userId || "",
-              },
-            }));
+          const fetchedChats: IChat[] = chatArray.map((chat: any) => ({
+            id: chat.id,
+            userId: chat.userId || null,
+            guestId: chat.guestId || null,
+            guestName: chat.guestName || null,
+            guestEmail: chat.guestEmail || null,
+            status: chat.status || "ACTIVE",
+            messages: chat.messages || [],
+            createdAt: new Date(chat.createdAt || new Date()),
+            updatedAt: new Date(chat.updatedAt || new Date()),
+            lastMessage: chat.lastMessage || null,
+            senderInfo: chat.senderInfo || {
+              type: chat.guestId ? "GUEST" : "USER",
+              name: chat.guestName || "Guest",
+              email: chat.guestEmail || null,
+              id: chat.guestId || chat.userId || "",
+            },
+          }));
 
-            if (pageNum === 1) {
-              setChats(fetchedChats);
-            } else {
-              setChats((prev) => [...prev, ...fetchedChats]);
-            }
-
-            // Check if there are more pages
-            setHasMore(fetchedChats.length === 50);
+          if (pageNum === 1) {
+            setChats(fetchedChats);
           } else {
-            console.log("⚠️ No chats found in response");
-            if (pageNum === 1) {
-              setChats([]);
-            }
-            setHasMore(false);
+            setChats((prev) => [...prev, ...fetchedChats]);
           }
+
+          // Check if there are more pages
+          setHasMore(chatArray.length === PAGE_LIMIT);
         } else {
-          console.error("❌ Failed to fetch chats. Status:", response.status);
-          console.error("Error response:", data);
+          console.error("❌ Failed to fetch chats:", result.error);
           if (pageNum === 1) {
             setChats([]);
           }
@@ -185,36 +120,12 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
       const fetchMore = async () => {
         try {
           setIsLoadingMore(true);
+          const PAGE_LIMIT = 50;
+          const result = await getAllChatsForAdmin(page + 1, PAGE_LIMIT);
 
-          // Check if token is available
-          if (!session?.accessToken) {
-            console.warn("No access token available, skipping load more");
-            setIsLoadingMore(false);
-            return;
-          }
-
-          const response = await fetch(
-            `${BASE_API}/chat/admin/all-chats?page=${page + 1}&limit=50`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.accessToken}`,
-              },
-              credentials: "include",
-            },
-          );
-          const data = await response.json();
-          if (response.ok) {
-            // Parse response - handle { data: [...], meta: {...} } format
-            let chatArray = [];
-            if (Array.isArray(data.data)) {
-              chatArray = data.data;
-            } else if (Array.isArray(data)) {
-              chatArray = data;
-            } else if (data.data && Array.isArray(data.data.data)) {
-              chatArray = data.data.data;
-            }
+          if (result.success && result.data) {
+            const rawData = result.data.data || result.data;
+            const chatArray = Array.isArray(rawData) ? rawData : [];
 
             if (chatArray.length > 0) {
               setChats((prev) => [
@@ -238,7 +149,7 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
                   },
                 })),
               ]);
-              setHasMore(chatArray.length === 50);
+              setHasMore(chatArray.length === PAGE_LIMIT);
             } else {
               setHasMore(false);
             }

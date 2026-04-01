@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { IChat, IMessage } from "@/types/chat.interface";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 import { cn } from "@/lib/utils";
 import {
@@ -54,6 +55,7 @@ export function ChatWindow({
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messageIdsRef = useRef<Set<string>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const hydrated = useHydrated();
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize message IDs from initial messages
@@ -108,15 +110,11 @@ export function ChatWindow({
     }
   }, [chat.id, isAdmin]);
 
-  // Get guest info from localStorage only if no user session
+  // Get guest info from localStorage only if no user session and mounted on client
   const guestId =
-    typeof window !== "undefined" && !session?.user
-      ? localStorage.getItem("guestId")
-      : null;
+    hydrated && !session?.user ? localStorage.getItem("guestId") : null;
   const guestName =
-    typeof window !== "undefined" && !session?.user
-      ? localStorage.getItem("guestName")
-      : null;
+    hydrated && !session?.user ? localStorage.getItem("guestName") : null;
 
   // Determine if this is a guest chat
   const isGuestChat = !!chat.guestId;
@@ -446,7 +444,9 @@ export function ChatWindow({
                       }
                     >
                       <p className="word-break break-word whitespace-pre-wrap font-medium">
-                        {message.content}
+                        {typeof message.content === "string"
+                          ? message.content
+                          : JSON.stringify(message.content)}
                       </p>
                       <div className="flex items-center justify-between gap-4 mt-1 opacity-70">
                         <span

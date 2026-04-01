@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
+import { getSocketUrl } from "@/lib/url-utils";
 
 interface SocketEvents {
   onMessageReceived?: (message: any) => void;
@@ -18,9 +19,7 @@ export function useChatSocket(chatId: string | null, events?: SocketEvents) {
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const BASE_URL =
-    process.env.NEXT_PUBLIC_BASE_API?.replace("/api/v1", "") ||
-    "http://localhost:5000";
+  const BASE_URL = getSocketUrl(process.env.NEXT_PUBLIC_BASE_API);
 
   useEffect(() => {
     if (!chatId) {
@@ -31,7 +30,7 @@ export function useChatSocket(chatId: string | null, events?: SocketEvents) {
     console.log("Initializing socket with chatId:", chatId);
     console.log("BASE_URL:", BASE_URL);
 
-    const guestId = localStorage.getItem("guestId");
+    const guestId = typeof window !== "undefined" ? localStorage.getItem("guestId") : null;
 
     const newSocket = io(BASE_URL, {
       auth: {
@@ -129,15 +128,15 @@ export function useChatSocket(chatId: string | null, events?: SocketEvents) {
         return;
       }
 
-      const guestId = localStorage.getItem("guestId");
+      const guestId = typeof window !== "undefined" ? localStorage.getItem("guestId") : null;
       const messagePayload = {
         chatId,
         content,
         senderType,
         guestId: senderType === "GUEST" ? guestId : null,
         senderName:
-          session?.user?.name || localStorage.getItem("guestName") || "User",
-        guestEmail: localStorage.getItem("guestEmail"),
+          session?.user?.name || (typeof window !== "undefined" ? localStorage.getItem("guestName") : null) || "User",
+        guestEmail: typeof window !== "undefined" ? localStorage.getItem("guestEmail") : null,
       };
 
       console.log("📤 Sending message via Socket.io:", messagePayload);
@@ -180,7 +179,7 @@ export function useChatSocket(chatId: string | null, events?: SocketEvents) {
     socket.emit("typing", {
       chatId,
       senderName:
-        session?.user?.name || localStorage.getItem("guestName") || "User",
+        session?.user?.name || (typeof window !== "undefined" ? localStorage.getItem("guestName") : null) || "User",
     });
 
     if (typingTimeoutRef.current) {

@@ -3,6 +3,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
+import { useHydrated } from "@/hooks/use-hydrated";
+import { getAllChatsForAdmin } from "@/action/chat/chat.action";
+import { getSocketUrl } from "@/lib/url-utils";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -19,14 +22,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [chats, setChats] = useState<Record<string, any>>({});
+  const hydrated = useHydrated();
 
   useEffect(() => {
-    const BASE_URL =
-      process.env.NEXT_PUBLIC_BASE_API?.replace("/api/v1", "") ||
-      "http://localhost:5000";
+    const BASE_URL = getSocketUrl(process.env.NEXT_PUBLIC_BASE_API);
+    
+    if (!BASE_URL) {
+      console.warn("⚠️ No Socket BASE_URL configured for SocketProvider");
+      return;
+    }
 
-    const guestId =
-      typeof window !== "undefined" ? localStorage.getItem("guestId") : null;
+    const guestId = hydrated ? localStorage.getItem("guestId") : null;
 
     const newSocket = io(BASE_URL, {
       auth: {
@@ -42,7 +48,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     // Connection events
     newSocket.on("connect", () => {
-      console.log("✅ Global Socket connected:", newSocket.id);
+      console.log("✅ Global Socket connected:", newSocket.id, "to", BASE_URL);
       setIsConnected(true);
     });
 
@@ -131,19 +137,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
-        const response = await fetch(`${BASE_API}/chat/admin/all-chats`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-          credentials: "include",
-        });
+        const result = await getAllChatsForAdmin();
 
-        if (response.ok) {
-          const data = await response.json();
-          const chatsArray = data.data || (Array.isArray(data) ? data : []);
+        if (result.success && result.data) {
+          const rawData = result.data.data || result.data || [];
+          const chatsArray = Array.isArray(rawData) ? rawData : [];
 
           const chatsMap: Record<string, any> = {};
           if (Array.isArray(chatsArray)) {
@@ -162,8 +160,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
             });
           }
           setChats(chatsMap);
-        } else if (response.status === 401) {
-          console.warn("Unauthorized - token may have expired");
+        } else {
+          console.warn("Failed to fetch admin chats:", result.error);
           setChats({});
         }
       } catch (error) {

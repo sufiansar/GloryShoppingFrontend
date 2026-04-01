@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { MessageCircle, X, Heart } from "lucide-react";
+import { MessageCircle, X, Heart, Loader2, AlertCircle } from "lucide-react";
 import { ChatWindow } from "./ChatWindow";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { IChat, IMessage } from "@/types/chat.interface";
 import {
   getChatMessagesAsGuest,
@@ -13,6 +14,7 @@ import {
   startChatAsUser,
   startChatAsGuest,
 } from "@/action/chat/chat.action";
+import { toast } from "sonner";
 import logo from "@/components/Assets/Logo.png";
 
 interface FloatingChatButtonProps {
@@ -28,13 +30,12 @@ export function FloatingChatButtonImproved({
   const { data: session } = useSession(); // Add session hook for logged-in users
   const pathname = usePathname();
 
-  // Hide the floating widget entirely on admin dashboard pages
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/dashboard")) {
-    return null;
-  }
+  const hydrated = useHydrated();
 
   // Listen for navbar chat button click and auto-open based on session storage
   useEffect(() => {
+    if (!hydrated) return;
+    
     const handleOpenFloatingChat = () => {
       console.log("📱 Opening floating chat from navbar");
       handleOpenChat();
@@ -50,10 +51,12 @@ export function FloatingChatButtonImproved({
     return () => {
       window.removeEventListener("openFloatingChat", handleOpenFloatingChat);
     };
-  }, []); // Empty dependency - only run once on mount
+  }, [hydrated]); // Run when hydrated
 
   // Handle session changes (login/logout)
   useEffect(() => {
+    if (!hydrated) return;
+
     // If user just logged in, clear guest chat and reset state to allow new user chat
     if (session?.user && !activeChat?.id?.startsWith("guest-")) {
       // User is logged in, their flow will handle it
@@ -65,7 +68,19 @@ export function FloatingChatButtonImproved({
       // User logged out, keep guest chat if it exists
       return;
     }
-  }, [session?.user, activeChat]);
+  }, [session?.user, activeChat, hydrated]);
+
+  // Hide the floating widget entirely on admin dashboard pages
+  // IMPORTANT: This must be BELOW all hook declarations to avoid React Error #300
+  const isDashboardRoute =
+    pathname?.startsWith("/admin") || pathname?.startsWith("/dashboard");
+
+  if (isDashboardRoute) {
+    return null;
+  }
+
+  // Hide entirely until hydrated to prevent storage-related mismatch
+  if (!hydrated) return null;
 
   const handleOpenChat = async () => {
     if (activeChat) {
@@ -147,6 +162,8 @@ export function FloatingChatButtonImproved({
             setIsExpanded(true);
             sessionStorage.setItem("isChatExpanded", "true");
           }
+        } else {
+          toast.error("Could not start chat. Please try again.");
         }
         setIsInitializing(false);
         return;
@@ -206,9 +223,6 @@ export function FloatingChatButtonImproved({
       if (!newGuestId) {
         newGuestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         localStorage.setItem("guestId", newGuestId);
-        console.log("Generated new guestId:", newGuestId);
-      } else {
-        console.log("Using existing guestId:", newGuestId);
       }
 
       const startResult = await startChatAsGuest({
@@ -217,39 +231,30 @@ export function FloatingChatButtonImproved({
       });
 
       if (startResult.success && startResult.data) {
-        const chatData = startResult.data;
-        chatId = chatData.id || chatData.chatId;
-        const guestIdFromResponse = chatData.guestId || newGuestId;
-
-        console.log("Chat created successfully:", {
-          chatId,
-          guestId: guestIdFromResponse,
-          data: chatData,
-        });
-
-        localStorage.setItem("guestId", guestIdFromResponse);
-        localStorage.setItem("chatId", chatId as string);
-        localStorage.setItem("guestName", "Guest User");
+        const chatData = startResult.data.data || startResult.data;
+        const chatId = chatData.id || chatData.chatId;
 
         const chatObject: IChat = {
-          id: chatId as string,
+          id: chatId,
           status: chatData.status || "ACTIVE",
-          messages: [],
+          messages: chatData.messages || [],
           createdAt: new Date(chatData.createdAt || new Date()),
           updatedAt: new Date(chatData.updatedAt || new Date()),
+          guestId: newGuestId,
+          guestName: "Guest User",
         };
 
         setActiveChat(chatObject);
         setIsExpanded(true);
         sessionStorage.setItem("isChatExpanded", "true");
+        toast.success("Connected to support!");
       } else {
-        console.error("❌ Failed to create guest chat:", {
-          error: startResult.error,
-          result: startResult,
-        });
+        console.error("❌ Failed to create guest chat:", startResult.error);
+        toast.error(startResult.error || "Could not connect to chat server. Please check your internet or try again later.");
       }
     } catch (error: any) {
-      console.error("❌ Error starting chat:", error);
+      console.error("❌ Error starting guest chat:", error);
+      toast.error("Connection error. Please check your internet.");
     } finally {
       setIsInitializing(false);
     }
