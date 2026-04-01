@@ -58,6 +58,7 @@ export const makeApiCall = async <T>(
   // Use revalidate for GET requests during static generation, no-store for authenticated requests
   const isGetRequest = options.method === "GET" || !options.method;
   const isAuthenticatedRequest = session?.accessToken;
+  
 
   const fetchOptions: any = {
     ...options,

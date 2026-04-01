@@ -38,27 +38,73 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
         setIsLoading(pageNum === 1);
         setIsLoadingMore(pageNum > 1);
 
+        // Check if session and token are available
+        if (!session?.accessToken) {
+          console.warn("❌ No access token available, skipping chat fetch");
+          console.log("Session object:", session);
+          setChats([]);
+          setIsLoading(false);
+          setIsLoadingMore(false);
+          return;
+        }
+
+        console.log(
+          "🔍 Fetching admin chats from:",
+          `${BASE_API}/chat/admin/all-chats?page=${pageNum}&limit=50`,
+        );
+        console.log("👤 Admin ID:", session?.user?.id);
+        console.log(
+          "🔑 Token:",
+          session?.accessToken?.substring(0, 20) + "...",
+        );
+
         const response = await fetch(
           `${BASE_API}/chat/admin/all-chats?page=${pageNum}&limit=50`,
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.accessToken || ""}`,
+              Authorization: `Bearer ${session.accessToken}`,
             },
             credentials: "include",
           },
         );
 
+        console.log("📡 API Status:", response.status, response.statusText);
         const data = await response.json();
-        console.log("Admin chats response:", data);
+        console.log("📊 Admin chats response:", data);
+        console.log("📊 data.data:", data.data);
+        console.log("📊 data.meta:", data.meta);
 
         if (response.ok) {
-          // Handle both wrapped and unwrapped responses
-          const chatsData = data.data || data;
-          const chatArray = Array.isArray(chatsData)
-            ? chatsData
-            : chatsData?.data || [];
+          // Backend returns { data: [...chats], meta: {...} }
+          let chatArray = [];
+
+          console.log("🔍 Analyzing response structure:");
+          console.log("  - Is data.data array?", Array.isArray(data.data));
+          console.log("  - Is data array?", Array.isArray(data));
+          console.log("  - data.data type:", typeof data.data);
+          console.log("  - data type:", typeof data);
+          console.log("  - data.data?.data type:", typeof data.data?.data);
+
+          if (Array.isArray(data.data)) {
+            chatArray = data.data;
+            console.log("✅ Found chats in data.data");
+          } else if (Array.isArray(data)) {
+            chatArray = data;
+            console.log("✅ Found chats in data directly");
+          } else if (data.data && Array.isArray(data.data.data)) {
+            chatArray = data.data.data;
+            console.log("✅ Found chats in data.data.data");
+          } else {
+            console.log("⚠️ Could not find chats array in response");
+            console.log("  - Full data keys:", Object.keys(data));
+            if (data.data) {
+              console.log("  - data.data keys:", Object.keys(data.data));
+            }
+          }
+
+          console.log("✅ Chats parsed successfully. Count:", chatArray.length);
 
           if (chatArray.length > 0) {
             const fetchedChats: IChat[] = chatArray.map((chat: any) => ({
@@ -89,20 +135,23 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
             // Check if there are more pages
             setHasMore(fetchedChats.length === 50);
           } else {
+            console.log("⚠️ No chats found in response");
             if (pageNum === 1) {
               setChats([]);
             }
             setHasMore(false);
           }
         } else {
-          console.error("Failed to fetch chats:", data.message);
+          console.error("❌ Failed to fetch chats. Status:", response.status);
+          console.error("Error response:", data);
           if (pageNum === 1) {
             setChats([]);
           }
           setHasMore(false);
         }
       } catch (error) {
-        console.error("Failed to fetch admin chats:", error);
+        console.error("❌ Failed to fetch admin chats:", error);
+        console.error("Error details:", (error as any)?.message);
         if (pageNum === 1) {
           setChats([]);
         }
@@ -114,38 +163,59 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
     };
 
     const roleStr = String(session?.user?.role || "");
-    const isAdmin = roleStr.includes("ADMIN") || roleStr.includes("SUPER_ADMIN");
+    const isAdmin =
+      roleStr.includes("ADMIN") || roleStr.includes("SUPER_ADMIN");
 
-    if (isAdmin) {
+    console.log("🔐 Role check:", roleStr, "| Is Admin:", isAdmin);
+    console.log("🔑 Token available:", !!session?.accessToken);
+
+    if (isAdmin && session?.accessToken) {
+      console.log("🚀 Triggering fetch admin chats");
       fetchAdminChats(1);
+    } else {
+      console.log("⚠️ Skipping fetch - not admin or no token");
     }
-  }, [session?.user?.role]);
+  }, [session?.user?.role, session?.accessToken]);
 
   // Handle infinite scroll
   const handleLoadMore = () => {
-    if (!isLoadingMore && hasMore) {
+    if (!isLoadingMore && hasMore && session?.accessToken) {
       setPage((prev) => prev + 1);
       const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
       const fetchMore = async () => {
         try {
           setIsLoadingMore(true);
+
+          // Check if token is available
+          if (!session?.accessToken) {
+            console.warn("No access token available, skipping load more");
+            setIsLoadingMore(false);
+            return;
+          }
+
           const response = await fetch(
             `${BASE_API}/chat/admin/all-chats?page=${page + 1}&limit=50`,
             {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${session?.accessToken || ""}`,
+                Authorization: `Bearer ${session.accessToken}`,
               },
               credentials: "include",
             },
           );
           const data = await response.json();
           if (response.ok) {
-            const chatsData = data.data || data;
-            const chatArray = Array.isArray(chatsData)
-              ? chatsData
-              : chatsData?.data || [];
+            // Parse response - handle { data: [...], meta: {...} } format
+            let chatArray = [];
+            if (Array.isArray(data.data)) {
+              chatArray = data.data;
+            } else if (Array.isArray(data)) {
+              chatArray = data;
+            } else if (data.data && Array.isArray(data.data.data)) {
+              chatArray = data.data.data;
+            }
+
             if (chatArray.length > 0) {
               setChats((prev) => [
                 ...prev,
@@ -219,15 +289,30 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
           const existing = merged.get(c.id)!;
 
           // Deduplicate messages efficiently by ID
-          const msgMap = new Map((existing.messages || []).map((m: any) => [m.id || Date.now() + Math.random(), m]));
-          (c.messages || []).forEach((m: any) => msgMap.set(m.id || Date.now() + Math.random(), m));
+          const msgMap = new Map(
+            (existing.messages || []).map((m: any) => [
+              m.id || Date.now() + Math.random(),
+              m,
+            ]),
+          );
+          (c.messages || []).forEach((m: any) =>
+            msgMap.set(m.id || Date.now() + Math.random(), m),
+          );
           const updatedMessages = Array.from(msgMap.values());
 
           merged.set(c.id, {
             ...existing,
             messages: updatedMessages,
-            updatedAt: c.updatedAt > existing.updatedAt ? c.updatedAt : existing.updatedAt,
-            lastMessage: c.lastMessage || existing.lastMessage || (updatedMessages.length > 0 ? updatedMessages[updatedMessages.length - 1] : null),
+            updatedAt:
+              c.updatedAt > existing.updatedAt
+                ? c.updatedAt
+                : existing.updatedAt,
+            lastMessage:
+              c.lastMessage ||
+              existing.lastMessage ||
+              (updatedMessages.length > 0
+                ? updatedMessages[updatedMessages.length - 1]
+                : null),
           });
         } else {
           // Add new chat
@@ -273,7 +358,8 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
   });
 
   const roleStrCheck = String(session?.user?.role || "");
-  const isAuthorized = roleStrCheck.includes("ADMIN") || roleStrCheck.includes("SUPER_ADMIN");
+  const isAuthorized =
+    roleStrCheck.includes("ADMIN") || roleStrCheck.includes("SUPER_ADMIN");
 
   if (!isAuthorized) {
     return (
@@ -351,10 +437,11 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
                         [chat.id]: 0,
                       }));
                     }}
-                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 animate-in fade-in slide-in-from-left-4 ${isSelected
-                      ? "bg-blue-50 dark:bg-blue-900/20"
-                      : "hover:bg-gray-100 dark:hover:bg-slate-800/50 border-transparent"
-                      }`}
+                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 animate-in fade-in slide-in-from-left-4 ${
+                      isSelected
+                        ? "bg-blue-50 dark:bg-blue-900/20"
+                        : "hover:bg-gray-100 dark:hover:bg-slate-800/50 border-transparent"
+                    }`}
                     style={{ animationDelay: `${index * 20}ms` }}
                   >
                     <div className="relative w-12 h-12 shrink-0">
@@ -373,16 +460,23 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
                             {getDisplayName(chat)}
                           </h3>
                           {chat.guestId && (
-                            <span className="shrink-0 bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded-sm font-medium">Guest</span>
+                            <span className="shrink-0 bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300 text-[10px] px-1.5 py-0.5 rounded-sm font-medium">
+                              Guest
+                            </span>
                           )}
                         </div>
                         <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                          {new Date(chat.updatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                          {new Date(chat.updatedAt).toLocaleTimeString(
+                            "en-US",
+                            { hour: "numeric", minute: "2-digit" },
+                          )}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between mt-1">
-                        <p className={`text-sm truncate ${messageCount > 0 ? "font-bold text-gray-900 dark:text-gray-100" : (isSelected ? "text-gray-600 dark:text-gray-300" : "text-gray-500 dark:text-gray-400")}`}>
+                        <p
+                          className={`text-sm truncate ${messageCount > 0 ? "font-bold text-gray-900 dark:text-gray-100" : isSelected ? "text-gray-600 dark:text-gray-300" : "text-gray-500 dark:text-gray-400"}`}
+                        >
                           {chat.lastMessage?.content || "No messages yet"}
                         </p>
                         {messageCount > 0 && (
@@ -436,9 +530,9 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
               setSelectedChat((prev) =>
                 prev
                   ? {
-                    ...prev,
-                    messages: [...(prev.messages || []), message],
-                  }
+                      ...prev,
+                      messages: [...(prev.messages || []), message],
+                    }
                   : null,
               );
             }}

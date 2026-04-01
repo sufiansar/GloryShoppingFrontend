@@ -122,48 +122,64 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch all chats for admin on component mount
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const fetchAdminChats = async () => {
-      if (session?.user?.role?.includes("ADMIN")) {
-        try {
-          const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
-          const response = await fetch(`${BASE_API}/chat/admin/all-chats`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          });
+      // Ensure we have both the role and token before making the request
+      if (!session?.user?.role?.includes("ADMIN") || !session?.accessToken) {
+        return;
+      }
 
-          if (response.ok) {
-            const data = await response.json();
-            const chatsArray = data.data || (Array.isArray(data) ? data : []);
+      try {
+        const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+        const response = await fetch(`${BASE_API}/chat/admin/all-chats`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+          credentials: "include",
+        });
 
-            const chatsMap: Record<string, any> = {};
-            if (Array.isArray(chatsArray)) {
-              chatsArray.forEach((chat: any) => {
-                chatsMap[chat.id] = {
-                  id: chat.id,
-                  guestId: chat.guestId,
-                  userId: chat.userId,
-                  guestName: chat.guestName || "Guest",
-                  guestEmail: chat.guestEmail,
-                  status: chat.status || "ACTIVE",
-                  messages: chat.messages || [],
-                  createdAt: chat.createdAt,
-                  updatedAt: chat.updatedAt,
-                };
-              });
-            }
-            setChats(chatsMap);
+        if (response.ok) {
+          const data = await response.json();
+          const chatsArray = data.data || (Array.isArray(data) ? data : []);
+
+          const chatsMap: Record<string, any> = {};
+          if (Array.isArray(chatsArray)) {
+            chatsArray.forEach((chat: any) => {
+              chatsMap[chat.id] = {
+                id: chat.id,
+                guestId: chat.guestId,
+                userId: chat.userId,
+                guestName: chat.guestName || "Guest",
+                guestEmail: chat.guestEmail,
+                status: chat.status || "ACTIVE",
+                messages: chat.messages || [],
+                createdAt: chat.createdAt,
+                updatedAt: chat.updatedAt,
+              };
+            });
           }
-        } catch (error) {
-          console.error("Failed to fetch admin chats:", error);
+          setChats(chatsMap);
+        } else if (response.status === 401) {
+          console.warn("Unauthorized - token may have expired");
+          setChats({});
         }
+      } catch (error) {
+        console.error("Failed to fetch admin chats:", error);
       }
     };
 
-    fetchAdminChats();
-  }, [session?.user?.role]);
+    // Delay fetch slightly to allow session to fully initialize
+    if (session?.user?.role?.includes("ADMIN") && session?.accessToken) {
+      timeoutId = setTimeout(fetchAdminChats, 100);
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [session?.user?.role, session?.accessToken]);
 
   const addChat = (chatId: string, chat: any) => {
     setChats((prev) => ({

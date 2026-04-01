@@ -8,12 +8,25 @@ interface ApiResponse<T = any> {
   message?: string;
 }
 
-// Start a new chat as guest - No body needed, socket.io will handle guestId
-export async function startChatAsGuest() {
+// Start a new chat as guest
+export async function startChatAsGuest(guestInfo?: {
+  email?: string;
+  name?: string;
+  guestId?: string;
+}) {
   try {
+    // Generate a guestId if not provided
+    const guestId =
+      guestInfo?.guestId ||
+      `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     const response = await makeApiCall<ApiResponse>("/chat/start-guest", {
       method: "POST",
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        guestId: guestId,
+        email: guestInfo?.email || null,
+        name: guestInfo?.name || "Guest User",
+      }),
     });
 
     if (response?.success) {

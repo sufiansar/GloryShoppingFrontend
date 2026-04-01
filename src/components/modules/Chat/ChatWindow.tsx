@@ -206,30 +206,87 @@ export function ChatWindow({
       senderName = "Guest";
     }
 
-    // Ensure message is permanently persisted to DB via correct HTTP APIs
+    // Create optimistic message for UI
+    const optimisticMessage: IMessage = {
+      id: `temp-${Date.now()}`,
+      content: messageContent,
+      senderId: session?.user?.id || null,
+      guestId: guestId || null,
+      senderType: senderType,
+      senderName: senderName,
+      createdAt: new Date(),
+      isEdited: false,
+      type: "TEXT",
+      url: null,
+      isRead: false,
+    };
+
+    // Add message to UI immediately (optimistic update)
+    setMessages((prev) => [...prev, optimisticMessage]);
+    messageIdsRef.current.add(optimisticMessage.id);
+
+    // Persist message to DB via HTTP API
     try {
+      setIsLoading(true);
       if (isAdmin) {
-        await sendMessageAsAdmin(chat.id, messageContent);
-        sendAdminReply(messageContent, senderName);
+        console.log("📨 Sending admin message...");
+        const result = await sendMessageAsAdmin(chat.id, messageContent);
+        console.log("✅ Admin message sent:", result);
+        // Update optimistic message with real ID from server
+        if (result.data?.id) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === optimisticMessage.id
+                ? { ...msg, id: result.data.id }
+                : msg,
+            ),
+          );
+          messageIdsRef.current.delete(optimisticMessage.id);
+          messageIdsRef.current.add(result.data.id);
+        }
       } else {
         if (senderType === "GUEST" && guestId) {
-          await sendMessageAsGuest(chat.id, messageContent, guestId);
+          console.log("📨 Sending guest message...");
+          const result = await sendMessageAsGuest(
+            chat.id,
+            messageContent,
+            guestId,
+          );
+          console.log("✅ Guest message sent:", result);
+          if (result.data?.id) {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === optimisticMessage.id
+                  ? { ...msg, id: result.data.id }
+                  : msg,
+              ),
+            );
+            messageIdsRef.current.delete(optimisticMessage.id);
+            messageIdsRef.current.add(result.data.id);
+          }
         } else {
-          await sendMessageAsUser(chat.id, messageContent);
+          console.log("📨 Sending user message...");
+          const result = await sendMessageAsUser(chat.id, messageContent);
+          console.log("✅ User message sent:", result);
+          if (result.data?.id) {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === optimisticMessage.id
+                  ? { ...msg, id: result.data.id }
+                  : msg,
+              ),
+            );
+            messageIdsRef.current.delete(optimisticMessage.id);
+            messageIdsRef.current.add(result.data.id);
+          }
         }
-        sendMessage(messageContent, senderType);
       }
     } catch (error) {
-      console.error(
-        "❌ Failed to save message via HTTP API, falling back to pure Socket:",
-        error,
-      );
-      // Fallback
-      if (isAdmin) {
-        sendAdminReply(messageContent, senderName);
-      } else {
-        sendMessage(messageContent, senderType);
-      }
+      console.error("❌ Failed to save message via HTTP API:", error);
+      // Message is already in UI from optimistic update
+      // Keep it there even if backend fails
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -461,10 +518,7 @@ export function ChatWindow({
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              disabled={
-                isLoading ||
-                (chat.status !== "OPEN" && chat.status !== "ACTIVE")
-              }
+              disabled={isLoading}
               className="bg-slate-100/50 dark:bg-slate-800/80 border-0 focus-visible:ring-2 focus-visible:ring-rose-500/20 h-12 md:h-11 pr-10 text-[16px] rounded-2xl"
             />
             <Button
@@ -478,11 +532,7 @@ export function ChatWindow({
 
           <Button
             onClick={handleSendMessage}
-            disabled={
-              isLoading ||
-              !input.trim() ||
-              (chat.status !== "OPEN" && chat.status !== "ACTIVE")
-            }
+            disabled={isLoading || !input.trim()}
             className="text-white shadow-xl hover:scale-105 active:scale-95 transition-all shrink-0 h-12 w-12 rounded-2xl border-0"
             style={{
               background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)`,

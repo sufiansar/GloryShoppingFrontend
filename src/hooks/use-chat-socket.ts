@@ -64,6 +64,21 @@ export function useChatSocket(chatId: string | null, events?: SocketEvents) {
       }
     });
 
+    // For admins - receive guest/user messages
+    newSocket.on("guest-message", (message) => {
+      console.log("📨 Guest message received by admin:", message);
+      if (events?.onMessageReceived) {
+        events.onMessageReceived(message);
+      }
+    });
+
+    newSocket.on("user-message", (message) => {
+      console.log("📨 User message received by admin:", message);
+      if (events?.onMessageReceived) {
+        events.onMessageReceived(message);
+      }
+    });
+
     newSocket.on("user-typing", (data) => {
       console.log("User typing:", data);
       if (events?.onUserTyping) {
