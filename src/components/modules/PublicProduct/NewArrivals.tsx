@@ -19,7 +19,7 @@ export default function BestProductSlider() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const result = await getAllProducts("");
+        const result = await getAllProducts("limit=15&sortBy=createdAt&sortOrder=desc");
         setProducts(result?.data || []);
       } catch {
         setError(true);
@@ -59,7 +59,7 @@ export default function BestProductSlider() {
           New Arrivals
         </h2>
 
-        <Link className="text-pink-500 border-pink-500" href="/products">
+        <Link className="text-pink-500 border-pink-500" href="/product">
           <Button variant="outline" className="gap-2 ">
             See More <ChevronRight className="h-4 w-4" />
           </Button>

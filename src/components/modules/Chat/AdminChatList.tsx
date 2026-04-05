@@ -19,9 +19,8 @@ interface AdminChatListProps {
 
 export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
   const { data: session } = useSession();
-  const { chats: globalChats, isConnected } = useSocket();
-  const [chats, setChats] = useState<IChat[]>([]);
-  const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
+  const { chats: globalChats, isConnected, setChatsBulk } = useSocket();
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [newMessagesCount, setNewMessagesCount] = useState<
     Record<string, number>
@@ -40,7 +39,7 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
         setIsLoadingMore(pageNum > 1);
 
         console.log("🔍 Fetching admin chats via server action, page:", pageNum);
-        
+
         const result = await getAllChatsForAdmin(pageNum, PAGE_LIMIT);
 
         if (result.success && result.data) {
@@ -69,27 +68,29 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
             },
           }));
 
-          if (pageNum === 1) {
-            setChats(fetchedChats);
-          } else {
-            setChats((prev) => [...prev, ...fetchedChats]);
-          }
+          const getSortTime = (chat: IChat) => {
+            const times = [
+              new Date(chat.updatedAt).getTime(),
+              new Date(chat.createdAt).getTime(),
+              chat.lastMessage?.createdAt ? new Date(chat.lastMessage.createdAt).getTime() : 0,
+              ...(chat.messages || []).map(m => new Date(m.createdAt).getTime())
+            ];
+            return Math.max(...times);
+          };
+
+          const chatsMap: Record<string, any> = {};
+          fetchedChats.forEach(c => {
+            chatsMap[c.id] = c;
+          });
+
+          setChatsBulk(chatsMap, pageNum > 1);
 
           // Check if there are more pages
           setHasMore(chatArray.length === PAGE_LIMIT);
         } else {
-          console.error("❌ Failed to fetch chats:", result.error);
-          if (pageNum === 1) {
-            setChats([]);
-          }
           setHasMore(false);
         }
       } catch (error) {
-        console.error("❌ Failed to fetch admin chats:", error);
-        console.error("Error details:", (error as any)?.message);
-        if (pageNum === 1) {
-          setChats([]);
-        }
         setHasMore(false);
       } finally {
         setIsLoading(false);
@@ -104,13 +105,50 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
     console.log("🔐 Role check:", roleStr, "| Is Admin:", isAdmin);
     console.log("🔑 Token available:", !!session?.accessToken);
 
+    let pollInterval: NodeJS.Timeout;
+
     if (isAdmin && session?.accessToken) {
       console.log("🚀 Triggering fetch admin chats");
       fetchAdminChats(1);
+
+      // High-reliability fallback polling (every 15s)
+      pollInterval = setInterval(() => {
+        console.log("🔄 Background polling for new chats...");
+        fetchAdminChats(1);
+      }, 15000);
     } else {
       console.log("⚠️ Skipping fetch - not admin or no token");
     }
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
   }, [session?.user?.role, session?.accessToken]);
+
+  // Listen for real-time chat notifications to update unread badges
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleChatNotification = (event: any) => {
+      const detail = event.detail;
+      const chatId = detail.chatId;
+
+      console.log("🔔 AdminChatList received notification for chat:", chatId);
+
+      // Only increment if we aren't currently viewing this chat
+      // OR if we don't have a selected chat at all
+      if (chatId && chatId !== selectedChatId) {
+        setNewMessagesCount((prev) => ({
+          ...prev,
+          [chatId]: (prev[chatId] || 0) + 1,
+        }));
+      }
+    };
+
+    window.addEventListener("chatNotification", handleChatNotification);
+    return () =>
+      window.removeEventListener("chatNotification", handleChatNotification);
+  }, [selectedChatId]);
 
   // Handle infinite scroll
   const handleLoadMore = () => {
@@ -128,27 +166,31 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
             const chatArray = Array.isArray(rawData) ? rawData : [];
 
             if (chatArray.length > 0) {
-              setChats((prev) => [
-                ...prev,
-                ...chatArray.map((chat: any) => ({
-                  id: chat.id,
-                  userId: chat.userId || null,
-                  guestId: chat.guestId || null,
-                  guestName: chat.guestName || null,
-                  guestEmail: chat.guestEmail || null,
-                  status: chat.status || "ACTIVE",
-                  messages: chat.messages || [],
-                  createdAt: new Date(chat.createdAt || new Date()),
-                  updatedAt: new Date(chat.updatedAt || new Date()),
-                  lastMessage: chat.lastMessage || null,
-                  senderInfo: chat.senderInfo || {
-                    type: chat.guestId ? "GUEST" : "USER",
-                    name: chat.guestName || "Guest",
-                    email: chat.guestEmail || null,
-                    id: chat.guestId || chat.userId || "",
-                  },
-                })),
-              ]);
+              const fetchedChats = chatArray.map((chat: any) => ({
+                id: chat.id,
+                userId: chat.userId || null,
+                guestId: chat.guestId || null,
+                guestName: chat.guestName || null,
+                guestEmail: chat.guestEmail || null,
+                status: chat.status || "ACTIVE",
+                messages: chat.messages || [],
+                createdAt: new Date(chat.createdAt || new Date()),
+                updatedAt: new Date(chat.updatedAt || new Date()),
+                lastMessage: chat.lastMessage || null,
+                senderInfo: chat.senderInfo || {
+                  type: chat.guestId ? "GUEST" : "USER",
+                  name: chat.guestName || "Guest",
+                  email: chat.guestEmail || null,
+                  id: chat.guestId || chat.userId || "",
+                },
+              }));
+
+              const chatsMap: Record<string, any> = {};
+              fetchedChats.forEach(c => {
+                chatsMap[c.id] = c;
+              });
+              setChatsBulk(chatsMap, true);
+              
               setHasMore(chatArray.length === PAGE_LIMIT);
             } else {
               setHasMore(false);
@@ -165,77 +207,44 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
     }
   };
 
-  // Update local chats from global socket context (real-time updates)
-  useEffect(() => {
-    const chatArray: IChat[] = Object.values(globalChats)
-      .map((chat: any) => ({
-        id: chat.id,
-        userId: chat.userId || null,
-        guestId: chat.guestId || null,
-        guestName: chat.guestName || null,
-        guestEmail: chat.guestEmail || null,
-        status: chat.status || "ACTIVE",
-        messages: chat.messages || [],
-        createdAt: new Date(chat.createdAt || new Date()),
-        updatedAt: new Date(chat.updatedAt || new Date()),
-        lastMessage: chat.lastMessage || null,
-        senderInfo: chat.senderInfo || {
-          type: chat.guestId ? "GUEST" : "USER",
-          name: chat.guestName || "Guest",
-          email: chat.guestEmail || null,
-          id: chat.guestId || chat.userId || "",
-        },
-      }))
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      );
-
-    // Merge fetched chats with real-time socket updates
-    setChats((prevChats) => {
-      const merged = new Map(prevChats.map((c) => [c.id, c]));
-      chatArray.forEach((c) => {
-        if (merged.has(c.id)) {
-          // Update existing chat with new messages safely
-          const existing = merged.get(c.id)!;
-
-          // Deduplicate messages efficiently by ID
-          const msgMap = new Map(
-            (existing.messages || []).map((m: any) => [
-              m.id || Date.now() + Math.random(),
-              m,
-            ]),
-          );
-          (c.messages || []).forEach((m: any) =>
-            msgMap.set(m.id || Date.now() + Math.random(), m),
-          );
-          const updatedMessages = Array.from(msgMap.values());
-
-          merged.set(c.id, {
-            ...existing,
-            messages: updatedMessages,
-            updatedAt:
-              c.updatedAt > existing.updatedAt
-                ? c.updatedAt
-                : existing.updatedAt,
-            lastMessage:
-              c.lastMessage ||
-              existing.lastMessage ||
-              (updatedMessages.length > 0
-                ? updatedMessages[updatedMessages.length - 1]
-                : null),
-          });
-        } else {
-          // Add new chat
-          merged.set(c.id, c);
-        }
-      });
-      return Array.from(merged.values()).sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      );
+  // Prepare display-ready chats from global state
+  const chats: IChat[] = Object.values(globalChats)
+    .map((chat: any) => ({
+      id: chat.id,
+      userId: chat.userId || null,
+      guestId: chat.guestId || null,
+      guestName: chat.guestName || null,
+      guestEmail: chat.guestEmail || null,
+      status: chat.status || "ACTIVE",
+      messages: chat.messages || [],
+      createdAt: new Date(chat.createdAt || new Date()),
+      updatedAt: new Date(chat.updatedAt || new Date()),
+      lastMessage: chat.lastMessage || null,
+      senderInfo: chat.senderInfo || {
+        type: chat.guestId ? "GUEST" : "USER",
+        name: chat.guestName || "Guest",
+        email: chat.guestEmail || null,
+        id: chat.guestId || chat.userId || "",
+      },
+    }))
+    .sort((a, b) => {
+      const getSafeTime = (date: any) => {
+        const d = new Date(date);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      };
+      const getSortTime = (chat: IChat) => {
+        const times = [
+          getSafeTime(chat.updatedAt),
+          getSafeTime(chat.createdAt),
+          chat.lastMessage?.createdAt ? getSafeTime(chat.lastMessage.createdAt) : 0,
+          ...(chat.messages || []).map(m => getSafeTime(m?.createdAt))
+        ];
+        return Math.max(...times);
+      };
+      return getSortTime(b) - getSortTime(a);
     });
-  }, [globalChats]);
+
+  const activeChat = selectedChatId ? chats.find(c => c.id === selectedChatId) : null;
 
   // Helper function to get display name - first 5 words
   const getDisplayName = (chat: IChat): string => {
@@ -335,24 +344,23 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
           ) : (
             <div className="space-y-1 p-3">
               {filteredChats.map((chat, index) => {
-                const isSelected = selectedChat?.id === chat.id;
+                const isSelected = selectedChatId === chat.id;
                 const messageCount = newMessagesCount[chat.id] || 0;
 
                 return (
                   <button
                     key={chat.id}
                     onClick={() => {
-                      setSelectedChat(chat);
+                      setSelectedChatId(chat.id);
                       setNewMessagesCount((prev) => ({
                         ...prev,
                         [chat.id]: 0,
                       }));
                     }}
-                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 animate-in fade-in slide-in-from-left-4 ${
-                      isSelected
+                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 animate-in fade-in slide-in-from-left-4 ${isSelected
                         ? "bg-blue-50 dark:bg-blue-900/20"
                         : "hover:bg-gray-100 dark:hover:bg-slate-800/50 border-transparent"
-                    }`}
+                      }`}
                     style={{ animationDelay: `${index * 20}ms` }}
                   >
                     <div className="relative w-12 h-12 shrink-0">
@@ -391,7 +399,7 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
                           {chat.lastMessage?.content || "No messages yet"}
                         </p>
                         {messageCount > 0 && (
-                          <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0 ml-2 shadow-xs">
+                          <div className="w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0 ml-2 shadow-sm ring-2 ring-white dark:ring-slate-900 animate-in zoom-in duration-300">
                             {messageCount}
                           </div>
                         )}
@@ -432,21 +440,11 @@ export function AdminChatList({ onlineChats = [] }: AdminChatListProps) {
 
       {/* Chat Window Container */}
       <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden min-w-0">
-        {selectedChat ? (
+        {activeChat ? (
           <ChatWindow
-            key={selectedChat.id}
-            chat={selectedChat}
+            key={activeChat.id}
+            chat={activeChat}
             isAdmin={true}
-            onMessageSent={(message) => {
-              setSelectedChat((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      messages: [...(prev.messages || []), message],
-                    }
-                  : null,
-              );
-            }}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-4">

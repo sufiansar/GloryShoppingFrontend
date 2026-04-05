@@ -1,165 +1,136 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import io, { Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
 import { storage } from "@/lib/storage-utils";
-import { getSocketUrl } from "@/lib/url-utils";
+import { useSocket } from "@/providers/SocketProvider";
 
 interface SocketEvents {
   onMessageReceived?: (message: any) => void;
   onUserTyping?: (data: any) => void;
   onUserStopTyping?: (data: any) => void;
   onAdminReply?: (message: any) => void;
+  onNotification?: (data: any) => void;
   onError?: (error: any) => void;
 }
 
-export function useChatSocket(chatId: string | null, events?: SocketEvents) {
+export function useChatSocket(
+  chatId: string | null, 
+  events?: SocketEvents,
+  config?: { tempGuestId?: string | null; tempGuestName?: string | null }
+) {
   const { data: session } = useSession();
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const { socket, isConnected: globalIsConnected } = useSocket();
+  const eventsRef = useRef<SocketEvents | undefined>(events);
   const [isTyping, setIsTyping] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const BASE_URL = getSocketUrl(process.env.NEXT_PUBLIC_BASE_API);
+  // Keep eventsRef updated with the latest callbacks without triggering useEffect
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   useEffect(() => {
-    if (!chatId) {
-      console.log("No chatId, skipping socket connection");
+    if (!socket || !chatId) {
       return;
     }
 
-    console.log("Initializing socket with chatId:", chatId);
-    console.log("BASE_URL:", BASE_URL);
+    console.log("🔗 Connecting chat room listeners for:", chatId);
 
-    const guestId = typeof window !== "undefined" ? storage.local.get("guestId") : null;
+    // Join room - only if connected
+    if (socket.connected) {
+      console.log("🔑 Joining chat room:", chatId);
+      socket.emit("join-chat", { chatId });
+    } else {
+      const handleConnect = () => {
+        console.log("🔑 Socket connected, now joining chat room:", chatId);
+        socket.emit("join-chat", { chatId });
+      };
+      socket.once("connect", handleConnect);
+      // Cleanup listener if component unmounts before connect
+      return () => {
+        socket.off("connect", handleConnect);
+        console.log("🔌 Removing chat room listeners for:", chatId);
+        if (socket.connected) socket.emit("leave-chat", { chatId });
+      };
+    }
 
-    const newSocket = io(BASE_URL, {
-      auth: {
-        userId: session?.user?.id,
-        guestId: guestId,
-        role: session?.user?.role || "GUEST",
-      },
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    // Consolidate Message Receivers to avoid duplication
+    const handleMessage = (message: any) => {
+      // Basic validation: ensure message belongs to THIS chat
+      if (message.chatId && message.chatId !== chatId) return;
 
-    newSocket.on("connect", () => {
-      console.log("✅ Socket connected:", newSocket.id);
-      setIsConnected(true);
-      newSocket.emit("join-chat", { chatId });
-      console.log("Joined chat room:", chatId);
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log("❌ Socket disconnected");
-      setIsConnected(false);
-    });
-
-    newSocket.on("message-received", (message) => {
-      console.log("📨 Message received:", message);
-      if (events?.onMessageReceived) {
-        events.onMessageReceived(message);
-      }
-    });
-
-    // For admins - receive guest/user messages
-    newSocket.on("guest-message", (message) => {
-      console.log("📨 Guest message received by admin:", message);
-      if (events?.onMessageReceived) {
-        events.onMessageReceived(message);
-      }
-    });
-
-    newSocket.on("user-message", (message) => {
-      console.log("📨 User message received by admin:", message);
-      if (events?.onMessageReceived) {
-        events.onMessageReceived(message);
-      }
-    });
-
-    newSocket.on("user-typing", (data) => {
-      console.log("User typing:", data);
-      if (events?.onUserTyping) {
-        events.onUserTyping(data);
-      }
-    });
-
-    newSocket.on("user-stop-typing", (data) => {
-      console.log("User stop typing:", data);
-      if (events?.onUserStopTyping) {
-        events.onUserStopTyping(data);
-      }
-    });
-
-    newSocket.on("admin-reply", (message) => {
-      console.log("Admin reply:", message);
-      if (events?.onAdminReply) {
-        events.onAdminReply(message);
-      }
-    });
-
-    newSocket.on("error", (error) => {
-      console.error("❌ Socket error:", error);
-      if (events?.onError) {
-        events.onError(error);
-      }
-    });
-
-    socketRef.current = newSocket;
-    setSocket(newSocket);
-
-    return () => {
-      if (newSocket) {
-        newSocket.emit("leave-chat", { chatId });
-        newSocket.disconnect();
-        console.log("Socket disconnected on cleanup");
+      console.log("📨 Message received in hook:", message);
+      if (eventsRef.current?.onMessageReceived) {
+        eventsRef.current.onMessageReceived(message);
       }
     };
-  }, [chatId, BASE_URL]);
+
+    // Listen only to core events
+    socket.on("message-received", handleMessage);
+    socket.on("admin-reply", handleMessage);
+
+    // Typing Status
+    const handleTyping = (data: any) => {
+      if (data.chatId === chatId && eventsRef.current?.onUserTyping) eventsRef.current.onUserTyping(data);
+    };
+    const handleStopTyping = (data: any) => {
+      if (data.chatId === chatId && eventsRef.current?.onUserStopTyping) eventsRef.current.onUserStopTyping(data);
+    };
+
+    socket.on("user-typing", handleTyping);
+    socket.on("user-stop-typing", handleStopTyping);
+
+    // Notifications
+    const handleNotification = (data: any) => {
+      if (eventsRef.current?.onNotification) eventsRef.current.onNotification(data);
+    };
+    socket.on("notification-received", handleNotification);
+
+    return () => {
+      console.log("🔌 Removing chat room listeners for:", chatId);
+      socket.emit("leave-chat", { chatId });
+
+      socket.off("message-received", handleMessage);
+      socket.off("guest-message", handleMessage);
+      socket.off("user-message", handleMessage);
+      socket.off("admin-reply", handleMessage);
+      socket.off("user-typing", handleTyping);
+      socket.off("user-stop-typing", handleStopTyping);
+      socket.off("notification-received", handleNotification);
+    };
+  }, [socket, chatId]); // REMOVED events from dependencies
 
   const sendMessage = useCallback(
     (content: string, senderType: "USER" | "GUEST" | "ADMIN" = "USER") => {
       if (!socket || !chatId) {
-        console.error("Socket not connected or no chatId", {
-          socket: !!socket,
-          chatId,
-        });
+        console.error("Socket not connected or no chatId");
         return;
       }
 
-      const guestId = typeof window !== "undefined" ? storage.local.get("guestId") : null;
+      const guestId = config?.tempGuestId || (typeof window !== "undefined" ? storage.local.get("guestId") : null);
       const messagePayload = {
         chatId,
         content,
         senderType,
+        socketId: socket.id,
         guestId: (senderType === "GUEST" || !session?.user) ? guestId : null,
-        senderName:
-          session?.user?.name || (typeof window !== "undefined" ? storage.local.get("guestName") : null) || "User",
+        senderName: session?.user?.name || config?.tempGuestName || (typeof window !== "undefined" ? storage.local.get("guestName") : null) || "Guest",
         guestEmail: typeof window !== "undefined" ? storage.local.get("guestEmail") : null,
       };
 
       console.log("📤 Sending message via Socket.io:", messagePayload);
+
+      // FIXED: Only emit ONE core event. 
+      // If the backend needs BOTH events, it should be fixed there, 
+      // but usually 'send-message' is a unified entry point.
       socket.emit("send-message", messagePayload);
-      
-      // Also emit specialized event for guest messages if needed by backend
-      if (senderType === "GUEST" || !session?.user) {
-        socket.emit("guest-message", messagePayload);
-      }
     },
-    [socket, chatId, session?.user, session?.user?.name],
+    [socket, chatId, session?.user],
   );
 
   const sendAdminReply = useCallback(
     (content: string, adminName: string = "Admin") => {
-      if (!socket || !chatId) {
-        console.error("Socket not connected or no chatId for admin reply", {
-          socket: !!socket,
-          chatId,
-        });
-        return;
-      }
+      if (!socket || !chatId) return;
 
       const replyPayload = {
         chatId,
@@ -173,38 +144,31 @@ export function useChatSocket(chatId: string | null, events?: SocketEvents) {
     [socket, chatId],
   );
 
-  const joinAdminRoom = useCallback(() => {
-    if (!socket) return;
-    socket.emit("join-admin-room");
-  }, [socket]);
-
   const sendTyping = useCallback(() => {
     if (!socket || !chatId || isTyping) return;
 
     setIsTyping(true);
     socket.emit("typing", {
       chatId,
-      senderName:
-        session?.user?.name || (typeof window !== "undefined" ? storage.local.get("guestName") : null) || "User",
+      senderName: session?.user?.name || config?.tempGuestName || (typeof window !== "undefined" ? storage.local.get("guestName") : null) || "User",
     });
 
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit("stop-typing", { chatId });
       setIsTyping(false);
-    }, 1000);
-  }, [socket, chatId, session?.user?.name, isTyping]);
+    }, 1500);
+  }, [socket, chatId, session?.user, isTyping]);
 
   return {
     socket,
-    isConnected,
+    isConnected: globalIsConnected,
     isTyping,
     sendMessage,
     sendAdminReply,
     sendTyping,
-    joinAdminRoom,
+    socketId: socket?.id
   };
 }
+

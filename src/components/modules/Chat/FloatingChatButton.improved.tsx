@@ -1,23 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { MessageCircle, X, Heart, Loader2, AlertCircle } from "lucide-react";
+import logo from "@/components/Assets/Logo.png";
+import { Button } from "@/components/ui/button";
+import { LogIn, UserPlus, Ghost, AlertTriangle, MessageCircle, X, Heart, Loader2, RefreshCcw, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ChatWindow } from "./ChatWindow";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { storage } from "@/lib/storage-utils";
 import { IChat, IMessage } from "@/types/chat.interface";
+import { useSocket } from "@/providers/SocketProvider";
 import {
   getChatMessagesAsGuest,
-  getChatMessagesAsUser,
   startChatAsUser,
   startChatAsGuest,
   getAllUserMessages,
 } from "@/action/chat/chat.action";
 import { toast } from "sonner";
-import logo from "@/components/Assets/Logo.png";
 
 interface FloatingChatButtonProps {
   displayName?: string;
@@ -27,333 +29,409 @@ export function FloatingChatButtonImproved({
   displayName = "Glory Chat Support",
 }: FloatingChatButtonProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [activeChat, setActiveChat] = useState<IChat | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
-  const { data: session } = useSession(); // Add session hook for logged-in users
+  const [view, setView] = useState<"selection" | "guest-form" | "chat">("selection");
+  const [tempGuestId, setTempGuestId] = useState<string | null>(null);
+  const [tempGuestName, setTempGuestName] = useState<string>("Guest User");
+  const router = useRouter();
+  const { setEphemeralGuestId } = useSocket();
+  
+  const { data: session, status } = useSession(); 
   const pathname = usePathname();
-
   const hydrated = useHydrated();
 
-  // Listen for navbar chat button click and auto-open based on session storage
-  useEffect(() => {
-    if (!hydrated) return;
+  // STABILITY REFS: These track logic status WITHOUT triggering re-renders or function re-definitions
+  const isInitializingRef = useRef(false);
+  const activeChatRef = useRef<IChat | null>(null);
+  const initializationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sync activeChatRef with state for use inside stable useCallback
+  useEffect(() => { activeChatRef.current = activeChat; }, [activeChat]);
+
+  // STABLE HANDLER: handleOpenChat
+  const handleOpenChat = useCallback(async (isAutoOpenFromAnotherTab = false) => {
+    // 1. INSTANT UI FEEDBACK (especially for Cross-Tab Sync)
+    if (isAutoOpenFromAnotherTab) setIsExpanded(true);
+
+    // 2. WAIT FOR SESSION STABILITY
+    if (status === "loading") {
+      console.log("⏳ Session loading, waiting...");
+      return;
+    }
+
+    // 3. DUP PREVENTION
+    if (isInitializingRef.current) return;
     
-    const handleOpenFloatingChat = () => {
-      console.log("📱 Opening floating chat from navbar");
-      handleOpenChat();
-    };
-
-    window.addEventListener("openFloatingChat", handleOpenFloatingChat);
-
-    // Auto-open if it was expanded before reload
-    if (storage.session.get("isChatExpanded") === "true") {
-      handleOpenChat();
-    }
-
-    return () => {
-      window.removeEventListener("openFloatingChat", handleOpenFloatingChat);
-    };
-  }, [hydrated]); // Run when hydrated
-
-  // Handle session changes (login/logout)
-  useEffect(() => {
-    if (!hydrated) return;
-
-    // If user just logged in, clear guest chat and reset state to allow new user chat
-    if (session?.user && !activeChat?.id?.startsWith("guest-")) {
-      // User is logged in, their flow will handle it
-      return;
-    }
-
-    // If user logged out, reset chat
-    if (!session?.user && activeChat) {
-      // User logged out, keep guest chat if it exists
-      return;
-    }
-  }, [session?.user, activeChat, hydrated]);
-
-  // Hide the floating widget entirely on admin dashboard pages
-  // IMPORTANT: This must be BELOW all hook declarations to avoid React Error #300
-  const isDashboardRoute =
-    pathname?.startsWith("/admin") || pathname?.startsWith("/dashboard");
-
-  if (isDashboardRoute) {
-    return null;
-  }
-
-  // Hide entirely until hydrated to prevent storage-related mismatch
-  if (!hydrated) return null;
-
-  const handleOpenChat = async () => {
-    if (activeChat) {
+    if (activeChatRef.current && activeChatRef.current.id) {
+      setView("chat");
       setIsExpanded(true);
-      storage.session.set("isChatExpanded", "true");
+      storage.local.set("isChatExpanded", "true");
       return;
     }
 
+    console.log("🚀 Establishing Stable Chat Connection...", { status, userId: session?.user?.id });
+    isInitializingRef.current = true;
     setIsInitializing(true);
 
+    // Cleanup any existing timeout
+    if (initializationTimeoutRef.current) clearTimeout(initializationTimeoutRef.current);
+    // Safety timeout: if it takes more than 15s, something is wrong
+    initializationTimeoutRef.current = setTimeout(() => {
+      if (isInitializingRef.current && !activeChatRef.current) {
+        console.error("🕒 Chat initialization timed out");
+        setIsInitializing(false);
+        isInitializingRef.current = false;
+      }
+    }, 15000);
+
     try {
-      // 1. Authenticated User Flow (PRIORITY)
+      // --- Flow A: Logged-in User ---
       if (session?.user) {
         let userChatId = storage.local.get(`userChatId_${session.user.id}`);
-
-        if (userChatId) {
-          console.log("📖 Loading existing User chat:", userChatId);
-            const result = await getAllUserMessages();
-
-            if (result.success && result.data) {
-              const messagesData = result.data.data || result.data || [];
-
-              const messages: IMessage[] = messagesData.map((msg: any) => ({
-                id: msg.id,
-                content: msg.content,
-                senderId: msg.senderId || null,
-                guestId: null,
-                senderType: msg.senderType,
-                senderName: msg.senderName || (msg.senderType === "ADMIN" ? "Support" : "You"),
-                createdAt: new Date(msg.createdAt),
-                isEdited: false,
-                type: msg.type || "TEXT",
-                url: msg.url || null,
-                isRead: msg.isRead || false,
-              }));
-
-              // Use the latest chatId for socket connection
-              const latestChatId = messagesData.length > 0 ? messagesData[messagesData.length - 1].chatId : null;
-
-              const chatObject: IChat = {
-                id: (latestChatId as string) || `user-${session.user.id}`,
-                status: "ACTIVE",
-                messages: messages,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              };
-
+        
+        // Always try to fetch first if we are logged in
+        const result = await getAllUserMessages();
+        if (result.success && result.data) {
+          const rawData = result.data.data || result.data || [];
+          const messagesData = Array.isArray(rawData) ? rawData : [];
+          
+          if (messagesData.length > 0 || userChatId) {
+            const messages: IMessage[] = messagesData.map((msg: any) => ({
+              id: msg.id, content: msg.content, senderId: msg.senderId || null, guestId: null, senderType: msg.senderType, senderName: msg.senderName || (msg.senderType === "ADMIN" ? "Support" : "You"), createdAt: new Date(msg.createdAt), isEdited: false, type: msg.type || "TEXT", url: msg.url || null, isRead: msg.isRead || false,
+            }));
+            const latestChatId = messagesData.length > 0 ? messagesData[messagesData.length - 1].chatId : (userChatId as string);
+            
+            if (latestChatId) {
+              const chatObject: IChat = { id: latestChatId, status: "ACTIVE", messages: messages, createdAt: new Date(), updatedAt: new Date() };
               setActiveChat(chatObject);
-              setIsExpanded(true);
-              storage.session.set("isChatExpanded", "true");
-              setIsInitializing(false);
+              setView("chat");
+              setIsExpanded(true); 
+              storage.local.set("isChatExpanded", "true");
+              storage.local.set(`userChatId_${session.user.id}`, latestChatId);
               return;
             }
           }
-
-        // Start a new User chat
-        console.log("🆕 Starting new chat for logged-in User");
-        const startResult = await startChatAsUser({
-          subject: "Support Request",
-          initialMessage: "Hi, I need some help.",
-        });
-
+        }
+        
+        // No existing messages, start new chat
+        const startResult = await startChatAsUser({ subject: "Support", initialMessage: "Hi" });
         if (startResult.success && startResult.data) {
           const chatData = startResult.data;
-          userChatId = chatData.id || chatData.chatId;
-
-          if (userChatId) {
-            storage.local.set(
-              `userChatId_${session.user.id}`,
-              userChatId as string,
-            );
-
-            const chatObject: IChat = {
-              id: userChatId as string,
-              status: chatData.status || "ACTIVE",
-              messages: [],
-              createdAt: new Date(chatData.createdAt || new Date()),
-              updatedAt: new Date(chatData.updatedAt || new Date()),
-            };
-
-            setActiveChat(chatObject);
+          const newId = chatData.id || chatData.chatId;
+          if (newId) {
+            storage.local.set(`userChatId_${session.user.id}`, newId as string);
+            setActiveChat({ id: newId as string, status: "ACTIVE", messages: [], createdAt: new Date(), updatedAt: new Date() });
+            setView("chat");
             setIsExpanded(true);
-            storage.session.set("isChatExpanded", "true");
+            storage.local.set("isChatExpanded", "true");
+            return;
           }
-        } else {
-          toast.error("Could not start chat. Please try again.");
         }
-        setIsInitializing(false);
+      } 
+      // --- Flow B: Guest User (Selection Screen) ---
+      else {
+        // Just show selection screen, don't initialize API yet
+        setView("selection");
+        setIsExpanded(true);
+        storage.local.set("isChatExpanded", "true");
         return;
       }
-
-      // 2. Guest User Flow
-      let guestId = storage.local.get("guestId");
-      let chatId = storage.local.get("chatId");
-
-      // If we have existing chat, just load it
-      if (chatId && guestId) {
-        console.log("📖 Loading existing chat:", chatId);
-
-        const messagesResult = await getChatMessagesAsGuest(
-          chatId as string,
-          guestId as string,
-        );
-        const messagesData = messagesResult.success
-          ? messagesResult.data || []
-          : [];
-
-        // Convert API response to IMessage format
-        const messages: IMessage[] = messagesData.map((msg: any) => ({
-          id: msg.id,
-          content: msg.content,
-          senderId: msg.senderId || null,
-          guestId: msg.guestId || null,
-          senderType: msg.senderType,
-          senderName: msg.senderName || "Support",
-          createdAt: new Date(msg.createdAt),
-          isEdited: false,
-          type: msg.type || "TEXT",
-          url: msg.url || null,
-          isRead: msg.isRead || false,
-        }));
-
-        const chatObject: IChat = {
-          id: chatId as string,
-          status: "ACTIVE",
-          messages: messages,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        console.log("✅ Chat loaded with", messages.length, "messages");
-        setActiveChat(chatObject);
-        setIsExpanded(true);
-        storage.session.set("isChatExpanded", "true");
-        return;
-      }
-
-      // Create new chat
-      console.log("🆕 Starting new chat for Guest");
-      
-      // Generate or retrieve guestId
-      let newGuestId = storage.local.get("guestId");
-      if (!newGuestId) {
-        newGuestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        storage.local.set("guestId", newGuestId);
-      }
-
-      const startResult = await startChatAsGuest({
-        guestId: newGuestId,
-        name: "Guest User",
-      });
-
-      if (startResult.success && startResult.data) {
-        const chatData = startResult.data.data || startResult.data;
-        const chatId = chatData.id || chatData.chatId;
-
-        // Save chatId for persistence
-        if (chatId) {
-          storage.local.set("chatId", chatId);
-        }
-
-        const chatObject: IChat = {
-          id: chatId,
-          status: chatData.status || "ACTIVE",
-          messages: chatData.messages || [],
-          createdAt: new Date(chatData.createdAt || new Date()),
-          updatedAt: new Date(chatData.updatedAt || new Date()),
-          guestId: newGuestId,
-          guestName: "Guest User",
-        };
-
-        setActiveChat(chatObject);
-        setIsExpanded(true);
-        storage.session.set("isChatExpanded", "true");
-        toast.success("Connected to support!");
-      } else {
-        console.error("❌ Failed to create guest chat:", startResult.error);
-        toast.error(startResult.error || "Could not connect to chat server. Please check your internet or try again later.");
-      }
-    } catch (error: any) {
-      console.error("❌ Error starting guest chat:", error);
-      toast.error("Connection error. Please check your internet.");
+      throw new Error("Initialization failed");
+    } catch (error) {
+      console.error("❌ Initialization failed:", error);
+      toast.error("Support chat is temporarily unavailable.");
     } finally {
       setIsInitializing(false);
+      isInitializingRef.current = false;
+      if (initializationTimeoutRef.current) clearTimeout(initializationTimeoutRef.current);
+    }
+  }, [session?.user?.id, status]);
+
+  // STABLE SYNC: Ensure session status is respected
+  useEffect(() => {
+    if (status === "authenticated" && !activeChatRef.current && storage.local.get("isChatExpanded") === "true") {
+      handleOpenChat();
+    }
+  }, [status, handleOpenChat]);
+
+  // Dedicated function for guest chat start (called from UI selection)
+  const handleStartGuestChat = async () => {
+    if (isInitializing) return;
+    
+    setIsInitializing(true);
+    isInitializingRef.current = true;
+
+    try {
+      const newGuestId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log("🆕 Creating new ephemeral guest session:", newGuestId);
+
+      const startResult = await startChatAsGuest({ guestId: newGuestId, name: "Guest" });
+      if (startResult.success && startResult.data) {
+        const chatData = startResult.data.data || startResult.data;
+        const newId = chatData.id || chatData.chatId;
+        if (newId) {
+          setTempGuestId(newGuestId);
+          setEphemeralGuestId(newGuestId);
+          setTempGuestName("Guest");
+          
+          // NEW: Backup ephemeral Guest ID to session storage for the current tab
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("glory_temp_guest_id", newGuestId);
+          }
+
+          setActiveChat({ 
+            id: newId, 
+            status: "ACTIVE", 
+            messages: [], 
+            createdAt: new Date(), 
+            updatedAt: new Date(), 
+            guestId: newGuestId 
+          });
+          setView("chat");
+          return;
+        }
+      }
+      throw new Error("Guest initialization failed");
+    } catch (error) {
+      console.error("❌ Guest initialization failed:", error);
+      toast.error("Failed to start guest chat. Please try again.");
+    } finally {
+      setIsInitializing(false);
+      isInitializingRef.current = false;
     }
   };
 
-  // BRAND DESIGN TOKENS
+
+  // Tab Sync & Events
+  useEffect(() => {
+    if (!hydrated) return;
+    const handleOpenFloatingChat = () => handleOpenChat();
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "isChatExpanded") {
+        if (e.newValue === "true") {
+           // Tab Sync Case: Open instantly and then fetch
+           handleOpenChat(true); 
+        } else {
+           setIsExpanded(false);
+        }
+      }
+    };
+    window.addEventListener("openFloatingChat", handleOpenFloatingChat);
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("openFloatingChat", handleOpenFloatingChat);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [hydrated, handleOpenChat]);
+
+  // Initial Auto-open
+  useEffect(() => {
+    if (hydrated && status !== "loading" && storage.local.get("isChatExpanded") === "true") { 
+      handleOpenChat(true); 
+    }
+  }, [hydrated, status, handleOpenChat]);
+
+  // Notification Badge
+  useEffect(() => {
+    if (!hydrated || isExpanded) return;
+    const countNotification = () => setNotificationCount(p => p + 1);
+    window.addEventListener("chatNotification", countNotification);
+    return () => window.removeEventListener("chatNotification", countNotification);
+  }, [hydrated, isExpanded]);
+
+  useEffect(() => { if (isExpanded) setNotificationCount(0); }, [isExpanded]);
+
+  // Session boundary protection - improved to be less aggressive during loads
+  useEffect(() => {
+    if (!hydrated || status === "loading" || !activeChat) return;
+    
+    const isGuestChat = activeChat.id?.startsWith("guest-") || !!activeChat.guestId;
+    
+    // If we have a guest chat but we are now logged in
+    if (session?.user && isGuestChat) {
+      console.log("♻️ Switching from guest chat to user chat");
+      setActiveChat(null);
+      handleOpenChat();
+    }
+    
+    // If we have a user chat but we are now logged out
+    if (!session?.user && !isGuestChat) {
+      console.log("♻️ Switching from user chat to guest chat");
+      setActiveChat(null);
+      handleOpenChat();
+    }
+  }, [session?.user, activeChat, hydrated, status, handleOpenChat]);
+
+  // NEW: Auto-initialize for logged-in users to skip selection screen
+  useEffect(() => {
+    if (hydrated && session?.user && view !== "chat" && !activeChat && status === "authenticated") {
+      console.log("⚡ Logged in user detected, auto-initializing chat...");
+      handleOpenChat();
+    }
+  }, [session, hydrated, status, view, activeChat, handleOpenChat]);
+
+  const isDashboardRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/dashboard");
+  if (isDashboardRoute || !hydrated) return null;
+
   const GLORY_MAGENTA = "#d12a7a";
 
-  // Closed state - Show floating button with brand colors and heart animation
-  if (!isExpanded) {
-    return (
-      <div
-        className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 group"
-        style={{ animation: "slideInUp 0.5s ease-out forwards" }}
-      >
-        <button
-          onClick={handleOpenChat}
-          className="relative h-16 w-16 border-[3.5px] border-white dark:border-slate-800 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgba(209,42,122,0.4)] transition-all duration-300 hover:scale-110 active:scale-95 z-50 disabled:opacity-50 group"
-          style={{
-            background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)`,
-          }}
-          disabled={isInitializing}
-          aria-label="Open support chat"
-        >
-          {/* Continuous pulsing ripple rings in brand color */}
-          <span
-            className="absolute inset-0 rounded-full animate-ping opacity-40 duration-1000"
-            style={{ backgroundColor: GLORY_MAGENTA }}
-          ></span>
-          <span
-            className="absolute -inset-2 rounded-full animate-ping opacity-20 duration-1500"
-            style={{ backgroundColor: GLORY_MAGENTA }}
-          ></span>
-
-          {/* Decorative Hearts that pop out on hover */}
-          <Heart
-            className="absolute -top-4 -left-2 h-4 w-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 group-hover:-translate-y-2 group-hover:-translate-x-1"
-            fill="currentColor"
-          />
-          <Heart
-            className="absolute top-0 -right-4 h-3 w-3 text-rose-300 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-150 group-hover:-translate-y-1 group-hover:translate-x-2"
-            fill="currentColor"
-          />
-
-          {isInitializing ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-t-white border-white/30 rounded-full animate-spin"></div>
-            </div>
-          ) : (
-            <div className="relative w-9 h-9 transition-transform duration-300 group-hover:scale-110">
-              <Image
-                src={logo}
-                alt="Chat Support"
-                fill
-                className="object-contain drop-shadow-md brightness-0 invert"
-              />
-            </div>
-          )}
-        </button>
-      </div>
-    );
-  }
-
-  // Expanded state - Show full chat window (Responsive: Fullscreen on mobile, Floating on desktop)
-  if (activeChat) {
+  if (isExpanded) {
     return (
       <div
         className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 w-full md:w-96 h-full md:h-150 z-50 flex flex-col md:rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-slate-900 transition-all duration-300"
-        style={{
-          animation: "slideInUp 0.5s ease-out forwards",
-          boxShadow: "0 20px 60px -15px rgba(209, 42, 122, 0.3)",
-        }}
+        style={{ animation: "slideInUp 0.5s ease-out forwards", boxShadow: "0 20px 60px -15px rgba(209, 42, 122, 0.3)" }}
       >
-        <style>{`
-          @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
-        <ChatWindow
-          chat={activeChat}
-          onClose={() => {
-            setIsExpanded(false);
-            storage.session.set("isChatExpanded", "false");
-          }}
-        />
+        <style>{`@keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        
+        {activeChat && view === "chat" ? (
+          <ChatWindow 
+            chat={activeChat} 
+            onClose={() => { setIsExpanded(false); storage.local.set("isChatExpanded", "false"); }} 
+            tempGuestId={tempGuestId}
+            tempGuestName={tempGuestName}
+          />
+        ) : (isInitializing || status === "loading") ? (
+          /* Loading State (Existing) */
+          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900 relative">
+             <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-5" style={{ background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)` }}>
+                <div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full bg-white/20 animate-pulse" /><div className="h-4 w-32 bg-white/30 rounded-full animate-pulse" /></div>
+                <Button variant="ghost" size="icon" onClick={() => { setIsExpanded(false); storage.local.set("isChatExpanded", "false"); }} className="text-white hover:bg-white/20"><X className="h-6 w-6" /></Button>
+             </div>
+             <div className="text-center mt-16 animate-in zoom-in duration-300">
+                <div className="relative mb-6 inline-block">
+                  <Heart className="h-16 w-16 text-rose-500 animate-pulse" fill="currentColor" />
+                  <Loader2 className="h-8 w-8 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
+                  {status === "authenticated" ? "Connecting to Support..." : "Syncing Conversation"}
+                </h3>
+                <p className="text-sm text-slate-500">
+                  {status === "authenticated" ? "Loading your chat history..." : "Connecting your session across tabs..."}
+                </p>
+                
+                {!isInitializing && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleOpenChat()}
+                    className="mt-6 border-rose-200 text-rose-500 hover:bg-rose-50 rounded-full"
+                  >
+                    <RefreshCcw className="h-3.5 w-3.5 mr-2" />
+                    Retry Connection
+                  </Button>
+                )}
+             </div>
+          </div>
+        ) : view === "selection" ? (
+          /* Selection View */
+          <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden">
+             {/* Header */}
+             <div className="h-16 flex items-center justify-between px-5 shrink-0" style={{ background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)` }}>
+                <h3 className="font-bold text-white tracking-wide">Support Selection</h3>
+                <Button variant="ghost" size="icon" onClick={() => { setIsExpanded(false); storage.local.set("isChatExpanded", "false"); }} className="text-white hover:bg-white/20"><X className="h-6 w-6" /></Button>
+             </div>
+             
+             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 overflow-y-auto">
+                <div className="space-y-1">
+                  <h4 className="text-lg font-bold text-slate-800 dark:text-white">How would you like to chat?</h4>
+                  <p className="text-xs text-slate-500">Pick an option to continue</p>
+                </div>
+
+                <div className="w-full space-y-3">
+                   <button 
+                    onClick={() => router.push("/login")}
+                    className="w-full p-4 rounded-xl border border-rose-100 hover:border-rose-300 hover:bg-rose-50 dark:border-slate-800 dark:hover:bg-slate-800 transition-all flex items-center gap-4 text-left group"
+                   >
+                      <div className="h-10 w-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
+                        <LogIn className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm text-slate-800 dark:text-white">Login to Save History</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Recommended for order support</p>
+                      </div>
+                   </button>
+
+                   <button 
+                    onClick={() => setView("guest-form")}
+                    className="w-full p-4 rounded-xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 transition-all flex items-center gap-4 text-left group"
+                   >
+                      <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 group-hover:scale-110 transition-transform">
+                        <Ghost className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm text-slate-800 dark:text-white">Continue as Guest</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Messages lost on refresh</p>
+                      </div>
+                   </button>
+                </div>
+                
+                <p className="text-[10px] text-slate-400 italic">Glory Support Team typically replies in minutes</p>
+             </div>
+          </div>
+        ) : view === "guest-form" ? (
+          /* Guest Transition / Ready View */
+          <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden">
+             <div className="h-16 flex items-center justify-between px-5 shrink-0" style={{ background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)` }}>
+                <Button variant="ghost" size="sm" onClick={() => setView("selection")} className="text-white hover:bg-white/20 p-0 h-auto">{"< Back"}</Button>
+                <h3 className="font-bold text-white tracking-wide">Guest Chat</h3>
+                <Button variant="ghost" size="icon" onClick={() => { setIsExpanded(false); storage.local.set("isChatExpanded", "false"); }} className="text-white hover:bg-white/20"><X className="h-6 w-6" /></Button>
+             </div>
+
+             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6">
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3 text-left">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-amber-800 dark:text-amber-400">Ephemeral Session</p>
+                    <p className="text-[10px] text-amber-700 dark:text-amber-500 leading-tight">
+                      Guest chats are temporary. All messages will be wiped if you refresh or close the tab.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <Heart className="h-12 w-12 text-rose-500 animate-pulse mx-auto" fill="currentColor" />
+                </div>
+                
+                <div className="space-y-4 w-full">
+                  <Button 
+                    onClick={() => handleStartGuestChat()}
+                    disabled={isInitializing}
+                    className="w-full bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl h-11"
+                  >
+                    {isInitializing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MessageCircle className="h-4 w-4 mr-2" />}
+                    Start Chatting Now
+                  </Button>
+                </div>
+             </div>
+          </div>
+        ) : (
+          <div className="flex-1" />
+        )}
       </div>
     );
   }
 
-  return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 group" style={{ animation: "slideInUp 0.5s ease-out forwards" }}>
+      <button
+        onClick={() => handleOpenChat()}
+        className="relative h-16 w-16 border-[3.5px] border-white dark:border-slate-800 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgba(209,42,122,0.4)] transition-all duration-300 hover:scale-110 active:scale-95 z-50 group"
+        style={{ background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)` }}
+        disabled={isInitializing}
+      >
+        <span className="absolute inset-0 rounded-full animate-ping opacity-40 duration-1000" style={{ backgroundColor: GLORY_MAGENTA }}></span>
+        <span className="absolute -inset-2 rounded-full animate-ping opacity-20 duration-1500" style={{ backgroundColor: GLORY_MAGENTA }}></span>
+        {notificationCount > 0 && <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white border-2 border-white shadow-lg animate-bounce z-50">{notificationCount > 9 ? "9+" : notificationCount}</div>}
+        <Heart className="absolute -top-4 -left-2 h-4 w-4 text-rose-400 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 group-hover:-translate-y-2 group-hover:-translate-x-1" fill="currentColor" />
+        <Heart className="absolute top-0 -right-4 h-3 w-3 text-rose-300 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-150 group-hover:-translate-y-1 group-hover:translate-x-2" fill="currentColor" />
+        {isInitializing ? (
+          <div className="absolute inset-0 flex items-center justify-center"><div className="w-6 h-6 border-2 border-t-white border-white/30 rounded-full animate-spin"></div></div>
+        ) : (
+          <div className="relative w-9 h-9 transition-transform duration-300 group-hover:scale-110"><Image src={logo} alt="Chat" fill className="object-contain brightness-0 invert" /></div>
+        )}
+      </button>
+    </div>
+  );
 }

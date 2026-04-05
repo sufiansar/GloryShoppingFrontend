@@ -109,7 +109,7 @@ export default function HeroSliderWrapper({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl ${className}`}
+      className={`relative w-full overflow-hidden ${className}`}
       style={{ height }}
       onMouseEnter={() => pauseOnHover && setPaused(true)}
       onMouseLeave={() => pauseOnHover && setPaused(false)}

@@ -11,6 +11,12 @@ export const superAdminNavItems: NavSection[] = [
         roles: ["SUPER_ADMIN"],
       },
       {
+        title: "Shipping Settings",
+        href: "/admin/dashboard/shipping",
+        icon: "Truck",
+        roles: ["SUPER_ADMIN", "ADMIN"],
+      },
+      {
         title: "Create Section",
         href: "/admin/dashboard/create-section",
         icon: "FolderPlus",

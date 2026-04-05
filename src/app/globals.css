@@ -160,6 +160,37 @@
   .hover\:text-primary-custom:hover {
     color: #c25891;
   }
+
+  /* Premium UI Utilities */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .dark .glass-card {
+    background: rgba(15, 15, 15, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .premium-shadow {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  }
+
+  .premium-shadow-hover {
+    transition: all 0.3s ease;
+  }
+
+  .premium-shadow-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
+  }
+
+  .dashboard-gradient-bg {
+    background: radial-gradient(circle at top right, rgba(202, 66, 139, 0.05), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(107, 32, 90, 0.03), transparent 40%);
+  }
 }
 /* Add to your global.css */
 [data-radix-navigation-menu-trigger] {

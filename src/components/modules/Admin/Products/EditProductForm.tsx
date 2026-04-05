@@ -131,6 +131,14 @@ export default function EditProductForm({ product }: EditProductFormProps) {
       formDataObj.append("isBestSeller", String(formData.isBestSeller));
       formDataObj.append("isActive", String(formData.isActive));
 
+      // Relationships
+      if (selectedBrand?.id) {
+        formDataObj.append("brandId", selectedBrand.id);
+      }
+      if (selectedCategory?.id) {
+        formDataObj.append("categoryId", selectedCategory.id);
+      }
+
       // Handle image
       if (thumbImageFile) {
         formDataObj.append("thumbleImage", thumbImageFile);
@@ -263,7 +271,19 @@ export default function EditProductForm({ product }: EditProductFormProps) {
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <Label>Brand</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Brand</Label>
+                  {selectedBrand && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setBrandDialogOpen(true)}
+                    >
+                      Change
+                    </Button>
+                  )}
+                </div>
 
                 {selectedBrand ? (
                   <div className="border rounded-lg p-4 bg-accent/50">
@@ -282,17 +302,17 @@ export default function EditProductForm({ product }: EditProductFormProps) {
                     </div>
                   </div>
                 ) : (
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Building2 className="h-8 w-8" />
-                      <div>
-                        <p>Brand ID: {product.brandId}</p>
-                        <p className="text-xs mt-1">
-                          Brand cannot be changed after creation
-                        </p>
-                      </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-20 border-dashed"
+                    onClick={() => setBrandDialogOpen(true)}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Building2 className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-sm">Select Brand</span>
                     </div>
-                  </div>
+                  </Button>
                 )}
               </div>
             </CardContent>
@@ -302,7 +322,19 @@ export default function EditProductForm({ product }: EditProductFormProps) {
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <Label>Category</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Category</Label>
+                  {selectedCategory && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCategoryDialogOpen(true)}
+                    >
+                      Change
+                    </Button>
+                  )}
+                </div>
 
                 {selectedCategory ? (
                   <div className="border rounded-lg p-4 bg-accent/50">
@@ -321,17 +353,17 @@ export default function EditProductForm({ product }: EditProductFormProps) {
                     </div>
                   </div>
                 ) : (
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center gap-3 text-muted-foreground">
-                      <Folder className="h-8 w-8" />
-                      <div>
-                        <p>Category ID: {product.categoryId}</p>
-                        <p className="text-xs mt-1">
-                          Category cannot be changed after creation
-                        </p>
-                      </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-20 border-dashed"
+                    onClick={() => setCategoryDialogOpen(true)}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Folder className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-sm">Select Category</span>
                     </div>
-                  </div>
+                  </Button>
                 )}
               </div>
             </CardContent>

@@ -24,7 +24,7 @@ export const updateProduct = async (id: string, formData: FormData) => {
     const entries = Object.fromEntries(formData.entries());
 
     // Build the product data with proper types
-    const productData = {
+    const productData: any = {
       name: entries.name as string,
       slug: entries.slug as string,
       description: entries.description as string,
@@ -40,6 +40,11 @@ export const updateProduct = async (id: string, formData: FormData) => {
       isActive: entries.isActive === "true",
       thumbleImage: entries.thumbleImage as string,
     };
+
+    // Add optional fields if they exist in entries
+    if (entries.brandId) productData.brandId = entries.brandId as string;
+    if (entries.categoryId) productData.categoryId = entries.categoryId as string;
+    if (entries.faquestions) productData.faquestions = entries.faquestions as string;
 
     // Check if there's a file to upload
     const thumbImage = formData.get("thumbleImage");
@@ -93,13 +98,9 @@ export const getAllProducts = async (queryString: string) => {
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
     const searchTerm = searchParams.get("searchTerm") || "";
-    let builtQueryString = `?page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    let builtQueryString = `page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
     if (searchTerm) {
-      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
-        searchTerm,
-      )}`;
-    } else {
-      builtQueryString = `page=${page}&limit=${limit}`;
+      builtQueryString += `&searchTerm=${encodeURIComponent(searchTerm)}`;
     }
 
     const result = await makeApiCall<any>(`/product?${builtQueryString}`, {

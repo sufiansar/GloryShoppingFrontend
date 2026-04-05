@@ -12,13 +12,10 @@ export function getSocketUrl(apiBaseUrl?: string): string {
   // Remove /api/v1 or any trailing slashes to get the root domain
   let baseUrl = apiBaseUrl.replace(/\/api\/v1\/?$/, "").replace(/\/$/, "");
 
-  // If the current page is HTTPS but the API URL is HTTP, we need to be careful.
-  // Browsers will block insecure WebSocket connections from secure pages.
+  // Handle protocol upgrades (ws -> wss) if the page is secure
   if (typeof window !== "undefined" && window.location.protocol === "https:") {
-    // If the URL starts with http:// but NOT https://, try to upgrade it to https://
-    // This assumes the backend supports SSL on the same host/port.
-    if (baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-      console.warn("⚠️ Upgrading insecure API URL to HTTPS for secure page context");
+    if (baseUrl.startsWith("http://")) {
+      console.log("🔒 Deriving secure Socket URL for HTTPS context");
       baseUrl = baseUrl.replace("http://", "https://");
     }
   }

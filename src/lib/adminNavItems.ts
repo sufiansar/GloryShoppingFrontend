@@ -96,6 +96,12 @@ export const adminNavItems: NavSection[] = [
         icon: "ShoppingCart",
         roles: ["SUPER_ADMIN"],
       },
+      {
+        title: "Shipping Settings",
+        href: "/admin/dashboard/shipping",
+        icon: "Truck",
+        roles: ["SUPER_ADMIN", "ADMIN"],
+      },
     ],
   },
 ];

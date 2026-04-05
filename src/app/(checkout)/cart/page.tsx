@@ -55,21 +55,48 @@ export default function CartPage() {
       console.log("[CartPage] API Result:", result);
 
       // Parse cart items from response - handle various possible structures
-      let items = [];
+      let items: any[] = [];
 
-      if (result?.data?.items) {
-        // Structure: { data: { items: [...] } }
+      if (result?.data?.items && Array.isArray(result.data.items)) {
         items = result.data.items;
-      } else if (result?.items) {
-        // Structure: { items: [...] }
+      } else if (result?.items && Array.isArray(result.items)) {
         items = result.items;
-      } else if (result?.data?.data?.items) {
-        // Structure: { data: { data: { items: [...] } } }
+      } else if (result?.data?.data?.items && Array.isArray(result.data.data.items)) {
         items = result.data.data.items;
+      } else if (result?.data?.cartItems && Array.isArray(result.data.cartItems)) {
+        items = result.data.cartItems;
+      } else if (result?.cartItems && Array.isArray(result.cartItems)) {
+        items = result.cartItems;
+      } else if (Array.isArray(result?.data)) {
+        items = result.data;
+      } else if (Array.isArray(result)) {
+        items = result;
       }
 
-      console.log("[CartPage] Parsed items:", items);
-      setCartItems(items || []);
+      console.log("[CartPage] Raw parsed items:", items);
+      
+      const validItems = items.filter(item => item !== null && typeof item === 'object');
+      
+      const normalizedItems: CartItem[] = validItems.map((item) => {
+        let productImage = "/placeholder.png";
+        if (item.productImage) productImage = item.productImage;
+        else if (item.product?.images && item.product.images.length > 0) productImage = item.product.images[0];
+        else if (item.image) productImage = item.image;
+        else if (item.variant?.image) productImage = item.variant.image;
+        
+        return {
+          id: item.id || item._id || Math.random().toString(),
+          productId: item.productId || item.product?.id || item.variantId || item.id,
+          productName: item.productName || item.product?.name || item.name || item.variant?.productName || "Unknown Product",
+          productImage: productImage,
+          price: item.price || item.unitPrice || item.product?.price || item.variant?.price || 0,
+          quantity: item.quantity || 1,
+          originalPrice: item.originalPrice || item.product?.originalPrice,
+        };
+      });
+
+      console.log("[CartPage] Normalized items:", normalizedItems);
+      setCartItems(normalizedItems);
       setError(null);
     } catch (err) {
       console.error("Error fetching cart:", err);

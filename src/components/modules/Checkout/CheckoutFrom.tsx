@@ -1,11 +1,12 @@
 // components/checkout/CheckoutForm.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { createOrder } from "@/action/order/order.action";
+import { getShippingConfigs } from "@/action/shipping/shipping.action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,8 +56,8 @@ import {
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-// Delivery charge constants
-const DELIVERY_CHARGES = {
+// Delivery charge constants (Fallbacks)
+const DEFAULT_DELIVERY_CHARGES = {
   INSIDE_DHAKA: 60,
   OUTSIDE_DHAKA: 120,
 } as const;
@@ -112,6 +113,18 @@ export function CheckoutForm({
     directVariantId || "",
   );
   const [directQuantity, setDirectQuantity] = useState(initialDirectQuantity);
+  const [shippingConfigs, setShippingConfigs] = useState<any[]>([]);
+
+  // Fetch shipping configurations
+  useEffect(() => {
+    const fetchShipping = async () => {
+      const result = await getShippingConfigs();
+      if (result.success && result.data && result.data.length > 0) {
+        setShippingConfigs(result.data);
+      }
+    };
+    fetchShipping();
+  }, []);
 
   const baseColor = "oklch(52.801% 0.15987 344.323)";
 
@@ -134,8 +147,14 @@ export function CheckoutForm({
   const watchCheckoutType = form.watch("checkoutType");
   const watchDeliveryZone = form.watch("deliveryZone");
 
-  // Get delivery charge based on zone
-  const deliveryCharge = DELIVERY_CHARGES[watchDeliveryZone];
+  // Get delivery charge based on zone from API, fallback to defaults
+  const deliveryCharge = React.useMemo(() => {
+    if (shippingConfigs.length > 0) {
+      const config = shippingConfigs.find(c => c.zoneName === watchDeliveryZone);
+      if (config) return config.charge;
+    }
+    return DEFAULT_DELIVERY_CHARGES[watchDeliveryZone];
+  }, [shippingConfigs, watchDeliveryZone]);
 
   // Calculate totals based on checkout type
   const calculateTotals = () => {
@@ -577,26 +596,28 @@ export function CheckoutForm({
                                   value="INSIDE_DHAKA"
                                   id="inside-dhaka"
                                 />
-                                <Label
-                                  htmlFor="inside-dhaka"
-                                  className="cursor-pointer"
-                                >
-                                  <div>
-                                    <p className="font-medium">Inside Dhaka</p>
-                                    <p className="text-sm text-slate-500">
-                                      Dhaka City Corporation areas
-                                    </p>
-                                  </div>
-                                </Label>
-                              </div>
-                              <div className="text-right">
-                                <p
-                                  className="font-semibold"
-                                  style={{ color: baseColor }}
-                                >
-                                  ৳{DELIVERY_CHARGES.INSIDE_DHAKA}
-                                </p>
-                              </div>
+                                  <Label
+                                    htmlFor="inside-dhaka"
+                                    className="cursor-pointer"
+                                  >
+                                    <div>
+                                      <p className="font-medium">
+                                        {shippingConfigs.find(c => c.zoneName === "INSIDE_DHAKA")?.description || "Inside Dhaka"}
+                                      </p>
+                                      <p className="text-sm text-slate-500">
+                                        {shippingConfigs.find(c => c.zoneName === "INSIDE_DHAKA")?.description ? "Dhaka City Corporation areas" : "Dhaka City Corporation areas"}
+                                      </p>
+                                    </div>
+                                  </Label>
+                                </div>
+                                <div className="text-right">
+                                  <p
+                                    className="font-semibold"
+                                    style={{ color: baseColor }}
+                                  >
+                                    ৳{shippingConfigs.find(c => c.zoneName === "INSIDE_DHAKA")?.charge ?? DEFAULT_DELIVERY_CHARGES.INSIDE_DHAKA}
+                                  </p>
+                                </div>
                             </div>
 
                             <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer">
@@ -605,26 +626,28 @@ export function CheckoutForm({
                                   value="OUTSIDE_DHAKA"
                                   id="outside-dhaka"
                                 />
-                                <Label
-                                  htmlFor="outside-dhaka"
-                                  className="cursor-pointer"
-                                >
-                                  <div>
-                                    <p className="font-medium">Outside Dhaka</p>
-                                    <p className="text-sm text-slate-500">
-                                      Other cities and districts
-                                    </p>
-                                  </div>
-                                </Label>
-                              </div>
-                              <div className="text-right">
-                                <p
-                                  className="font-semibold"
-                                  style={{ color: baseColor }}
-                                >
-                                  ৳{DELIVERY_CHARGES.OUTSIDE_DHAKA}
-                                </p>
-                              </div>
+                                  <Label
+                                    htmlFor="outside-dhaka"
+                                    className="cursor-pointer"
+                                  >
+                                    <div>
+                                      <p className="font-medium">
+                                        {shippingConfigs.find(c => c.zoneName === "OUTSIDE_DHAKA")?.description || "Outside Dhaka"}
+                                      </p>
+                                      <p className="text-sm text-slate-500">
+                                        {shippingConfigs.find(c => c.zoneName === "OUTSIDE_DHAKA")?.description ? "Other cities and districts" : "Other cities and districts"}
+                                      </p>
+                                    </div>
+                                  </Label>
+                                </div>
+                                <div className="text-right">
+                                  <p
+                                    className="font-semibold"
+                                    style={{ color: baseColor }}
+                                  >
+                                    ৳{shippingConfigs.find(c => c.zoneName === "OUTSIDE_DHAKA")?.charge ?? DEFAULT_DELIVERY_CHARGES.OUTSIDE_DHAKA}
+                                  </p>
+                                </div>
                             </div>
                           </RadioGroup>
                         </FormControl>

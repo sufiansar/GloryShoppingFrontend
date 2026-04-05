@@ -32,23 +32,25 @@ export default async function AdminDashboard({
   const navItems = getNavItemsByRole(role);
 
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50/50">
       <SidebarProvider
         style={
           {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 12)",
+            "--sidebar-width": "18rem",
+            "--header-height": "4rem",
           } as React.CSSProperties
         }
       >
         <AppSidebar userInfo={userInfo} navItems={navItems} variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="bg-transparent">
           <SiteHeader userInfo={userInfo} />
-          <div className="flex flex-1 flex-col">
-            <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4 p-3">{children}</div>
+          <main className="flex-1 overflow-y-auto dashboard-gradient-bg">
+            <div className="mx-auto w-full max-w-7xl animate-in fade-in duration-700">
+              <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
+                {children}
+              </div>
             </div>
-          </div>
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </div>

@@ -51,29 +51,32 @@ export function NavMain({ sections }: NavMainProps) {
                       <Link
                         href={item.href}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                          "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 relative group",
                           isActive
-                            ? "bg-blue-50 text-blue-600"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                            ? "bg-primary-custom/10 text-primary-custom shadow-sm ring-1 ring-primary-custom/20"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:pl-5",
                         )}
                       >
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary-custom shadow-[0_0_8px_rgba(194,88,145,0.6)]" />
+                        )}
                         {Icon && (
                           <Icon
                             className={cn(
-                              "h-5 w-5 shrink-0",
-                              isActive ? "text-blue-600" : "text-gray-400",
+                              "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-110",
+                              isActive ? "text-primary-custom" : "text-slate-400 group-hover:text-slate-600",
                             )}
                           />
                         )}
-                        <span className="flex-1 truncate">{item.title}</span>
+                        <span className="flex-1 truncate tracking-tight">{item.title}</span>
 
                         {item.badge && (
                           <span
                             className={cn(
-                              "ml-auto rounded-md px-2 py-0.5 text-xs font-semibold",
+                              "ml-auto rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-wider",
                               isActive
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-gray-100 text-gray-600",
+                                ? "bg-primary-custom text-white shadow-lg shadow-primary-custom/30"
+                                : "bg-slate-100 text-slate-500",
                             )}
                           >
                             {item.badge}

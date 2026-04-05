@@ -12,6 +12,7 @@ export interface IMessage {
   type?: "TEXT" | "IMAGE" | "FILE";
   url?: string | null;
   isRead?: boolean;
+  status?: "SENDING" | "SENT" | "FAILED";
 }
 
 export interface IChat {

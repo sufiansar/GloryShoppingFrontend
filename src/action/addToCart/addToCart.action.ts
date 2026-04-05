@@ -1,43 +1,12 @@
-const API_BASE = process.env.NEXT_PUBLIC_BASE_API;
+"use server";
 
-type AddToCartPayload = {
-  productId: string;
-  quantity?: number;
-};
-
-export const fetchWithSession = async <T>(
-  path: string,
-  init: RequestInit = {},
-) => {
-  const res = await fetch(`${API_BASE}${path}`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(init.headers || {}),
-    },
-    ...init,
-  });
-
-  let data: any = null;
-  try {
-    data = await res.json();
-  } catch (error) {
-    data = null;
-  }
-
-  if (!res.ok) {
-    throw new Error(
-      data?.message || `Request failed with status ${res.status}`,
-    );
-  }
-
-  return data as T;
-};
+import { makeApiCall } from "../apiClinet";
 
 export const getCart = async () => {
   try {
-    const result = await fetchWithSession<any>("/cart", {
+    const result = await makeApiCall<any>("/cart", {
       method: "GET",
+      cache: "no-store",
     });
 
     console.log("[getCart] API Response:", result);
@@ -50,8 +19,9 @@ export const getCart = async () => {
 
 export const getCartCount = async () => {
   try {
-    const result = await fetchWithSession<any>("/cart/count", {
+    const result = await makeApiCall<any>("/cart/count", {
       method: "GET",
+      cache: "no-store",
     });
 
     return result;
@@ -64,9 +34,9 @@ export const getCartCount = async () => {
 export const addToCart = async ({
   productId,
   quantity = 1,
-}: AddToCartPayload) => {
+}: { productId: string, quantity?: number }) => {
   try {
-    const result = await fetchWithSession<any>("/cart", {
+    const result = await makeApiCall<any>("/cart", {
       method: "POST",
       body: JSON.stringify({
         productId,
@@ -89,7 +59,7 @@ export const updateCartItem = async ({
   quantity: number;
 }) => {
   try {
-    const result = await fetchWithSession<any>("/cart", {
+    const result = await makeApiCall<any>("/cart", {
       method: "PATCH",
       body: JSON.stringify({
         productId,
@@ -106,7 +76,7 @@ export const updateCartItem = async ({
 
 export const removeCartItem = async (productId: string) => {
   try {
-    const result = await fetchWithSession<any>(`/cart/${productId}`, {
+    const result = await makeApiCall<any>(`/cart/${productId}`, {
       method: "DELETE",
     });
 

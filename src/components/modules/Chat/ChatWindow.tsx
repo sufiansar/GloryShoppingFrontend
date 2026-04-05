@@ -20,12 +20,15 @@ import {
   MessageCircle,
   Heart,
   Sparkles,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { storage } from "@/lib/storage-utils";
 import { IChat, IMessage } from "@/types/chat.interface";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 import {
   sendMessageAsAdmin,
   sendMessageAsGuest,
@@ -39,6 +42,8 @@ interface ChatWindowProps {
   onMessageSent?: (message: IMessage) => void;
   userInfo?: any;
   onRefresh?: () => Promise<void>;
+  tempGuestId?: string | null;
+  tempGuestName?: string | null;
 }
 
 export function ChatWindow({
@@ -48,6 +53,8 @@ export function ChatWindow({
   onMessageSent,
   userInfo,
   onRefresh,
+  tempGuestId,
+  tempGuestName,
 }: ChatWindowProps) {
   const { data: session } = useSession();
   const [messages, setMessages] = useState<IMessage[]>(chat.messages || []);
@@ -58,11 +65,26 @@ export function ChatWindow({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const hydrated = useHydrated();
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isSendingRef = useRef(false);
 
   // Initialize message IDs from initial messages
   useEffect(() => {
-    messageIdsRef.current = new Set(chat.messages?.map((m) => m.id) || []);
-    setMessages(chat.messages || []);
+    // Only update internal messages from prop if prop messages are newer or more complete
+    // This is important for real-time socket updates received by the parent
+    if (chat.messages && chat.messages.length > 0) {
+      setMessages((prev) => {
+        const msgMap = new Map<string, any>(prev.map(m => [m.id, m]));
+        let hasNew = false;
+        chat.messages?.forEach(m => {
+          if (!msgMap.has(m.id)) {
+            msgMap.set(m.id, m);
+            hasNew = true;
+          }
+        });
+        return hasNew ? Array.from(msgMap.values()).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : prev;
+      });
+      messageIdsRef.current = new Set(chat.messages.map((m) => m.id));
+    }
   }, [chat.id, chat.messages]);
 
   // Fetch full conversation history from DB for Admins on mount
@@ -111,65 +133,124 @@ export function ChatWindow({
     }
   }, [chat.id, isAdmin]);
 
-  // Get guest info from storage only if no user session and mounted on client
+  // Get guest info from props or storage only if no user session and mounted on client
+  // Priority: Prop -> Object Property -> SessionStorage (Backup) -> LocalStorage
+  const getEphemeralId = () => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("glory_temp_guest_id");
+  };
+
   const guestId =
-    hydrated && !session?.user ? storage.local.get("guestId") : null;
+    tempGuestId || 
+    chat.guestId || 
+    getEphemeralId() ||
+    (hydrated && !session?.user ? storage.local.get("guestId") : null);
+    
   const guestName =
-    hydrated && !session?.user ? storage.local.get("guestName") : null;
+    tempGuestName || (hydrated && !session?.user ? storage.local.get("guestName") : null);
 
   // Determine if this is a guest chat
   const isGuestChat = !!chat.guestId;
 
-  // Use Socket.io for real-time communication
-  const { isConnected, sendMessage, sendAdminReply, sendTyping } =
+  const { isConnected, sendMessage, sendAdminReply, sendTyping, socketId } =
     useChatSocket(chat.id, {
       onMessageReceived: (message) => {
-        console.log("New message received:", message);
+        console.log("📨 Incoming WebSocket Message:", message);
 
-        // Prevent messages from other chats (cross-contamination)
-        if (message.chatId && message.chatId !== chat.id) {
-          console.log("❌ Ignored message for different chat:", message.chatId);
+        // 1. Context validation
+        if (message.chatId && message.chatId !== chat.id) return;
+
+        // 2. Self-echo detection (Matching SocketId)
+        if (message.socketId && socketId && message.socketId === socketId) {
+          console.log("♻️ Ignoring self-broadcast echo (matching socketId)");
+          if (message.id && !message.id.startsWith("temp-")) {
+            setMessages(prev => {
+              const updated = prev.map(m =>
+                (m.id.startsWith("temp-") && m.content === message.content)
+                  ? { ...m, id: message.id, status: "SENT" as const }
+                  : m
+              );
+              return updated;
+            });
+            messageIdsRef.current.add(message.id);
+          }
           return;
         }
 
-        // Prevent duplicate messages using ref
-        const messageId =
-          message.id ||
-          `${message.chatId}-${message.content}-${message.createdAt}`;
-        if (messageIdsRef.current.has(messageId)) {
-          console.log("❌ Duplicate message ignored:", messageId);
+        // 3. Robust Deduplication (by ID)
+        const realId = message.id || `${message.chatId}-${message.content}-${new Date(message.createdAt).getTime()}`;
+        if (messageIdsRef.current.has(realId)) {
+          console.log("❌ Duplicate message ignored (ID exists):", realId);
           return;
         }
-        const newMsg: IMessage = {
-          id: messageId,
-          content: message.content,
-          senderId: message.senderId || null,
-          guestId: message.guestId || null,
-          senderType: message.senderType,
-          senderName:
-            message.senderName ||
-            (message.senderType === "GUEST" ? "Guest" : "Admin"),
-          createdAt: new Date(message.createdAt),
-          isEdited: false,
-          type: message.type || "TEXT",
-          url: message.url || null,
-          isRead: message.isRead || false,
-        };
-        messageIdsRef.current.add(messageId);
-        setMessages((prev) => [...prev, newMsg]);
-        if (onMessageSent) onMessageSent(newMsg);
-      },
-      onUserTyping: (data) => {
-        setTypingUsers((prev) => new Set(prev).add(data.userId));
-      },
-      onUserStopTyping: (data) => {
-        setTypingUsers((prev) => {
-          const updated = new Set(prev);
-          updated.delete(data.userId);
-          return updated;
+
+        // 4. Optimistic Match (by Content + Time) - if ID wasn't found yet
+        setMessages((prev) => {
+          // Double-check if it's already in the array to be absolutely safe
+          if (prev.some(m => m.id === realId)) return prev;
+
+          // Check for optimistic match to swap
+          const isFromMe = isAdmin
+            ? message.senderType === "ADMIN"
+            : (message.senderType === "USER" || message.senderType === "GUEST");
+
+          if (isFromMe) {
+            const matchingOptimistic = prev.find(m =>
+              m.id.startsWith("temp-") &&
+              m.content === message.content &&
+              Math.abs(new Date(m.createdAt).getTime() - new Date(message.createdAt).getTime()) < 15000
+            );
+
+            if (matchingOptimistic) {
+               console.log("✅ Matching optimistic message found, swapping ID:", realId);
+               messageIdsRef.current.add(realId);
+               return prev.map(m => m.id === matchingOptimistic.id ? { ...m, id: realId, status: "SENT" as const } : m);
+            }
+            
+            // VERY AGGRESSIVE: If it's from me and identical content/time but no temp match found, 
+            // it might be a race condition where the temp message was already replaced by another event.
+            const exactMatch = prev.find(m => m.id !== realId && m.content === message.content && Math.abs(new Date(m.createdAt).getTime() - new Date(message.createdAt).getTime()) < 2000);
+            if (exactMatch) {
+               console.log("❌ Aggressive content-match duplicate ignored:", realId);
+               return prev;
+            }
+          }
+
+          // Otherwise, add as new message
+          const newMsg: IMessage = {
+            id: realId,
+            content: message.content,
+            senderId: message.senderId || null,
+            guestId: message.guestId || null,
+            senderType: message.senderType,
+            senderName: message.senderName || (message.senderType === "GUEST" ? "Guest" : "Admin"),
+            createdAt: new Date(message.createdAt),
+            isEdited: false,
+            type: message.type || "TEXT",
+            url: message.url || null,
+            isRead: message.isRead || false,
+          };
+          
+          messageIdsRef.current.add(realId);
+          if (onMessageSent) onMessageSent(newMsg);
+          
+          return [...prev, newMsg];
         });
-      },
-    });
+        },
+        onUserTyping: (data) => {
+          setTypingUsers((prev) => new Set(prev).add(data.userId));
+        },
+        onUserStopTyping: (data) => {
+          setTypingUsers((prev) => {
+            const updated = new Set(prev);
+            updated.delete(data.userId);
+            return updated;
+          });
+        },
+      }, {
+        tempGuestId: guestId,
+        tempGuestName: guestName
+      });
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
@@ -188,8 +269,8 @@ export function ChatWindow({
     setInput("");
 
     // Determine sender type
-    let senderType: "USER" | "ADMIN" | "GUEST" = "USER";
-    let senderName = "You";
+    let senderType: "USER" | "ADMIN" | "GUEST" = "GUEST";
+    let senderName = "Guest";
 
     if (isAdmin) {
       senderType = "ADMIN";
@@ -197,12 +278,9 @@ export function ChatWindow({
     } else if (session?.user?.id) {
       senderType = "USER";
       senderName = session?.user?.name || "You";
-    } else if (guestId) {
+    } else if (guestId || isGuestChat) {
       senderType = "GUEST";
       senderName = guestName || "Guest";
-    } else {
-      senderType = "GUEST";
-      senderName = "Guest";
     }
 
     // Create optimistic message for UI
@@ -218,35 +296,32 @@ export function ChatWindow({
       type: "TEXT",
       url: null,
       isRead: false,
+      status: "SENDING", // NEW: Set initial sending status
     };
 
     // Add message to UI immediately (optimistic update)
     setMessages((prev) => [...prev, optimisticMessage]);
     messageIdsRef.current.add(optimisticMessage.id);
 
-    // Persist message to DB via HTTP API and then emit via socket for real-time
+    if (isSendingRef.current) return;
+    isSendingRef.current = true;
+
     try {
-      setIsLoading(true);
       if (isAdmin) {
         console.log("📨 Sending admin message (HTTP)...");
         const result = await sendMessageAsAdmin(chat.id, messageContent);
-        console.log("✅ Admin message sent (HTTP):", result);
         
-        // Also send via socket for real-time
-        sendAdminReply(messageContent, session?.user?.name || "Admin");
-
-        // Update optimistic message with real ID from server
-        if (result.data?.id) {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === optimisticMessage.id
-                ? { ...msg, id: result.data.id }
-                : msg,
-            ),
-          );
-          messageIdsRef.current.delete(optimisticMessage.id);
-          messageIdsRef.current.add(result.data.id);
-        }
+        // Update optimistic message with real ID and SUCCESS status
+        const realId = result.data?.id;
+        if (realId) messageIdsRef.current.add(realId);
+        
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === optimisticMessage.id
+              ? { ...msg, id: realId || msg.id, status: "SENT" as const }
+              : msg,
+          ),
+        );
       } else {
         if (senderType === "GUEST" && guestId) {
           console.log("📨 Sending guest message (HTTP)...");
@@ -255,49 +330,49 @@ export function ChatWindow({
             messageContent,
             guestId,
           );
-          console.log("✅ Guest message sent (HTTP):", result);
-          
-          // Also send via socket for real-time
-          sendMessage(messageContent, "GUEST");
 
-          if (result.data?.id) {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === optimisticMessage.id
-                  ? { ...msg, id: result.data.id }
-                  : msg,
-              ),
-            );
-            messageIdsRef.current.delete(optimisticMessage.id);
-            messageIdsRef.current.add(result.data.id);
-          }
+          const realId = result.data?.id;
+          if (realId) messageIdsRef.current.add(realId);
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === optimisticMessage.id
+                ? { ...msg, id: realId || msg.id, status: "SENT" as const }
+                : msg,
+            ),
+          );
         } else {
           console.log("📨 Sending user message (HTTP)...");
           const result = await sendMessageAsUser(chat.id, messageContent);
-          console.log("✅ User message sent (HTTP):", result);
-          
-          // Also send via socket for real-time
-          sendMessage(messageContent, "USER");
 
-          if (result.data?.id) {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === optimisticMessage.id
-                  ? { ...msg, id: result.data.id }
-                  : msg,
-              ),
-            );
-            messageIdsRef.current.delete(optimisticMessage.id);
-            messageIdsRef.current.add(result.data.id);
-          }
+          const realId = result.data?.id;
+          if (realId) messageIdsRef.current.add(realId);
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === optimisticMessage.id
+                ? { ...msg, id: realId || msg.id, status: "SENT" as const }
+                : msg,
+            ),
+          );
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Failed to save message via HTTP API:", error);
-      // Message is already in UI from optimistic update
-      // Keep it there even if backend fails
+      
+      // NEW: Show toast for better debugging
+      toast.error("Message failed to send. Please try again.");
+
+      // Mark optimistic message as FAILED
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === optimisticMessage.id
+            ? { ...msg, status: "FAILED" as const }
+            : msg,
+        ),
+      );
     } finally {
-      setIsLoading(false);
+      isSendingRef.current = false;
     }
   };
 
@@ -416,7 +491,7 @@ export function ChatWindow({
                 const isMe = isAdmin
                   ? message.senderType === "ADMIN"
                   : message.senderType === "USER" ||
-                    message.senderType === "GUEST";
+                  message.senderType === "GUEST";
                 const showAvatar = !isMe;
 
                 return (
@@ -451,8 +526,8 @@ export function ChatWindow({
                       style={
                         isMe
                           ? {
-                              background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)`,
-                            }
+                            background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)`,
+                          }
                           : {}
                       }
                     >
@@ -477,10 +552,15 @@ export function ChatWindow({
                           )}
                         </span>
                         {isMe && (
-                          <Heart
-                            className="h-2 w-2 text-white/50"
-                            fill="currentColor"
-                          />
+                          <div className="flex items-center gap-1.5 min-w-6">
+                            {message.status === "SENDING" ? (
+                              <Loader2 className="h-2.5 w-2.5 text-white/50 animate-spin" />
+                            ) : message.status === "FAILED" ? (
+                              <AlertCircle className="h-2.5 w-2.5 text-rose-200 animate-pulse" />
+                            ) : (
+                              <Heart className="h-2.5 w-2.5 text-white/70" fill="currentColor" />
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -531,7 +611,6 @@ export function ChatWindow({
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              disabled={isLoading}
               className="bg-slate-100/50 dark:bg-slate-800/80 border-0 focus-visible:ring-2 focus-visible:ring-rose-500/20 h-12 md:h-11 pr-10 text-[16px] rounded-2xl"
             />
             <Button
@@ -545,7 +624,7 @@ export function ChatWindow({
 
           <Button
             onClick={handleSendMessage}
-            disabled={isLoading || !input.trim()}
+            disabled={!input.trim()}
             className="text-white shadow-xl hover:scale-105 active:scale-95 transition-all shrink-0 h-12 w-12 rounded-2xl border-0"
             style={{
               background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)`,

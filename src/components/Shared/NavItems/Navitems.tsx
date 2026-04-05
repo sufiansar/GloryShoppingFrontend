@@ -210,13 +210,13 @@ export const navItems: NavItem[] = [
     ],
   },
   {
-    title: "COMBO",
-    href: "/categorys/combo",
+    title: "SPECIAL",
+    href: "/categorys/special",
     subItems: [
-      { title: "Skin Care Combo", href: "/categorys/skin-care-combo" },
-      { title: "Hair Care Combo", href: "/categorys/hair-care-combo" },
-      { title: "Makeup Combo", href: "/categorys/makeup-combo" },
-      { title: "Mom & Baby Combo", href: "/categorys/mom-baby-combo" },
+      { title: "Skin Care Special", href: "/categorys/skin-care-special" },
+      { title: "Hair Care Special", href: "/categorys/hair-care-special" },
+      { title: "Makeup Special", href: "/categorys/makeup-special" },
+      { title: "Mom & Baby Special", href: "/categorys/mom-baby-special" },
     ],
   },
   {

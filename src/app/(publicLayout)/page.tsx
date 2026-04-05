@@ -6,42 +6,90 @@ import HeroSliderWrapper from "@/components/modules/Sections/HeroSectionSlider";
 import { SkincareMarquee } from "@/components/SkincareMarquee";
 import { Button } from "@/components/ui/button";
 import ProductsPage from "./product/page";
-import { Filter, Grid, List } from "lucide-react";
+import { Filter, Grid, List, ChevronRight } from "lucide-react";
 import { Section } from "@/types/section.interface";
 import BestProductSlider from "@/components/modules/PublicProduct/NewArrivals";
+import { navItems } from "@/components/Shared/NavItems/Navitems";
+import { getAllProductByCategory } from "@/action/product/product.action";
+import { Category } from "@/types/categorys.interface";
+import Link from "next/link";
+import ProductFilters from "@/components/modules/PublicProduct/ProductFilters";
 
-const PublicPage = async () => {
-  // Define the 5 category slugs to display (in order of preference)
-  const preferredCategorySlugs = [
-    "skin-care",
-    "mom-baby",
-    "hair-beauty",
-    "supplement",
-    "accessories",
-    "perfume",
-  ];
+const MainCategoryGroup = async ({
+  mainItem,
+  allCategories,
+}: {
+  mainItem: any;
+  allCategories: Category[];
+}) => {
+  const mainSlug = mainItem.href.split("/").pop();
+  const mainCategory = allCategories.find((cat: any) => cat.slug === mainSlug);
+
+  if (!mainCategory) return null;
+
+  const subCategorySlugs =
+    mainItem.subItems
+      ?.filter((sub: any) => sub.href.includes("/categorys/"))
+      .map((sub: any) => sub.href.split("/").pop()) || [];
+
+  const subCategories = allCategories.filter((cat: any) =>
+    subCategorySlugs.includes(cat.slug),
+  );
+
+  const categoryIds = [mainCategory.id, ...subCategories.map((c) => c.id)];
+
+  try {
+    const productResponses = await Promise.all(
+      categoryIds.map((id) => getAllProductByCategory("limit=12", id || "")),
+    );
+
+    const allProducts = productResponses.flatMap(
+      (res) => res?.data?.data || res?.data || [],
+    );
+
+    const uniqueProducts = Array.from(
+      new Map(allProducts.map((p) => [p.id, p])).values(),
+    );
+
+    if (uniqueProducts.length === 0) return null;
+
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 mb-12 md:mb-20 last:mb-0 scale-up">
+        <CategoryShowcase
+          category={mainCategory}
+          initialProducts={uniqueProducts}
+          title={mainCategory.name}
+        />
+      </div>
+    );
+  } catch (error) {
+    console.error(`Error loading group for ${mainCategory.name}:`, error);
+    return null;
+  }
+};
+
+const PublicPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+    limit?: string;
+    searchTerm?: string;
+    categoryId?: string;
+    brandId?: string;
+    sortBy?: string;
+    sortOrder?: string;
+  }>;
+}) => {
+  const params = await searchParams;
+  const limit = params.limit || "12";
 
   try {
     const sectionsResponse = await getSections();
     const allSections = sectionsResponse?.data || [];
 
-    // Fetch all categories
     const allCategoriesResult = await fetchAllCategories("limit=100");
     const allCategories = allCategoriesResult?.data || [];
-
-    let categoriesToShow = preferredCategorySlugs
-      .map((slug) => allCategories.find((cat: any) => cat.slug === slug))
-      .filter((cat) => cat !== undefined);
-
-    console.log("📌 Categories to show:", categoriesToShow.length);
-    console.log(
-      "📌 Categories to show:",
-      categoriesToShow.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-      })),
-    );
 
     const heroSections = allSections
       .filter(
@@ -54,40 +102,26 @@ const PublicPage = async () => {
       .sort((a: Section, b: Section) => {
         const dateA = new Date(a.createdAt || 0).getTime();
         const dateB = new Date(b.createdAt || 0).getTime();
-        return dateB - dateA; // Newest first
+        return dateB - dateA;
       });
 
     const heroSection: Section | undefined = heroSections[0];
 
-    let searchParams = new Promise<{
-      page?: string;
-      limit?: string;
-      searchTerm?: string;
-      categoryId?: string;
-      brandId?: string;
-      sortBy?: string;
-      sortOrder?: string;
-    }>((resolve) => {
-      resolve({});
-    });
-
     return (
       <div>
         {heroSection ? (
-          <section className="hidden md:block p-2">
-            <div className="container mx-auto">
-              <HeroSliderWrapper
-                section={heroSection}
-                autoPlay={true}
-                autoPlayInterval={5000}
-                showNavigation={true}
-                showDots={true}
-                pauseOnHover={true}
-                height="calc(100vh - 280px)"
-                className="shadow-2xl"
-                showText={false}
-              />
-            </div>
+          <section className="hidden md:block w-full">
+            <HeroSliderWrapper
+              section={heroSection}
+              autoPlay={true}
+              autoPlayInterval={5000}
+              showNavigation={true}
+              showDots={true}
+              pauseOnHover={true}
+              height="calc(100vh - 280px)"
+              className="shadow-2xl"
+              showText={false}
+            />
           </section>
         ) : (
           <section className="hidden md:block p-2">
@@ -101,126 +135,57 @@ const PublicPage = async () => {
         </div>
         <CategoryMarquee categories={allCategories} />
 
-        {/* Category Showcases - Display 5 Specific Categories */}
-
         <div className="container mx-auto px-4 py-12">
           <BestProductSlider />
-          {preferredCategorySlugs.map((slug) => {
-            const category = allCategories.find(
-              (cat: any) => cat.slug === slug,
-            );
-
-            if (category) {
-              // Show category with products
-              return <CategoryShowcase key={category.id} category={category} />;
-            } else {
-              // Show placeholder for missing category
-              return (
-                <div key={slug} className="space-y-6 mb-12">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 uppercase">
-                        {slug
-                          .split("-")
-                          .map(
-                            (word) =>
-                              word.charAt(0).toUpperCase() + word.slice(1),
-                          )
-                          .join(" ")}
-                      </h2>
-                    </div>
-                  </div>
-                  <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed">
-                    <p className="text-gray-600 text-lg font-medium">
-                      No Data Found
-                    </p>
-                    <p className="text-gray-500 text-sm mt-2">
-                      This category has not been created yet
-                    </p>
-                  </div>
-                  <div className="border-b border-gray-200 mt-8"></div>
-                </div>
-              );
-            }
-          })}
+          {navItems
+            .filter((item) =>
+              [
+                "SKINCARE",
+                "PERFUME",
+                "MOM & BABY",
+                "SUPPLEMENT",
+                "HAIR AND BEAUTY",
+                "ACCESSORIES",
+              ].includes(item.title),
+            )
+            .map((mainItem) => (
+              <MainCategoryGroup
+                key={mainItem.title}
+                mainItem={mainItem}
+                allCategories={allCategories}
+              />
+            ))}
         </div>
 
-        {/* Recommended Products Section */}
-        <div className=" container mx-auto px-4 py-8 mb-2 flex items-center justify-between">
-          <div className="">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
+        <div className="container mx-auto px-4 py-8 mb-2 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
               RECOMMENDED FOR YOU
             </h1>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-              <div className="flex items-center border rounded-md">
-                <Button variant="ghost" size="sm" className="rounded-r-none">
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-l-none border-l"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+          <div className="flex gap-4 items-center">
+            <Link href="/product">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 border-pink-500 text-pink-600 font-semibold hover:bg-pink-50"
+              >
+                See All
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <ProductFilters />
           </div>
         </div>
-        <ProductsPage searchParams={searchParams} />
+        <ProductsPage searchParams={Promise.resolve({ ...params, limit })} />
       </div>
     );
   } catch (error) {
     console.error("Error in PublicPage:", error);
-    // Fallback if categories fail to load
-    let searchParams = new Promise<{
-      page?: string;
-      limit?: string;
-      searchTerm?: string;
-      categoryId?: string;
-      brandId?: string;
-      sortBy?: string;
-      sortOrder?: string;
-    }>((resolve) => {
-      resolve({});
-    });
-
     return (
-      <div>
-        <div className=" container mx-auto px-4 py-8 mb-8 flex items-center justify-between">
-          <div className="">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
-              RECOMMENDED FOR YOU
-            </h1>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-              <div className="flex items-center border rounded-md">
-                <Button variant="ghost" size="sm" className="rounded-r-none">
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-l-none border-l"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <ProductsPage searchParams={searchParams} />
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
+        <ProductsPage searchParams={Promise.resolve({ limit })} />
       </div>
     );
   }

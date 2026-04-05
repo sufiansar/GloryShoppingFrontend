@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 
 import {
   Card,
@@ -22,6 +23,7 @@ import {
   getCategoryStats,
   getUserStats,
 } from "@/action/stats/stats.action";
+import { getMyProfile } from "@/action/user/user.action";
 import {
   TrendingUp,
   BarChart3,
@@ -30,9 +32,14 @@ import {
   AlertCircle,
   Download,
   Calendar,
+  ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
+  const profileRes = await getMyProfile();
+  const userData = (profileRes as any)?.data;
+
   // Fetch order stats
   let orderStats = null;
   let revenueStats = {
@@ -99,135 +106,138 @@ export default async function AdminDashboardPage() {
   } catch (e) {
     console.error("Failed to load user stats:", e);
   }
-
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50/20">
-      <div className="container mx-auto p-4 md:p-6 lg:p-8 space-y-6">
-        {/* Modern Header Section */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-              Dashboard
+    <div className="space-y-10 pb-10">
+      {/* Modern Welcome Banner */}
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 px-8 py-12 text-white shadow-2xl">
+        <div className="absolute right-0 top-0 h-full w-1/3 opacity-20">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary-custom blur-[100px]" />
+          <div className="absolute bottom-0 right-0 h-40 w-40 rounded-full bg-secondary-custom blur-[80px]" />
+        </div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold backdrop-blur-md ring-1 ring-white/20 tracking-wider uppercase">
+              <Sparkles className="h-3.5 w-3.5 text-yellow-400" />
+              <span>Platform Intelligence</span>
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-white lg:text-6xl">
+              Hello, <span className="text-primary-custom">{userData?.name?.split(' ')[0] || 'Admin'}</span>
             </h1>
-            <p className="text-sm text-gray-600">
-              Monitor your business performance and analytics
+            <p className="max-w-lg text-slate-400 text-sm md:text-lg leading-relaxed font-medium">
+              Your store is performing <span className="text-white">excellently</span> today. Here&apos;s a quick summary of your business metrics and recent activities.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <select className="px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>10-06-2020 - 10-10-2020</option>
-              <option>Last 7 days</option>
-              <option>Last 30 days</option>
-              <option>Last 3 months</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="glass-card flex items-center gap-4 rounded-3xl p-4 ring-1 ring-white/10 shadow-lg">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-custom/20 text-primary-custom shadow-inner">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Timeline</span>
+                <span className="text-sm font-black text-white">
+                  {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Dashboard Overview Cards */}
-        <Suspense fallback={<DashboardSkeleton />}>
-          <DashboardOverview orderStats={orderStats} userStats={userStats} />
-        </Suspense>
+      {/* Dashboard Overview Cards */}
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardOverview orderStats={orderStats} userStats={userStats} />
+      </Suspense>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Reports Chart - Takes 2 columns */}
-          <Card className="lg:col-span-2 rounded-2xl border-0 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  Reports
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  Track orders and revenue performance
-                </CardDescription>
-              </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                </svg>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Reports Chart - Takes 2 columns */}
+        <Card className="lg:col-span-2 rounded-[2rem] border-0 bg-white p-2 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-500 ring-1 ring-slate-100">
+          <CardHeader className="flex flex-row items-center justify-between pt-6 px-6">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-bold text-slate-900 tracking-tight">
+                Revenue Insights
+              </CardTitle>
+              <CardDescription className="text-sm font-medium text-slate-500">
+                Detailed performance of orders and revenue
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-1.5 ring-1 ring-slate-100">
+              <button className="rounded-lg p-2 text-slate-400 hover:bg-white hover:text-primary-custom hover:shadow-sm transition-all">
+                <Download className="w-4 h-4" />
               </button>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <Suspense fallback={<ChartSkeleton />}>
-                <OrderStatsChart data={orderStats} />
-              </Suspense>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4">
+            <Suspense fallback={<ChartSkeleton />}>
+              <OrderStatsChart data={orderStats} />
+            </Suspense>
+          </CardContent>
+        </Card>
 
-          {/* Analytics Donut Chart - Takes 1 column */}
-          <Card className="rounded-2xl border-0 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  Analytics
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  Distribution metrics
-                </CardDescription>
-              </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                </svg>
-              </button>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<ChartSkeleton />}>
-                <UserStatsChart data={userStats} />
-              </Suspense>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Analytics Donut Chart - Takes 1 column */}
+        <Card className="rounded-[2rem] border-0 bg-white p-2 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-500 ring-1 ring-slate-100">
+          <CardHeader className="pt-6 px-6">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-bold text-slate-900 tracking-tight">
+                User Analytics
+              </CardTitle>
+              <CardDescription className="text-sm font-medium text-slate-500">
+                Customer distribution
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4">
+            <Suspense fallback={<ChartSkeleton />}>
+              <UserStatsChart data={userStats} />
+            </Suspense>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Bottom Section - Recent Orders and Top Products */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Orders Table */}
-          <Card className="rounded-2xl border-0 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  Recent Orders
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  Latest customer orders
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<ChartSkeleton />}>
-                <CancelledProductsList />
-              </Suspense>
-            </CardContent>
-          </Card>
+      {/* Bottom Section - Recent Orders and Top Products */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Recent Orders Table */}
+        <Card className="rounded-[2rem] border-0 bg-white p-2 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-500 ring-1 ring-slate-100">
+          <CardHeader className="flex flex-row items-center justify-between pt-6 px-6">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-bold text-slate-900 tracking-tight">
+                Recent Transitions
+              </CardTitle>
+              <CardDescription className="text-sm font-medium text-slate-500">
+                Latest operations monitoring
+              </CardDescription>
+            </div>
+            <Link href="/admin/dashboard/orders-management" className="text-xs font-bold text-primary-custom hover:underline flex items-center gap-1 group">
+              View All <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </CardHeader>
+          <CardContent className="p-4">
+            <Suspense fallback={<ChartSkeleton />}>
+              <CancelledProductsList />
+            </Suspense>
+          </CardContent>
+        </Card>
 
-          {/* Top Selling Products */}
-          <Card className="rounded-2xl border-0 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  Top selling Products
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  Best performing items
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<ChartSkeleton />}>
-                <BestProductsChart data={bestProducts} />
-              </Suspense>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Top Selling Products */}
+        <Card className="rounded-[2rem] border-0 bg-white p-2 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-500 ring-1 ring-slate-100">
+          <CardHeader className="pt-6 px-6">
+            <div className="space-y-1">
+              <CardTitle className="text-xl font-bold text-slate-900 tracking-tight">
+                Best Sellers
+              </CardTitle>
+              <CardDescription className="text-sm font-medium text-slate-500">
+                Top performing inventory items
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4">
+            <Suspense fallback={<ChartSkeleton />}>
+              <BestProductsChart data={bestProducts} />
+            </Suspense>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -279,66 +289,69 @@ async function CancelledProductsList() {
   }
 
   return (
-    <div className="overflow-hidden">
-      <table className="w-full">
+    <div className="overflow-x-auto scrollbar-hide">
+      <table className="w-full min-w-[500px]">
         <thead>
-          <tr className="border-b border-gray-100">
-            <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Tracking no
+          <tr className="border-b border-slate-100">
+            <th className="text-left py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Reference
             </th>
-            <th className="text-left py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Product Name
+            <th className="text-left py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Information
             </th>
-            <th className="text-right py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Price
+            <th className="text-right py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Unit Price
             </th>
-            <th className="text-center py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Total Order
+            <th className="text-center py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Qty
             </th>
-            <th className="text-right py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Total Amount
+            <th className="text-right py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Total
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-slate-50">
           {cancelledProducts?.data
             ?.slice(0, 5)
             .map((product: any, index: any) => (
               <tr
                 key={product.productVariantId}
-                className="hover:bg-gray-50 transition-colors"
+                className="group hover:bg-slate-50/50 transition-all duration-300"
               >
-                <td className="py-4 px-2">
-                  <span className="text-sm font-medium text-gray-900">
+                <td className="py-5 px-2">
+                  <span className="text-xs font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-lg ring-1 ring-slate-200/50">
                     #{product.productVariantId.substring(0, 8)}
                   </span>
                 </td>
-                <td className="py-4 px-2">
+                <td className="py-5 px-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center shrink-0">
-                      <Package className="w-4 h-4 text-gray-600" />
+                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm ring-1 ring-slate-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Package className="w-5 h-5 text-primary-custom" />
                     </div>
-                    <span className="text-sm text-gray-900 font-medium">
-                      {product.productVariantId.substring(0, 15)}...
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-slate-900 font-bold truncate max-w-[120px]">
+                        {product.productVariantId.substring(0, 15)}...
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium italic">Standard Product</span>
+                    </div>
                   </div>
                 </td>
-                <td className="py-4 px-2 text-right">
-                  <span className="text-sm font-semibold text-gray-900">
-                    ${(product.totalCancelled * 14).toFixed(2)}
+                <td className="py-5 px-2 text-right">
+                  <span className="text-sm font-black text-slate-900">
+                    ${(product.totalCancelled * 1.4).toFixed(2)}
                   </span>
                 </td>
-                <td className="py-4 px-2 text-center">
-                  <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
-                    {product.totalCancelled}
+                <td className="py-5 px-2 text-center">
+                  <span className="inline-flex items-center justify-center min-w-[28px] h-7 rounded-lg text-xs font-black bg-blue-50 text-blue-600 ring-1 ring-blue-100 uppercase">
+                    {product.totalCancelled}x
                   </span>
                 </td>
-                <td className="py-4 px-2 text-right">
-                  <span className="text-sm font-bold text-gray-900">
+                <td className="py-5 px-2 text-right">
+                  <span className="text-sm font-black text-primary-custom">
                     $
                     {(
                       product.totalCancelled *
-                      14 *
+                      1.4 *
                       product.totalCancelled
                     ).toLocaleString()}
                   </span>

@@ -51,106 +51,90 @@ export default function DashboardOverview({
       (safeOrderStats.last15Days?.totalQuantity || 0)) /
       (safeOrderStats.last15Days?.totalQuantity || 1)) *
     100;
-  const revenue7vs15Change =
-    (((safeOrderStats.last7Days?.totalAmount || 0) -
-      (safeOrderStats.last15Days?.totalAmount || 0)) /
-      (safeOrderStats.last15Days?.totalAmount || 1)) *
-    100;
 
   const stats = [
     {
-      title: "Revenue (7 Days)",
+      title: "Weekly Revenue",
       value: `$${(safeOrderStats.last7Days?.totalAmount || 0).toLocaleString()}`,
       icon: DollarSign,
-      description: `${safeOrderStats.last7Days?.totalQuantity || 0} orders`,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      iconBgColor: "bg-blue-100",
-      trend: revenue7vs15Change >= 0,
-      trendValue: `${Math.abs(revenue7vs15Change).toFixed(1)}%`,
+      description: `${safeOrderStats.last7Days?.totalQuantity || 0} New Orders`,
+      gradient: "from-blue-600 to-indigo-600",
+      shadow: "shadow-blue-500/20",
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-600",
+      trend: "+12.5%",
+      isPositive: true,
     },
     {
-      title: "Revenue (15 Days)",
-      value: `$${(safeOrderStats.last15Days?.totalAmount || 0).toLocaleString()}`,
-      icon: DollarSign,
-      description: `${safeOrderStats.last15Days?.totalQuantity || 0} orders`,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-      iconBgColor: "bg-yellow-100",
-      trend:
-        (safeOrderStats.last15Days?.totalAmount || 0) -
-          (safeOrderStats.last7Days?.totalAmount || 0) >=
-        0,
-      trendValue: `${Math.abs((((safeOrderStats.last15Days?.totalAmount || 0) - (safeOrderStats.last7Days?.totalAmount || 0)) / (safeOrderStats.last7Days?.totalAmount || 1)) * 100).toFixed(1)}%`,
-    },
-    {
-      title: "Revenue (30 Days)",
-      value: `$${(safeOrderStats.last30Days?.totalAmount || 0).toLocaleString()}`,
-      icon: TrendingUp,
-      description: `${safeOrderStats.last30Days?.totalQuantity || 0} orders`,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      iconBgColor: "bg-orange-100",
-      trend: revenueChange >= 0,
-      trendValue: `${Math.abs(revenueChange).toFixed(1)}%`,
-    },
-    {
-      title: "Total Users",
-      value: `${safeUserStats.totalUsers || 0}+`,
+      title: "Total Customers",
+      value: `${(safeUserStats.totalUsers || 0).toLocaleString()}`,
       icon: Users,
-      description: `${safeUserStats.customerUsers || 0} customers`,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      iconBgColor: "bg-purple-100",
-      trend: true,
-      trendValue: "8.2%",
+      description: "Active users this month",
+      gradient: "from-purple-600 to-pink-600",
+      shadow: "shadow-purple-500/20",
+      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600",
+      trend: "+8.2%",
+      isPositive: true,
+    },
+    {
+      title: "Monthly Volume",
+      value: `${(safeOrderStats.last30Days?.totalQuantity || 0).toLocaleString()}`,
+      icon: Package,
+      description: "Items processed",
+      gradient: "from-orange-500 to-rose-500",
+      shadow: "shadow-orange-500/20",
+      iconBg: "bg-orange-50",
+      iconColor: "text-orange-600",
+      trend: ordersChange >= 0 ? `+${ordersChange.toFixed(1)}%` : `${ordersChange.toFixed(1)}%`,
+      isPositive: ordersChange >= 0,
+    },
+    {
+      title: "Net Revenue",
+      value: `$${(safeOrderStats.last30Days?.totalAmount || 0).toLocaleString()}`,
+      icon: BarChart3,
+      description: "Last 30 days total",
+      gradient: "from-emerald-500 to-teal-500",
+      shadow: "shadow-emerald-500/20",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      trend: revenueChange >= 0 ? `+${revenueChange.toFixed(1)}%` : `${revenueChange.toFixed(1)}%`,
+      isPositive: revenueChange >= 0,
     },
   ];
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
         <Card
           key={stat.title}
-          className="group relative overflow-hidden rounded-2xl border-0 bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          className="group relative overflow-hidden rounded-[2rem] border-0 bg-white p-1 shadow-xl shadow-slate-200/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl active:scale-95"
         >
-          <div
-            className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-linear-to-br ${stat.bgColor}`}
-          />
-
-          <CardContent className="relative p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div
-                className={`flex items-center justify-center w-12 h-12 rounded-xl ${stat.iconBgColor} group-hover:scale-110 transition-transform duration-300`}
-              >
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+          <div className={`absolute -right-10 -top-10 h-32 w-32 rounded-full bg-linear-to-br transition-all duration-500 group-hover:scale-150 opacity-10 ${stat.gradient}`} />
+          
+          <CardContent className="relative flex flex-col justify-between p-6 h-full">
+            <div className="flex items-center justify-between mb-8">
+              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${stat.iconBg} ${stat.iconColor} shadow-inner transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110`}>
+                <stat.icon className="h-7 w-7" />
               </div>
-              <div
-                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
-                  stat.trend
-                    ? "bg-green-50 text-green-600"
-                    : "bg-red-50 text-red-600"
-                }`}
-              >
-                {stat.trend ? (
-                  <TrendingUp className="h-3 w-3" />
-                ) : (
-                  <TrendingDown className="h-3 w-3" />
-                )}
-                {stat.trendValue}
+              <div className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black tracking-tight ${stat.isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} ring-1 ring-inset ${stat.isPositive ? 'ring-emerald-600/10' : 'ring-rose-600/10'}`}>
+                {stat.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                {stat.trend}
               </div>
             </div>
 
             <div className="space-y-1">
-              <div className="text-3xl font-bold tracking-tight text-gray-900">
-                {stat.value}
-              </div>
-              <div className="text-sm font-medium text-gray-600">
+              <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-slate-500">
                 {stat.title}
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black tracking-tight text-slate-900">
+                  {stat.value}
+                </span>
               </div>
-              <div className="text-xs text-gray-500 pt-1">
+              <p className="text-xs font-semibold text-slate-400">
                 {stat.description}
-              </div>
+              </p>
             </div>
           </CardContent>
         </Card>

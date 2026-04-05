@@ -112,25 +112,52 @@ import "keen-slider/keen-slider.min.css";
 
 interface CategoryShowcaseProps {
   category: Category;
+  limit?: number;
+  title?: string;
+  isSubCategory?: boolean;
+  initialProducts?: Product[];
 }
 
-export default function CategoryShowcase({ category }: CategoryShowcaseProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+export default function CategoryShowcase({
+  category,
+  limit = 10,
+  title,
+  isSubCategory = false,
+  initialProducts,
+}: CategoryShowcaseProps) {
+  const [products, setProducts] = useState<Product[]>(initialProducts || []);
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(!initialProducts);
   const timer = useRef<any>(null);
 
   useEffect(() => {
+    if (initialProducts) {
+      setProducts(initialProducts);
+      setIsLoading(false);
+      return;
+    }
     const fetchProducts = async () => {
       try {
-        const result = await getAllProductByCategory("", category.id || "");
+        setIsLoading(true);
+        const result = await getAllProductByCategory(
+          `limit=${limit}`,
+          category.id || "",
+        );
         setProducts(result?.data?.data || result?.data || []);
+        setIsLoading(false);
       } catch (err) {
         console.error(err);
         setError(true);
+        setIsLoading(false);
       }
     };
     fetchProducts();
-  }, [category.id]);
+  }, [category.id, limit, initialProducts]);
+
+  if (isSubCategory && !isLoading && products.length === 0) {
+    return null;
+  }
+
 
   const [sliderRef, slider] = useKeenSlider<HTMLDivElement>({
     slides: {
@@ -166,35 +193,47 @@ export default function CategoryShowcase({ category }: CategoryShowcaseProps) {
   };
 
   return (
-    <div className="space-y-6 mb-12">
+    <div
+      className={`space-y-4 ${
+        isSubCategory ? "mb-6" : "mb-12 border-b border-gray-100 pb-8 last:border-b-0"
+      }`}
+    >
       {/* Category Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 uppercase">
-            {category.name}
+          <h2
+            className={`${
+              isSubCategory ? "text-lg font-bold text-pink-600" : "text-2xl md:text-3xl font-bold text-gray-900"
+            } uppercase`}
+          >
+            {title || category.name}
           </h2>
-          {category.description && (
+          {category.description && !isSubCategory && (
             <p className="text-gray-600 mt-1 text-sm md:text-base">
               {category.description}
             </p>
           )}
         </div>
-        <Link href={`/categorys/${category.slug}`}>
-          <Button
-            variant="outline"
-            className="gap-2 border border-pink-500 text-pink-500 transition-colors"
-          >
-            See More
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </Link>
+        {!isSubCategory && (
+          <Link href={`/categorys/${category.slug}`}>
+            <Button
+              variant="outline"
+              className="gap-2 border border-pink-500 text-pink-500 transition-colors"
+            >
+              See More
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Products Slider */}
       {error ? (
-        <div className="text-center py-12 bg-red-50 rounded-lg border border-red-200">
-          <p className="text-red-600">Error loading products</p>
-        </div>
+        !isSubCategory && (
+          <div className="text-center py-12 bg-red-50 rounded-lg border border-red-200">
+            <p className="text-red-600">Error loading products</p>
+          </div>
+        )
       ) : products.length > 0 ? (
         <div ref={sliderRef} className="keen-slider cursor-grab">
           {products.map((product) => (
@@ -204,11 +243,13 @@ export default function CategoryShowcase({ category }: CategoryShowcaseProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
-            No products available in this category yet
-          </p>
-        </div>
+        !isSubCategory && (
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">
+              No products available in this category yet
+            </p>
+          </div>
+        )
       )}
     </div>
   );

@@ -539,7 +539,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           ref={marqueeRef}
           className="flex gap-8"
           style={{
-            animation: `marquee-scroll-left-to-right 12s linear ${isMarqueeHovered ? "paused" : "running"} infinite`,
+            animation: `marquee-scroll-left-to-right 60s linear ${isMarqueeHovered ? "paused" : "running"} infinite`,
             paddingLeft: "60px",
           }}
         >

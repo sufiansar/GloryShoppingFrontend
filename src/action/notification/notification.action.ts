@@ -11,7 +11,7 @@ interface ApiResponse<T = any> {
 // Get user notifications
 export async function getUserNotifications() {
   try {
-    const response = await makeApiCall<ApiResponse>("/notifications/user", {
+    const response = await makeApiCall<ApiResponse>("/notification/user", {
       method: "GET",
     });
 
@@ -35,10 +35,10 @@ export async function getUserNotifications() {
 }
 
 // Mark notification as read
-export async function markNotificationAsRead(notificationId: string) {
+export async function markAsRead(notificationId: string) {
   try {
     const response = await makeApiCall<ApiResponse>(
-      `/notifications/${notificationId}/read`,
+      `/notification/${notificationId}/read`,
       {
         method: "PATCH",
       },
@@ -64,11 +64,14 @@ export async function markNotificationAsRead(notificationId: string) {
 }
 
 // Get guest notifications
-export async function getGuestNotifications() {
+export async function getGuestNotifications(guestId?: string) {
   try {
-    const response = await makeApiCall<ApiResponse>("/notifications/guest", {
-      method: "GET",
-    });
+    const response = await makeApiCall<ApiResponse>(
+      `/notification/guest${guestId ? `?guestId=${guestId}` : ""}`,
+      {
+        method: "GET",
+      },
+    );
 
     if (response?.success) {
       return {
@@ -88,3 +91,66 @@ export async function getGuestNotifications() {
     };
   }
 }
+
+// Register webhook
+export async function registerWebhook(webhookUrl: string) {
+  try {
+    const response = await makeApiCall<ApiResponse>(
+      "/notification/webhook/register",
+      {
+        method: "POST",
+        body: JSON.stringify({ webhookUrl }),
+      },
+    );
+
+    if (response?.success) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+
+    return {
+      success: false,
+      error: response?.message || "Failed to register webhook",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error?.message || "Something went wrong",
+    };
+  }
+}
+
+// Get webhook logs
+export async function getWebhookLogs() {
+  try {
+    const response = await makeApiCall<ApiResponse>(
+      "/notification/webhook/logs",
+      {
+        method: "GET",
+      },
+    );
+
+    if (response?.success) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    }
+
+    return {
+      success: false,
+      error: response?.message || "Failed to fetch webhook logs",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error?.message || "Something went wrong",
+    };
+  }
+}
+
+// For backward compatibility (maps markAsRead to markNotificationAsRead if needed by old components)
+export const markNotificationAsRead = markAsRead;
+

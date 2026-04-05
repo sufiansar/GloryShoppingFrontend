@@ -58,8 +58,8 @@ export const makeApiCall = async <T>(
   // Use revalidate for GET requests during static generation, no-store for authenticated requests
   const isGetRequest = options.method === "GET" || !options.method;
   const isAuthenticatedRequest = session?.accessToken;
+  const hasGuestSession = headers.has("x-session-id") || headers.has("Cookie");
   
-
   const fetchOptions: any = {
     ...options,
     headers,
@@ -67,10 +67,13 @@ export const makeApiCall = async <T>(
   };
 
   // Add cache/revalidate strategy
-  if (isGetRequest && !isAuthenticatedRequest) {
+  if (options.cache) {
+    // If the caller explicitly provided a cache setting (like "no-store"), respect it
+    fetchOptions.cache = options.cache;
+  } else if (isGetRequest && !isAuthenticatedRequest && !hasGuestSession) {
     fetchOptions.next = { revalidate: 3600 }; // 1 hour revalidation for static generation
-  } else if (isAuthenticatedRequest) {
-    fetchOptions.cache = "no-store"; // No cache for authenticated requests
+  } else if (isAuthenticatedRequest || hasGuestSession) {
+    fetchOptions.cache = "no-store"; // No cache for authenticated or session-based requests
   }
 
   const res = await fetch(

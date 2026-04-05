@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { Search, MessageCircle, Send, MessageSquare } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, MessageCircle, Send, MessageSquare, Loader2, Package, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { getAllProducts } from "@/action/product/product.action";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,11 @@ const SecondaryNavbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2); // Demo: replace with real count from state/context
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const { data: session, status } = useSession();
@@ -36,8 +42,53 @@ const SecondaryNavbar = () => {
       router.push(`/product?${params.toString()}`);
       setSearchTerm("");
       setIsSearchVisible(false);
+      setShowResults(false);
     }
   };
+
+  // Real-time Search Logic
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchTerm.trim().length >= 1) {
+        setIsSearching(true);
+        setShowResults(true);
+        try {
+          const res = await getAllProducts(`searchTerm=${searchTerm}&limit=6`);
+          if (res?.data) {
+            const products = res.data.data || res.data || [];
+            console.log("Search results received:", products);
+            setSearchResults(Array.isArray(products) ? products : []);
+          } else {
+            setSearchResults([]);
+          }
+        } catch (error) {
+          console.error("Search error:", error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  // Click outside to close results
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const isOutsideDesktop = desktopSearchRef.current && !desktopSearchRef.current.contains(event.target as Node);
+      const isOutsideMobile = mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node);
+
+      if (isOutsideDesktop && isOutsideMobile) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleWhatsAppClick = () => {
     const phoneNumber = "8801577437554";
@@ -57,8 +108,8 @@ const SecondaryNavbar = () => {
   };
 
   return (
-    <nav className="top-0 z-50 w-full bg-white shadow-xl border-b border-gray-100">
-      <div className="container mx-auto px-4">
+    <nav className="relative z-[100] w-full bg-white shadow-xl border-b border-gray-100 font-sans">
+      <div className="w-full px-4 lg:px-8 xl:px-12">
         {/* Main Navigation */}
         <div className="flex items-center justify-between py-3">
           {/* Logo */}
@@ -80,7 +131,7 @@ const SecondaryNavbar = () => {
               {/* Brand text */}
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm sm:text-base md:text-lg font-black bg-linear-to-r from-[#ca428b] via-pink-500 to-[#f59e0b] bg-clip-text text-transparent drop-shadow-sm">
-                  Glory Shopping
+                  Glory Shopping BD
                 </span>
                 <span className="text-[10px] sm:text-xs md:text-xs text-gray-600 font-semibold tracking-wide uppercase">
                   Premium Beauty & Skincare
@@ -90,7 +141,7 @@ const SecondaryNavbar = () => {
           </Link>
 
           {/* Desktop Search - Enhanced UI */}
-          <div className="hidden lg:block absolute left-1/2 -translate-x-1/2">
+          <div className="hidden lg:block absolute left-1/2 -translate-x-1/2" ref={desktopSearchRef}>
             <form
               onSubmit={handleSearch}
               className="relative w-96 2xl:w-120 group"
@@ -108,7 +159,28 @@ const SecondaryNavbar = () => {
                   className="relative pl-16 pr-14 h-14 rounded-full border-2 border-gray-200 group-focus-within:border-transparent focus:border-transparent focus:ring-0 transition-all shadow-lg group-hover:shadow-2xl group-focus-within:shadow-[0_0_30px_rgba(202,66,139,0.25)] bg-linear-to-r from-white via-gray-50 to-white font-medium text-gray-800 placeholder:text-gray-500 hover:border-gray-300"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => {
+                    if (searchTerm.length >= 1) {
+                      setShowResults(true);
+                    }
+                  }}
                 />
+
+                {/* Loader or Clear Button */}
+                <div className="absolute right-14 top-1/2 -translate-y-1/2">
+                  {isSearching ? (
+                    <Loader2 className="h-5 w-5 text-[#ca428b] animate-spin" />
+                  ) : searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
                 {/* Search Button */}
                 <button
                   type="submit"
@@ -117,6 +189,82 @@ const SecondaryNavbar = () => {
                   <Search className="h-5 w-5" />
                 </button>
               </div>
+
+              {/* Real-time Results Dropdown */}
+              {showResults && searchTerm.trim().length >= 1 && (
+                <div className="absolute top-full left-4 right-4 mt-4 bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-slate-900/10 border border-slate-100 overflow-hidden z-[110] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                      {isSearching ? "Searching..." : `Search Results (${searchResults.length})`}
+                    </span>
+                    {searchTerm && (
+                      <Link
+                        href={`/product?searchTerm=${searchTerm}`}
+                        onClick={() => setShowResults(false)}
+                        className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-custom hover:underline"
+                      >
+                        View All
+                      </Link>
+                    )}
+                  </div>
+
+                  <div className="max-h-[400px] overflow-y-auto scrollbar-hide py-2">
+                    {isSearching ? (
+                      <div className="py-12 flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="h-8 w-8 text-primary-custom animate-spin" />
+                        <p className="text-xs font-bold text-slate-400 animate-pulse">Finding matching products...</p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((product, index) => (
+                        <Link
+                          key={product.id || product.slug || index}
+                          href={`/product/${product.slug}`}
+                          onClick={() => {
+                            setShowResults(false);
+                            setSearchTerm("");
+                          }}
+                          className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition-colors group"
+                        >
+                          <div className="h-12 w-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+                            {product.thumbleImage ? (
+                              <Image
+                                src={product.thumbleImage}
+                                alt={product.name}
+                                width={48}
+                                height={48}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <Package className="h-5 w-5 text-slate-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-primary-custom transition-colors">
+                              {product.name}
+                            </h4>
+                            <p className="text-[10px] font-semibold text-slate-400 truncate tracking-tight uppercase">
+                              {product?.category?.name || "Premium Product"}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-sm font-black text-slate-900">${product.price.toLocaleString()}</span>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="py-12 flex flex-col items-center justify-center gap-4 text-center px-6">
+                        <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center">
+                          <Search className="h-6 w-6 text-slate-300" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-slate-900">No results found</p>
+                          <p className="text-xs font-medium text-slate-400">Try searching with different keywords</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </form>
           </div>
 
@@ -132,69 +280,55 @@ const SecondaryNavbar = () => {
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Chat Button - Enhanced UI */}
+            {/* Chat Button - Premium UI */}
             <div className="relative z-30">
-              <Button
+              <button
                 onClick={handleChatClick}
-                className="relative bg-linear-to-r from-purple-500 via-pink-500 to-rose-600 hover:from-purple-600 hover:via-pink-600 hover:to-rose-700 text-white h-10 w-10 sm:h-11 sm:w-auto sm:px-5 rounded-full transition-all shadow-lg hover:shadow-2xl hover:scale-110 font-semibold border border-pink-300/60 hover:border-pink-200 flex items-center gap-1.5 group overflow-hidden active:scale-95"
-                size="icon"
+                className="relative bg-linear-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white h-[42px] px-3 sm:px-5 rounded-full transition-all shadow-sm hover:shadow-lg hover:shadow-pink-500/30 font-semibold flex items-center justify-center gap-2 group active:scale-95 border-none outline-none"
                 title="Live Chat Support"
               >
-                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
-                <div className="relative z-10">
-                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 relative shrink-0 group-hover:scale-125 transition-transform duration-300" />
-                  {unreadCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold p-0 rounded-full animate-pulse">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </Badge>
-                  )}
+                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 rounded-full transition-opacity duration-300" />
+                <MessageSquare className="h-4 w-4 sm:h-[18px] sm:w-[18px] relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                <span className="hidden sm:inline text-[13px] sm:text-[14px] font-bold relative z-10 tracking-wide">Chat</span>
+              </button>
+              {unreadCount > 0 && (
+                <div className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] flex items-center justify-center bg-red-600 text-white text-[10px] font-extrabold px-1.5 rounded-full shadow-md z-40 border-2 border-white animate-bounce">
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </div>
-                <span className="hidden sm:inline text-xs sm:text-sm font-bold whitespace-nowrap">
-                  Chat
-                </span>
-              </Button>
+              )}
             </div>
 
-            {/* Messenger Button - Enhanced UI */}
+            {/* Messenger Button - Premium UI */}
             <div className="relative z-30">
-              <Button
+              <button
                 onClick={handleMessengerClick}
-                className="bg-linear-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 text-white h-10 w-10 sm:h-11 sm:w-auto sm:px-5 rounded-full transition-all shadow-lg hover:shadow-2xl hover:scale-110 font-semibold border border-blue-300/60 hover:border-blue-200 flex items-center gap-1.5 group relative overflow-hidden active:scale-95"
-                size="icon"
+                className="relative bg-linear-to-r from-[#0084FF] to-[#0064C8] hover:from-[#0064C8] hover:to-[#004A99] text-white h-[42px] px-3 sm:px-5 rounded-full transition-all shadow-sm hover:shadow-lg hover:shadow-blue-500/30 font-semibold flex items-center justify-center gap-2 group active:scale-95 border-none outline-none"
                 title="Chat on Messenger"
               >
-                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
-                <Send className="h-4 w-4 sm:h-5 sm:w-5 relative shrink-0 group-hover:scale-125 transition-transform duration-300 z-10" />
-                <span className="hidden sm:inline text-xs sm:text-sm font-bold whitespace-nowrap">
-                  Messenger
-                </span>
-              </Button>
+                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 rounded-full transition-opacity duration-300" />
+                <Send className="h-4 w-4 sm:h-[18px] sm:w-[18px] relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                <span className="hidden sm:inline text-[13px] sm:text-[14px] font-bold relative z-10 tracking-wide">Messenger</span>
+              </button>
             </div>
 
-            {/* WhatsApp Button - Enhanced UI */}
+            {/* WhatsApp Button - Premium UI */}
             <div className="hidden sm:flex relative z-30">
-              <Button
+              <button
                 onClick={handleWhatsAppClick}
-                className="bg-linear-to-r from-green-400 via-green-500 to-emerald-600 hover:from-green-500 hover:via-green-600 hover:to-emerald-700 text-white h-11 px-5 rounded-full transition-all shadow-lg hover:shadow-2xl hover:scale-110 font-semibold border border-green-300/60 hover:border-green-200 flex items-center gap-1.5 group relative overflow-hidden active:scale-95"
-                size="icon"
+                className="relative bg-linear-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54] text-white h-[42px] px-3 sm:px-5 rounded-full transition-all shadow-sm hover:shadow-lg hover:shadow-green-500/30 font-semibold flex items-center justify-center gap-2 group active:scale-95 border-none outline-none"
                 title="Chat on WhatsApp"
               >
-                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse" />
-                <MessageCircle className="h-5 w-5 relative shrink-0 group-hover:scale-125 transition-transform duration-300" />
-                <span className="text-xs sm:text-sm font-bold whitespace-nowrap relative z-10">
-                  WhatsApp
-                </span>
-              </Button>
+                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 rounded-full transition-opacity duration-300" />
+                <MessageCircle className="h-4 w-4 sm:h-[18px] sm:w-[18px] relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-[13px] sm:text-[14px] font-bold relative z-10 tracking-wide">WhatsApp</span>
+              </button>
             </div>
           </div>
         </div>
 
         {/* Mobile Search - Enhanced UI */}
         {isSearchVisible && (
-          <div className="lg:hidden mt-3 pb-2">
+          <div className="lg:hidden mt-3 pb-2 relative" ref={mobileSearchRef}>
             <form onSubmit={handleSearch} className="relative">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
@@ -208,6 +342,52 @@ const SecondaryNavbar = () => {
                 />
               </div>
             </form>
+
+            {/* Mobile Results Dropdown */}
+            {showResults && searchTerm.trim().length >= 1 && (
+              <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden z-[110] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="max-h-[350px] overflow-y-auto scrollbar-hide py-2">
+                  {isSearching ? (
+                    <div className="py-8 flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="h-6 w-6 text-primary-custom animate-spin" />
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    searchResults.map((product, index) => (
+                      <Link
+                        key={product.id || product.slug || index}
+                        href={`/product/${product.slug}`}
+                        onClick={() => {
+                          setShowResults(false);
+                          setIsSearchVisible(false);
+                          setSearchTerm("");
+                        }}
+                        className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                          {product.thumbleImage ? (
+                            <Image
+                              src={product.thumbleImage}
+                              alt={product.name}
+                              width={40}
+                              height={40}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <Package className="h-5 w-5 text-slate-400" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-slate-900 truncate">{product.name}</h4>
+                          <span className="text-xs font-black text-primary-custom">${product.price}</span>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="py-8 text-center text-xs font-bold text-slate-400">No results found</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

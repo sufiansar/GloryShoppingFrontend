@@ -1,14 +1,13 @@
 "use server";
 
 import { CheckoutInput, OrderResponse } from "@/types/checkout.interface";
-import { fetchWithSession } from "../addToCart/addToCart.action";
 import { makeApiCall } from "../apiClinet";
 
 const ORDER_BASE = "/order";
 
 export const createOrder = async (payload: CheckoutInput) => {
   try {
-    const result = await fetchWithSession<OrderResponse>(ORDER_BASE, {
+    const result = await makeApiCall<OrderResponse>(ORDER_BASE, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -83,7 +82,7 @@ export const getAllOrders = async (queryString: string) => {
 
 export const getOrderById = async (id: string) => {
   try {
-    return await fetchWithSession<OrderResponse>(`${ORDER_BASE}/${id}`, {
+    return await makeApiCall<OrderResponse>(`${ORDER_BASE}/${id}`, {
       method: "GET",
     });
   } catch (error) {
