@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteCategoriesAction } from "@/action/categories/categories.action";
+import { toast } from "sonner";
 
 interface DeleteAlertProps {
   open: boolean;
@@ -36,12 +37,20 @@ export default function DeleteAlert({
       setIsDeleting(true);
       setError(null);
 
-      await deleteCategoriesAction(categoryId);
+      const result = await deleteCategoriesAction(categoryId);
+
+      if (result?.success || result?.data?.id) {
+        toast.success("Category deleted successfully");
+        onOpenChange(false);
+        router.refresh();
+      } else {
+        toast.error(result?.message || "Failed to delete category");
+      }
     } catch (error) {
       console.error("Delete error:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to delete category",
-      );
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete category";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
     }

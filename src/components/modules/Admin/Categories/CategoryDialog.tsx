@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import { updateCategoriesAction } from "@/action/categories/categories.action";
 import { Category } from "@/types/categories.interface";
+import { toast } from "sonner";
 
 interface CategoryDialogProps {
   open: boolean;
@@ -66,9 +67,14 @@ export default function CategoryDialog({
         formDataObj.append("images", JSON.stringify(category.images));
       }
 
-      await updateCategoriesAction(category?.id!, formDataObj);
+      const result = await updateCategoriesAction(category?.id!, formDataObj);
 
-      onOpenChange(false, true);
+      if (result?.success || result?.data?.id) {
+        toast.success("Category updated successfully");
+        onOpenChange(false, true);
+      } else {
+        toast.error(result?.message || "Failed to update category");
+      }
     } catch (error) {
       console.error("Update error:", error);
       setError(

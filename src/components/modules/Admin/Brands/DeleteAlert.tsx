@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteBrand } from "@/action/brand/brand.action";
+import { toast } from "sonner";
 
 interface DeleteAlertProps {
   open: boolean;
@@ -34,10 +35,14 @@ export default function DeleteAlert({
       setIsDeleting(true);
       setError(null);
 
-      await deleteBrand(brandId);
-
-      router.refresh();
-      onOpenChange(false);
+      const result = await deleteBrand(brandId);
+      if (result?.success || result?.data?.id) {
+        toast.success("Brand deleted successfully");
+        router.refresh();
+        onOpenChange(false);
+      } else {
+        toast.error(result?.message || "Failed to delete brand");
+      }
     } catch (error) {
       console.error("Delete error:", error);
       setError(

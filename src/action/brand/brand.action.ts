@@ -13,8 +13,9 @@ export const createBrand = async (formdata: FormData) => {
       body: formdata,
     });
 
-    if (result?.id) {
+    if (result?.success || result?.data?.id) {
       revalidatePath("/brand", "page");
+      revalidatePath("/admin/dashboard/brand/brand-management", "page");
       revalidatePath("/", "layout");
       // redirect("/brands");
     }
@@ -30,8 +31,10 @@ export const updateBrand = async (id: string, formdata: FormData) => {
   try {
     const modifyData = Object.fromEntries(formdata.entries());
 
-    const modify = {
-      ...modifyData,
+    const modify: any = {
+      name: modifyData.name,
+      slug: modifyData.slug,
+      country: modifyData.country,
       logoUrl: modifyData.logoUrl
         ? JSON.parse(modifyData.logoUrl as string)
         : "",
@@ -44,8 +47,9 @@ export const updateBrand = async (id: string, formdata: FormData) => {
       body: JSON.stringify(modify),
     });
 
-    if (result?.id) {
+    if (result?.success || result?.data?.id) {
       revalidatePath("/brand", "page");
+      revalidatePath("/admin/dashboard/brand/brand-management", "page");
       revalidatePath("/", "layout");
       // redirect("/brands");
     }
@@ -166,8 +170,9 @@ export const deleteBrand = async (id: string) => {
     method: "DELETE",
   });
 
-  if (result) {
+  if (result?.success || result?.data?.id) {
     revalidatePath("/brand", "page");
+    revalidatePath("/admin/dashboard/brand/brand-management", "page");
     revalidatePath("/", "layout");
   }
 

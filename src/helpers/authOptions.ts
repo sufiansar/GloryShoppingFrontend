@@ -47,9 +47,43 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        accessToken: { label: "Access Token", type: "text" },
+        refreshToken: { label: "Refresh Token", type: "text" },
       },
 
       async authorize(credentials) {
+        // Handle direct token sync from social login
+        if (credentials?.accessToken && credentials?.refreshToken) {
+          try {
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_BASE_API}/user/my-profile`,
+              {
+                headers: {
+                  Authorization: `Bearer ${credentials.accessToken}`,
+                },
+              },
+            );
+
+            if (res.ok) {
+              const result = await res.json();
+              const user = result?.data;
+              if (user) {
+                return {
+                  id: user.id || user._id, 
+                  name: user.name,
+                  email: user.email,
+                  image: user.profileImage,
+                  role: user.role,
+                  accessToken: credentials.accessToken,
+                  refreshToken: credentials.refreshToken,
+                };
+              }
+            }
+          } catch (error) {
+            console.error("Token sync fetch error:", error);
+          }
+        }
+
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
@@ -109,26 +143,30 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-      console.log("JWT Callback - User:", user);
-      console.log("JWT Callback - Token before:", token);
       if (user) {
+        // When a new user logs in, we reset the token fields to avoid 
+        // carrying over data from a previous social session.
         token.id = user.id;
         token.role = user.role;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
         token.accessToken = (user as any).accessToken;
         token.refreshToken = (user as any).refreshToken;
-      } else {
       }
-      console.log("JWT Callback - Token after:", token);
       return token;
     },
 
     async session({ session, token }) {
-      console.log("Session Callback - Token:", token);
-      session.user.id = token.id as string;
-      session.user.role = token.role as any;
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as any;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.picture as string;
+      }
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
-      console.log("Session Callback - Session:", session);
       return session;
     },
   },

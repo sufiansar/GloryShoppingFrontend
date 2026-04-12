@@ -24,6 +24,7 @@ export const logout = async () => {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
   });
 
   if (!res.ok) {

@@ -79,17 +79,17 @@ export function AppSidebar({ userInfo, navItems, ...props }: AppSidebarProps) {
           {userInfo ? (
             <div className="flex flex-col gap-5">
               <div className="flex items-center gap-3 overflow-hidden rounded-[2rem] bg-white/30 dark:bg-slate-800/30 p-2.5 shadow-sm border border-white/20 dark:border-slate-700/50 group-data-[collapsible=icon]:p-1.5 transition-all duration-300">
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary-custom/80 to-indigo-600/80 shadow-lg ring-2 ring-white/20">
+                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-custom shadow-lg ring-2 ring-white/20">
                   <span className="text-sm font-black text-white uppercase mt-0.5">
                     {userInfo.name?.charAt(0)}
                   </span>
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-800 bg-emerald-500 shadow-xs" />
+                  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-800 bg-primary-custom shadow-xs" />
                 </div>
                 <div className="flex flex-1 flex-col truncate group-data-[collapsible=icon]:hidden">
                   <span className="text-[13px] font-black text-slate-900 dark:text-white truncate">
                     {userInfo.name}
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-0.5">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-primary-custom mt-0.5">
                     {userInfo.role}
                   </span>
                 </div>

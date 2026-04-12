@@ -20,6 +20,7 @@ import Image from "next/image";
 import { Upload, X } from "lucide-react";
 import { Brand } from "@/types/brand.interface";
 import { createBrand, updateBrand } from "@/action/brand/brand.action";
+import { toast } from "sonner";
 
 interface BrandDialogProps {
   open?: boolean;
@@ -109,13 +110,19 @@ export default function BrandDialog({
         formDataObj.append("logoUrl", JSON.stringify([formData.logoUrl]));
       }
 
+      let result;
       if (mode === "create") {
-        await createBrand(formDataObj);
+        result = await createBrand(formDataObj);
       } else if (mode === "edit" && brand) {
-        await updateBrand(brand.id, formDataObj);
+        result = await updateBrand(brand.id, formDataObj);
       }
 
-      setOpen(false, true);
+      if (result?.success || result?.data?.id) {
+        toast.success(`Brand ${mode === "create" ? "created" : "updated"} successfully`);
+        setOpen(false, true);
+      } else {
+        toast.error(result?.message || `Failed to ${mode} brand`);
+      }
     } catch (error) {
       console.error("Error saving brand:", error);
       setError(error instanceof Error ? error.message : "Failed to save brand");

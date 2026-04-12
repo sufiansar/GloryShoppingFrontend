@@ -55,6 +55,36 @@ export const navItems: NavItem[] = [
         href: "/categorys/facewash",
       },
       {
+        title: "Sheet Mask",
+        href: "/categorys/sheet-mask",
+      },
+      {
+        title: "Cleanser",
+        href: "/categorys/cleanser",
+      },
+
+      {
+        title: "Facial Cream",
+        href: "/categorys/facial-cream",
+      },
+      {
+        title: "Eye Cream",
+        href: "/categorys/eye-cream",
+      },
+      {
+        title: "Cream",
+        href: "/categorys/cream",
+      },
+      {
+        title: "Ampoule Serum",
+        href: "/categorys/ampoule-serum",
+      },
+      {
+        title: "Serum",
+        href: "/categorys/serum"
+
+      },
+      {
         title: "Moisturizer",
         href: "/categorys/moisturizer",
       },
@@ -130,19 +160,23 @@ export const navItems: NavItem[] = [
     subItems: [
       {
         title: "All Products",
-        href: "/categorys/perfume",
+        href: "/categorys/product",
         description: "Browse our entire collection",
       },
       {
-        title: "New Arrivals",
-        href: "/categorys/new-arrivals",
+        title: "Men's Fashion",
+        href: "/categorys/mens-fashion",
         description: "Latest additions to our store",
       },
       {
-        title: "Best Sellers",
-        href: "/categorys/best-sellers",
-        description: "Most popular items",
+        title: "Women's Fashion",
+        href: "/categorys/womens-fashion",
       },
+      {
+        title: "Unisex Perfume",
+        href: "/categorys/unisex-perfume",
+
+      }
     ],
     featured: [
       {
@@ -174,6 +208,14 @@ export const navItems: NavItem[] = [
         title: "Baby Wash & Shampoo",
         href: "/categorys/baby-wash-shampoo",
       },
+      {
+        title: "Baby Lotion",
+        href: "/categorys/baby-lotion",
+      },
+      {
+        title: "Baby Cream",
+        href: "/categorys/baby-cream"
+      },
       { title: "Baby Grooming", href: "/categorys/baby-grooming" },
       { title: "Feeding", href: "/categorys/feeding" },
     ],
@@ -181,7 +223,18 @@ export const navItems: NavItem[] = [
   {
     title: "SUPPLEMENT",
     href: "/categorys/supplement",
-    subItems: [],
+    subItems: [
+      { title: "Mom's Health", href: "/categorys/moms-health" },
+      {
+        title: "Women's Health", href: "/categorys/womens-health"
+      },
+      {
+        title: "Baby's Health", href: "/categorys/babys-health"
+      },
+      {
+        title: "Adult's Health", href: "/categorys/adults-health"
+      },
+    ],
   },
   {
     title: "HAIR AND BEAUTY",
@@ -217,6 +270,13 @@ export const navItems: NavItem[] = [
       { title: "Hair Care Special", href: "/categorys/hair-care-special" },
       { title: "Makeup Special", href: "/categorys/makeup-special" },
       { title: "Mom & Baby Special", href: "/categorys/mom-baby-special" },
+      { title: "Perfume Special", href: "/categorys/perfume-special" },
+      { title: "Supplement Special", href: "/categorys/supplement-special" },
+      { title: "Hair and Beauty Special", href: "/categorys/hair-and-beauty-special" },
+      { title: "Accessories Special", href: "/categorys/accessories-special" },
+      { title: "Super Special", href: "/categorys/super-special" },
+      { title: "Combo Special", href: "/categorys/combo-special" },
+
     ],
   },
   {
@@ -289,6 +349,16 @@ export const navItems: NavItem[] = [
       {
         title: "K-Beauty Bestsellers",
         href: "/categorys/k-beauty-bestsellers",
+        description: "Customer favorite Korean beauty accessories",
+      },
+      {
+        title: "Lip balm",
+        href: "/categorys/lip-balm",
+        description: "Customer favorite Korean beauty accessories",
+      },
+      {
+        title: "Lipstick",
+        href: "/categorys/lipstick",
         description: "Customer favorite Korean beauty accessories",
       },
       {

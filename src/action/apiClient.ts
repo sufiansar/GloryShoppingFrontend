@@ -21,7 +21,17 @@ export const makeApiCall = async <T>(
   // Forward cookies for guest cart sessions
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    let cookieHeader = cookieStore.toString();
+    
+    // If we have a session token, remove stale accessToken/refreshToken from raw cookies
+    // to prevent the backend from using old social login cookies.
+    if (session?.accessToken && cookieHeader) {
+      cookieHeader = cookieHeader
+        .split("; ")
+        .filter((c) => !c.startsWith("accessToken=") && !c.startsWith("refreshToken="))
+        .join("; ");
+    }
+
     if (cookieHeader) {
       headers.set("Cookie", cookieHeader);
     }
@@ -30,7 +40,6 @@ export const makeApiCall = async <T>(
     const sessionIdFromCookie = cookieStore.get("sessionId")?.value;
     if (sessionIdFromCookie) {
       headers.set("x-session-id", sessionIdFromCookie);
-    } else {
     }
   } catch (error) { }
 

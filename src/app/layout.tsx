@@ -6,6 +6,8 @@ import { CartProvider } from "@/providers/CartProvider";
 import { SocketProvider } from "@/providers/SocketProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { LayoutChat } from "@/components/LayoutChat";
+import { TokenSyncProvider } from "@/providers/TokenSyncProvider";
+import { Suspense } from "react";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,14 +34,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProviders>
-          <SocketProvider>
-            <CartProvider>
-              {children}
-              <Toaster position="top-right" richColors />
-              {/* Global Chat Button - Always Accessible */}
-              <LayoutChat />
-            </CartProvider>
-          </SocketProvider>
+          <Suspense fallback={null}>
+            <TokenSyncProvider>
+              <SocketProvider>
+                <CartProvider>
+                  {children}
+                  <Toaster position="top-right" richColors />
+                  {/* Global Chat Button - Always Accessible */}
+                  <LayoutChat />
+                </CartProvider>
+              </SocketProvider>
+            </TokenSyncProvider>
+          </Suspense>
         </AuthProviders>
       </body>
     </html>

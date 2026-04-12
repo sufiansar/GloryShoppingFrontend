@@ -32,6 +32,7 @@ import {
 import Password from "@/components/ui/Password";
 import Image from "next/image";
 import { Mail, Lock, LogIn, Sparkles } from "lucide-react";
+import { SocialLogin } from "../SocialLogin";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address." }),
@@ -230,6 +231,8 @@ export function LoginForm({
                     Login
                   </Button>
                 </Field>
+
+                <SocialLogin baseColor={baseColor} />
 
                 {/* Sign up link */}
                 <FieldDescription className="text-center text-sm">

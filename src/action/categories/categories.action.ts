@@ -11,10 +11,10 @@ export const createCategoriesAction = async (categoryData: FormData) => {
       body: categoryData,
     });
 
-    if (result?.id) {
+    if (result?.success || result?.data?.id) {
       revalidatePath("/categorys", "page");
       revalidatePath("/", "layout");
-      redirect("/categories");
+      redirect("/admin/dashboard/categories-management");
     }
 
     return result;
@@ -30,13 +30,12 @@ export const updateCategoriesAction = async (
 ) => {
   const categoryInfo = Object.fromEntries(categoryData.entries());
 
-  const modify = {
-    ...categoryInfo,
+  const modify: any = {
+    name: categoryInfo.name,
+    description: categoryInfo.description,
     images: categoryInfo.images
       ? JSON.parse(categoryInfo.images as string)
       : [],
-    isVisible:
-      categoryInfo.isVisible === "true" || categoryInfo.isVisible === "on",
   };
 
   console.log("Updating category:", id, modify);
@@ -50,10 +49,10 @@ export const updateCategoriesAction = async (
       body: JSON.stringify(modify),
     });
 
-    if (result?.id) {
+    if (result?.success || result?.data?.id) {
       revalidatePath("/categorys", "page");
       revalidatePath("/", "layout");
-      redirect("/categories");
+      // redirect("/admin/dashboard/categories-management");
     }
 
     return result;
@@ -71,10 +70,10 @@ export const deleteCategoriesAction = async (id: string) => {
       method: "DELETE",
     });
 
-    if (result?.id) {
+    if (result?.success || result?.data?.id) {
       revalidatePath("/categorys", "page");
       revalidatePath("/", "layout");
-      redirect("/categories");
+      // redirect("/admin/dashboard/categories-management");
     }
 
     return result;
