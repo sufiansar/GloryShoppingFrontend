@@ -38,10 +38,10 @@ export const addToCart = async ({
   try {
     const result = await makeApiCall<any>("/cart", {
       method: "POST",
-      body: JSON.stringify({
+      body: {
         productId,
         quantity,
-      }),
+      },
     });
 
     return result;
@@ -61,10 +61,10 @@ export const updateCartItem = async ({
   try {
     const result = await makeApiCall<any>("/cart", {
       method: "PATCH",
-      body: JSON.stringify({
+      body: {
         productId,
         quantity,
-      }),
+      },
     });
 
     return result;

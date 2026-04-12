@@ -4,7 +4,7 @@ import { authOptions } from "@/helpers/authOptions";
 
 export const makeApiCall = async <T>(
   endpoint: string,
-  options: RequestInit = {},
+  options: Omit<RequestInit, "body"> & { body?: any } = {},
 ): Promise<T> => {
   let session = null;
 
@@ -93,16 +93,43 @@ export const makeApiCall = async <T>(
   // Read body once
   let data: any = null;
   try {
-    data = await res.json();
+    const text = await res.text();
+    data = text ? JSON.parse(text) : null;
   } catch {
     data = null;
   }
 
-  if (!res.ok) {
-    console.log(data?.message || `Request failed with status ${res.status}`);
-    // throw new Error(
+  // Handle sessionId propagation from response to browser cookies
+  try {
+    // 1. Check if sessionId is in the response data (as seen in user response)
+    const sessionIdFromData = data?.sessionId || data?.data?.sessionId;
+    
+    // 2. Check if sessionId is in Set-Cookie header
+    let sessionIdFromHeader = null;
+    const setCookie = res.headers.get("Set-Cookie");
+    if (setCookie && setCookie.includes("sessionId=")) {
+      const match = setCookie.match(/sessionId=([^;]+)/);
+      if (match) sessionIdFromHeader = match[1];
+    }
 
-    // );
+    const finalSessionId = sessionIdFromData || sessionIdFromHeader;
+
+    if (finalSessionId) {
+      const cookieStore = await cookies();
+      cookieStore.set("sessionId", finalSessionId, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+  } catch (error) {
+    // This may fail in contexts where cookies cannot be set (e.g. Server Components)
+    // but will work in Server Actions where cart modifications usually happen.
+  }
+
+  if (!res.ok) {
+    console.warn(`[makeApiCall] Error: ${res.status} ${res.statusText}`, data?.message || "");
   }
 
   // For 204 No Content, return null

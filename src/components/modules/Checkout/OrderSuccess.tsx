@@ -58,224 +58,133 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
   };
 
   return (
-    <div
-      className="min-h-screen py-12 px-4"
-      style={{
-        background: `linear-gradient(135deg, #fdf2f8, #fce7f3, #fbcfe8)`,
-      }}
-    >
-      <div className="container mx-auto max-w-5xl">
-        {/* Back to Home Indicator */}
-        <div className="mb-6">
-          <a
-            href="/"
-            className="group inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 border border-slate-200"
-            style={{
-              boxShadow: `0 4px 12px ${baseColor}20`,
-            }}
-          >
-            <Home
-              className="w-4 h-4 transition-transform group-hover:-translate-x-1"
-              style={{ color: baseColor }}
-              strokeWidth={2}
-            />
-            <span className="text-sm font-medium text-slate-700">
-              Back to Home
-            </span>
-          </a>
-        </div>
+    <div className="min-h-screen pt-1 pb-8 px-4 bg-slate-50/50">
+      <div className="container mx-auto max-w-4xl">
 
-        <Card className="border-0 shadow-2xl backdrop-blur bg-white/90 rounded-3xl overflow-hidden print:shadow-none print:border">
-          {/* Decorative header */}
-          <div
-            className="h-2 w-full"
-            style={{
-              background: `linear-gradient(90deg, ${baseColor}, #db2777, #2563eb)`,
-            }}
-          />
+        <Card className="border border-slate-100 shadow-xs bg-white rounded-3xl overflow-hidden print:shadow-none print:border">
 
-          <CardHeader className="text-center print:pt-0 pb-8 pt-12">
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <div
-                  className="absolute inset-0 rounded-full blur-xl opacity-50 animate-pulse"
-                  style={{ backgroundColor: baseColor }}
-                ></div>
-                <CheckCircle
-                  className="relative h-24 w-24"
-                  style={{ color: baseColor }}
-                />
+          <CardHeader className="text-center print:pt-0 pb-4 pt-4">
+            <div className="flex justify-center mb-2">
+              <div className="w-24 h-24 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center shadow-xs">
+                 <CheckCircle
+                    className="h-12 w-12"
+                    style={{ color: baseColor }}
+                    strokeWidth={1.5}
+                  />
               </div>
             </div>
             <CardTitle
-              className="text-4xl md:text-5xl font-bold mb-3"
-              style={{
-                background: `linear-gradient(135deg, ${baseColor}, #db2777, #2563eb)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
+              className="text-3xl md:text-4xl font-black mb-1 tracking-tighter"
+              style={{ color: baseColor }}
             >
               Order Confirmed!
             </CardTitle>
-            <p className="text-slate-600 mt-4 text-lg">
-              Thank you for your purchase. A confirmation has been sent to{" "}
-              <strong style={{ color: baseColor }}>
+            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest leading-relaxed max-w-lg mx-auto">
+              Thank you for trusting us. A confirmation has been sent to{" "}
+              <span className="text-slate-900">
                 {order.delivery?.email}
-              </strong>
+              </span>
             </p>
           </CardHeader>
 
-          <CardContent className="space-y-8 print:space-y-4 px-6 pb-8">
+          <CardContent className="space-y-4 print:space-y-1 px-6 pb-6">
             {/* Order Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 print:grid-cols-4">
-              <div
-                className="p-5 rounded-xl shadow-sm border"
-                style={{
-                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
-                  borderColor: `${baseColor}30`,
-                }}
-              >
-                <p
-                  className="text-sm font-medium mb-2"
-                  style={{ color: baseColor }}
-                >
-                  Order ID
-                </p>
-                <p className="font-mono text-sm font-bold text-slate-900 break-all">
-                  {order.id.slice(0, 13)}...
-                </p>
-              </div>
+                <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100/50 transition-all hover:bg-white hover:border-slate-200">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Order ID</p>
+                  <p className="font-mono text-sm font-black text-slate-900 break-all leading-tight">
+                    {order.id.slice(0, 13)}...
+                  </p>
+                </div>
 
-              <div
-                className="p-5 rounded-xl shadow-sm border"
-                style={{
-                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
-                  borderColor: `${baseColor}30`,
-                }}
-              >
-                <p
-                  className="text-sm font-medium mb-2"
-                  style={{ color: baseColor }}
-                >
-                  Status
-                </p>
-                <Badge
-                  className={`mt-1 border ${getStatusColor(order.status)}`}
-                >
-                  {order.status}
-                </Badge>
-              </div>
+                <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100/50 transition-all hover:bg-white hover:border-slate-200">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Status</p>
+                  <Badge className={`mt-1 h-8 px-4 border shadow-sm text-xs font-black ${getStatusColor(order.status)}`}>
+                    {order.status}
+                  </Badge>
+                </div>
 
-              <div
-                className="p-5 rounded-xl shadow-sm border"
-                style={{
-                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
-                  borderColor: `${baseColor}30`,
-                }}
-              >
-                <p
-                  className="text-sm font-medium mb-2"
-                  style={{ color: baseColor }}
-                >
-                  Date
-                </p>
-                <p className="text-base font-semibold text-slate-900">
-                  {format(new Date(order.createdAt), "MMM dd, yyyy")}
-                </p>
-              </div>
+                <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100/50 transition-all hover:bg-white hover:border-slate-200">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Date</p>
+                  <p className="text-base font-black text-slate-900 tracking-tight">
+                    {format(new Date(order.createdAt), "MMM dd, yyyy")}
+                  </p>
+                </div>
 
-              <div
-                className="p-5 rounded-xl shadow-sm border"
-                style={{
-                  background: `linear-gradient(135deg, ${baseColor}10, #fdf2f8)`,
-                  borderColor: `${baseColor}30`,
-                }}
-              >
-                <p
-                  className="text-sm font-medium mb-2"
-                  style={{ color: baseColor }}
-                >
-                  Total
-                </p>
-                <p className="text-2xl font-bold" style={{ color: baseColor }}>
-                  ৳{order.amount.toFixed(2)}
-                </p>
-              </div>
+                <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100/50 transition-all hover:bg-white hover:border-slate-200">
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">Total Amount</p>
+                  <p className="text-3xl font-black tracking-tighter" style={{ color: baseColor }}>
+                    ৳{order.amount.toFixed(2)}
+                  </p>
+                </div>
             </div>
 
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 print:grid-cols-2">
               {/* Delivery Information */}
-              <Card className="shadow-lg border-0 overflow-hidden">
-                <div
-                  className="h-1.5 w-full"
-                  style={{
-                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
-                  }}
-                />
-                <CardHeader>
+              <Card className="shadow-xs border-slate-100 rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4">
                   <CardTitle
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-3 text-xs font-black uppercase tracking-widest"
                     style={{ color: baseColor }}
                   >
-                    <Package className="h-5 w-5" />
+                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                      <Truck className="h-4 w-4" style={{ color: baseColor }} />
+                    </div>
                     Delivery Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <User className="h-4 w-4 text-slate-400" />
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-100/30 rounded-2xl">
+                      <User className="h-4 w-4 text-slate-300" />
                       <div>
-                        <p className="text-xs text-slate-500">Name</p>
-                        <p className="font-medium text-sm">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recipient Name</p>
+                        <p className="font-black text-xs text-slate-800">
                           {order.delivery?.name}
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <Phone className="h-4 w-4 text-slate-400" />
+                    {/* ... repeat refined pattern for other items ... */}
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-100/30 rounded-2xl">
+                      <Phone className="h-4 w-4 text-slate-300" />
                       <div>
-                        <p className="text-xs text-slate-500">Phone</p>
-                        <p className="font-medium text-sm">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Phone</p>
+                        <p className="font-black text-xs text-slate-800">
                           {order.delivery?.phone}
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <Mail className="h-4 w-4 text-slate-400" />
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-100/30 rounded-2xl">
+                      <Mail className="h-4 w-4 text-slate-300" />
                       <div>
-                        <p className="text-xs text-slate-500">Email</p>
-                        <p className="font-medium text-sm">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</p>
+                        <p className="font-black text-xs text-slate-800">
                           {order.delivery?.email}
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <MapPin className="h-4 w-4 text-slate-400" />
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-100/30 rounded-2xl">
+                      <MapPin className="h-4 w-4 text-slate-300" />
                       <div>
-                        <p className="text-xs text-slate-500">Address</p>
-                        <p className="font-medium text-sm">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Address</p>
+                        <p className="font-black text-xs text-slate-800">
                           {order.delivery?.address}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <p className="text-xs text-slate-500">City</p>
-                      <p className="font-medium text-sm">
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div className="p-4 bg-slate-50 border border-slate-100/30 rounded-2xl">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">City</p>
+                      <p className="font-black text-xs text-slate-800">
                         {order.delivery?.city}
                       </p>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-lg">
-                      <p className="text-xs text-slate-500">Postal Code</p>
-                      <p className="font-medium text-sm">
+                    <div className="p-4 bg-slate-50 border border-slate-100/30 rounded-2xl">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Postal</p>
+                      <p className="font-black text-xs text-slate-800">
                         {order.delivery?.postalCode}
                       </p>
                     </div>
@@ -293,15 +202,15 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
               </Card>
 
               {/* Order Items */}
-              <Card className="shadow-lg border-0 overflow-hidden">
-                <div
-                  className="h-1.5 w-full"
-                  style={{
-                    background: `linear-gradient(90deg, ${baseColor}, #db2777)`,
-                  }}
-                />
-                <CardHeader>
-                  <CardTitle style={{ color: baseColor }}>
+              <Card className="shadow-xs border-slate-100 rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4">
+                  <CardTitle
+                    className="flex items-center gap-3 text-xs font-black uppercase tracking-widest"
+                    style={{ color: baseColor }}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                      <Package className="h-4 w-4" style={{ color: baseColor }} />
+                    </div>
                     Order Items
                   </CardTitle>
                 </CardHeader>
@@ -310,33 +219,29 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
                     {order.items.map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-start justify-between p-4 border rounded-xl"
-                        style={{
-                          background: `linear-gradient(135deg, ${baseColor}05, #fdf2f8)`,
-                          borderColor: `${baseColor}20`,
-                        }}
+                        className="flex items-start justify-between p-5 bg-white border border-slate-100 rounded-2xl"
                       >
                         <div className="flex-1">
                           <p
-                            className="font-semibold"
+                            className="font-black text-sm tracking-tight"
                             style={{ color: baseColor }}
                           >
                             {item.product}
                           </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Variant ID: {item.productVariantId.slice(0, 8)}
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                            SKU Ref: {item.productVariantId.slice(0, 8)}
                           </p>
-                          <div className="flex items-center gap-4 mt-2">
-                            <span className="text-xs bg-slate-100 px-2 py-1 rounded-full">
+                          <div className="flex items-center gap-3 mt-3">
+                            <span className="text-[9px] font-black uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-full text-slate-500">
                               Qty: {item.quantity}
                             </span>
-                            <span className="text-xs bg-slate-100 px-2 py-1 rounded-full">
-                              ৳{item.price.toFixed(2)} each
+                            <span className="text-[9px] font-black uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-full text-slate-500">
+                              ৳{item.price.toFixed(2)} unit
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold" style={{ color: baseColor }}>
+                          <p className="font-black text-base" style={{ color: baseColor }}>
                             ৳{(item.quantity * item.price).toFixed(2)}
                           </p>
                         </div>
@@ -345,24 +250,23 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
                   </div>
 
                   {/* Price Summary */}
-                  <div className="mt-6 space-y-2 pt-4 border-t border-slate-200">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Subtotal</span>
-                      <span className="font-medium">
+                  <div className="mt-8 space-y-3 pt-6 border-t border-dashed border-slate-200">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <span>Subtotal</span>
+                      <span className="text-slate-900 font-black">
                         ৳
-                        {order.productTotal?.toFixed(2) ||
-                          order.amount.toFixed(2)}
+                        {(order.productTotal || order.amount).toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">Delivery Charge</span>
-                      <span className="font-medium">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <span>Shipping Charge</span>
+                      <span className="text-slate-900 font-black">
                         ৳{order.deliveryCharge?.toFixed(2) || "0.00"}
                       </span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-slate-200">
-                      <span>Total</span>
-                      <span style={{ color: baseColor }}>
+                    <div className="flex justify-between items-end pt-4">
+                      <span className="text-xs font-black text-slate-800 uppercase tracking-widest">Grand Total</span>
+                      <span className="text-3xl font-black tracking-tighter" style={{ color: baseColor }}>
                         ৳{order.amount.toFixed(2)}
                       </span>
                     </div>
@@ -371,69 +275,37 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
               </Card>
             </div>
 
-            {/* Next Steps */}
-            <Card className="border-0 overflow-hidden">
-              <div
-                className="h-1.5 w-full"
-                style={{
-                  background: `linear-gradient(90deg, ${baseColor}, #db2777, #2563eb)`,
-                }}
-              />
-              <CardHeader>
+            <Card className="shadow-xs border-slate-100 rounded-3xl overflow-hidden">
+              <CardHeader className="pb-4">
                 <CardTitle
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-3 text-xs font-black uppercase tracking-widest"
                   style={{ color: baseColor }}
                 >
-                  <Clock className="h-5 w-5" />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                    <Clock className="h-4 w-4" style={{ color: baseColor }} />
+                  </div>
                   What Happens Next?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-6 border rounded-xl bg-slate-50/50">
-                    <div
-                      className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ background: `${baseColor}20` }}
-                    >
-                      <span className="font-bold" style={{ color: baseColor }}>
-                        1
-                      </span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { title: "Order Processing", desc: "We're currently preparing your items for shipment with care." },
+                    { title: "Express Shipping", desc: "Your order will be handed over to our couriers within 24-48 hours." },
+                    { title: "Rapid Delivery", desc: "Expect your package to arrive at your doorstep in 3-5 business days." }
+                  ].map((step, idx) => (
+                    <div key={idx} className="p-6 rounded-2xl bg-slate-50 border border-slate-100/50 flex flex-col items-center text-center group active:scale-95 transition-transform">
+                      <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center mb-4 font-black shadow-xs" style={{ color: baseColor }}>
+                        {idx + 1}
+                      </div>
+                      <h3 className="text-[10px] font-black uppercase tracking-widest mb-2 text-slate-800">
+                        {step.title}
+                      </h3>
+                      <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
+                        {step.desc}
+                      </p>
                     </div>
-                    <h3 className="font-semibold mb-2 text-sm">
-                      Order Processing
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      We're preparing your items for shipment
-                    </p>
-                  </div>
-                  <div className="text-center p-6 border rounded-xl bg-slate-50/50">
-                    <div
-                      className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ background: `${baseColor}20` }}
-                    >
-                      <span className="font-bold" style={{ color: baseColor }}>
-                        2
-                      </span>
-                    </div>
-                    <h3 className="font-semibold mb-2 text-sm">Shipping</h3>
-                    <p className="text-xs text-slate-500">
-                      Your order will be shipped within 24-48 hours
-                    </p>
-                  </div>
-                  <div className="text-center p-6 border rounded-xl bg-slate-50/50">
-                    <div
-                      className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                      style={{ background: `${baseColor}20` }}
-                    >
-                      <span className="font-bold" style={{ color: baseColor }}>
-                        3
-                      </span>
-                    </div>
-                    <h3 className="font-semibold mb-2 text-sm">Delivery</h3>
-                    <p className="text-xs text-slate-500">
-                      Expected delivery in 3-5 business days
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -443,52 +315,34 @@ export function OrderSuccess({ order, onContinueShopping }: OrderSuccessProps) {
               <Button
                 variant="outline"
                 size="lg"
-                className="flex-1 border-2 hover:bg-slate-50 transition-all"
-                style={{ borderColor: `${baseColor}40` }}
+                className="flex-1 h-16 rounded-2xl border-slate-100 font-black uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-all active:scale-95"
                 onClick={handlePrint}
               >
                 <Printer
-                  className="mr-2 h-5 w-5"
+                  className="mr-2 h-4 w-4"
                   style={{ color: baseColor }}
                 />
-                Print Receipt
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 border-2 hover:bg-slate-50 transition-all"
-                style={{ borderColor: `${baseColor}40` }}
-                asChild
-              >
-                <a
-                  href={`mailto:${order.delivery?.email}?subject=Order Inquiry #${order.id}`}
-                >
-                  <Mail className="mr-2 h-5 w-5" style={{ color: baseColor }} />
-                  Contact Support
-                </a>
+                Print Invoice
               </Button>
 
               <Button
                 size="lg"
-                className="flex-1 text-white transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${baseColor}, #db2777)`,
-                }}
+                className="flex-1 h-16 rounded-2xl text-white font-black uppercase tracking-widest text-[10px] shadow-lg transition-all active:scale-95"
+                style={{ background: baseColor }}
                 onClick={onContinueShopping}
               >
-                <Home className="mr-2 h-5 w-5" />
+                <Home className="mr-2 h-4 w-4" />
                 Continue Shopping
               </Button>
             </div>
 
             {/* Support Footer */}
-            <div className="text-center pt-6 border-t border-slate-200">
-              <p className="text-sm text-slate-500">
-                Need help? Contact our customer support at{" "}
+            <div className="text-center pt-4 border-t border-slate-100">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Need immediate assistance? Contact support at{" "}
                 <a
                   href="mailto:support@gloryshop.com"
-                  className="font-medium hover:underline"
+                  className="font-black text-slate-800 hover:underline"
                   style={{ color: baseColor }}
                 >
                   support@gloryshop.com

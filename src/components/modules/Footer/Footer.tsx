@@ -69,7 +69,6 @@ const Footer = () => {
 
   const trustBadges = [
     { icon: Shield, label: "Secure Payments" },
-    { icon: Truck, label: "Free Shipping Over $50" },
     { icon: RefreshCw, label: "30-Day Returns" },
     { icon: CreditCard, label: "Price Match Guarantee" },
   ];
