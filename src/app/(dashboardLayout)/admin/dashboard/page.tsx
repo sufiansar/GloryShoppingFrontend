@@ -114,7 +114,7 @@ export default async function AdminDashboardPage() {
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary-custom blur-[100px]" />
           <div className="absolute bottom-0 right-0 h-40 w-40 rounded-full bg-secondary-custom blur-[80px]" />
         </div>
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold backdrop-blur-md ring-1 ring-white/20 tracking-wider uppercase">

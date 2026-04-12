@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 import { toast } from "sonner";
 
 export const createSkinType = async (data: any) => {

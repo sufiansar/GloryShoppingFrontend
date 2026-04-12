@@ -224,7 +224,7 @@ export default function CategorySelectionDialog({
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {totalPages > 0 && (
             <div className="mt-4">
               <Pagination
                 currentPage={currentPage}

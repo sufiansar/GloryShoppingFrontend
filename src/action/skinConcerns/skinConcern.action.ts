@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 
 export const createSkinConcern = async (payload: any) => {
   try {

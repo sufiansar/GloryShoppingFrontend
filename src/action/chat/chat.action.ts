@@ -1,6 +1,6 @@
 "use server";
 
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 
 interface ApiResponse<T = any> {
   success: boolean;

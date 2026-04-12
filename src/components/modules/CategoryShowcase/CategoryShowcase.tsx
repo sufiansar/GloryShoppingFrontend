@@ -194,17 +194,15 @@ export default function CategoryShowcase({
 
   return (
     <div
-      className={`space-y-4 ${
-        isSubCategory ? "mb-6" : "mb-12 border-b border-gray-100 pb-8 last:border-b-0"
-      }`}
+      className={`space-y-4 ${isSubCategory ? "mb-6" : "mb-12 border-b border-gray-100 pb-8 last:border-b-0"
+        }`}
     >
       {/* Category Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2
-            className={`${
-              isSubCategory ? "text-lg font-bold text-pink-600" : "text-2xl md:text-3xl font-bold text-gray-900"
-            } uppercase`}
+            className={`${isSubCategory ? "text-lg font-bold text-pink-600" : "text-2xl md:text-3xl font-bold text-gray-900"
+              } uppercase`}
           >
             {title || category.name}
           </h2>

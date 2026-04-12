@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 import { RoleChangeRequest } from "@/types/User.interface";
 import { UserRole } from "@/lib/navItems.confiq";
 

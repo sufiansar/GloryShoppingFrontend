@@ -75,11 +75,11 @@ export function ProductListItem({ product }: { product: Product }) {
                   <span>
                     {product?.reviews && product.reviews.length > 0
                       ? (
-                          product.reviews.reduce(
-                            (sum, r) => sum + r.rating,
-                            0,
-                          ) / product.reviews.length
-                        ).toFixed(1)
+                        product.reviews.reduce(
+                          (sum, r) => sum + r.rating,
+                          0,
+                        ) / product.reviews.length
+                      ).toFixed(1)
                       : "0"}
                   </span>
                 </div>

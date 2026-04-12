@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 
 export const createCategoriesAction = async (categoryData: FormData) => {
   try {

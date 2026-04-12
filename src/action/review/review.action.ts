@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 
 export const createReview = async (data: any) => {
   try {

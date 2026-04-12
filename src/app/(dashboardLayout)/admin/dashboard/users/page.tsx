@@ -25,6 +25,7 @@ import { IUser } from "@/types/User.interface";
 import UsersTable from "@/components/modules/Admin/User/UsersTable";
 import UserCreateDialog from "@/components/modules/Admin/User/UserCreateDialog";
 import { getAllUsers } from "@/action/user/user.action";
+import Pagination from "@/components/Shared/Pagination";
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -65,7 +66,7 @@ export default function UsersManagementPage() {
             result.totalPages ||
             Math.ceil(
               (result.total || usersData.length) /
-                (result.limit || pagination.limit),
+              (result.limit || pagination.limit),
             ),
         });
       } else {
@@ -124,21 +125,21 @@ export default function UsersManagementPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 pt-4 px-2">
+      {/* Premium Header Card */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">User Management</h1>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
             Manage all users, their roles, and account status
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="rounded-2xl h-12 px-6 border-white/40 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 transition-all shadow-sm">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="rounded-2xl h-12 px-8 bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all border-none">
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
           </Button>
@@ -147,126 +148,86 @@ export default function UsersManagementPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.active} active users
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Administrators
-            </CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.admins}</div>
-            <p className="text-xs text-muted-foreground">
-              System administrators
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.total > 0
-                ? ((stats.active / stats.total) * 100).toFixed(1)
-                : 0}
-              % of total
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Verification
-            </CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">
-              Need email verification
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1 md:max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search users by name, email, or phone..."
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e?.target?.value)}
-                />
+        {[
+          { title: "Total Users", value: stats.total, desc: `${stats.active} active users`, icon: User, color: "text-blue-500", bg: "bg-blue-500/10" },
+          { title: "Administrators", value: stats.admins, desc: "System administrators", icon: User, color: "text-purple-500", bg: "bg-purple-500/10" },
+          { title: "Active Users", value: stats.active, desc: `${stats.total > 0 ? ((stats.active / stats.total) * 100).toFixed(1) : 0}% of total`, icon: User, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+          { title: "Pending Verification", value: stats.pending, desc: "Need email verification", icon: User, color: "text-amber-500", bg: "bg-amber-500/10" }
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/40 dark:border-slate-800/50 p-6 shadow-sm hover:shadow-md transition-all duration-300 group">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-[12px] font-black uppercase tracking-widest text-slate-500">{stat.title}</h3>
+              <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${stat.bg}`}>
+                <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
             </div>
-            <div className="flex items-center gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-35">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="w-35">
-                  <SelectValue placeholder="Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="USER">User</SelectItem>
-                  <SelectItem value="EDITOR">Editor</SelectItem>
-                  <SelectItem value="MODERATOR">Moderator</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-                </SelectContent>
-              </Select>
+            <div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white group-hover:text-primary-custom transition-colors">{stat.value}</div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-2">
+                {stat.desc}
+              </p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="all">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All Users</TabsTrigger>
-              <TabsTrigger value="admins">Admins</TabsTrigger>
-              <TabsTrigger value="unverified">Unverified</TabsTrigger>
-              <TabsTrigger value="inactive">Inactive</TabsTrigger>
+        ))}
+      </div>
+
+      {/* Filters and Search Container */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm overflow-hidden flex flex-col items-stretch p-0">       
+        
+        {/* Filter Toolbar */}
+        <div className="border-b border-white/40 dark:border-slate-800/50 p-6 flex flex-col xl:flex-row xl:items-center gap-4 bg-white/20 dark:bg-slate-800/20 w-full">
+          <div className="relative flex-1 group min-w-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Search users by name, email, or phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e?.target?.value)}
+              className="h-14 pl-11 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300 w-full"
+            />
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-40 h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus:ring-primary-custom/30 font-bold transition-all duration-300 uppercase text-[10px] tracking-widest">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
+                <SelectItem value="all" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-slate-500">All Status</SelectItem>
+                <SelectItem value="active" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Active</SelectItem>
+                <SelectItem value="inactive" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Inactive</SelectItem>
+                <SelectItem value="verified" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Verified</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="w-full sm:w-44 h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus:ring-primary-custom/30 font-bold transition-all duration-300 uppercase text-[10px] tracking-widest">
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
+                <SelectItem value="all" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-slate-500">All Roles</SelectItem>
+                <SelectItem value="USER" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">User</SelectItem>
+                <SelectItem value="EDITOR" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Editor</SelectItem>
+                <SelectItem value="MODERATOR" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Moderator</SelectItem>
+                <SelectItem value="ADMIN" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-primary-custom">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mb-6 h-14 bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-2xl w-full sm:w-auto inline-flex overflow-x-auto">
+              <TabsTrigger value="all" className="rounded-xl h-11 px-6 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-primary-custom transition-all shadow-sm">All Users</TabsTrigger>
+              <TabsTrigger value="admins" className="rounded-xl h-11 px-6 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-primary-custom transition-all shadow-sm">Admins</TabsTrigger>
+              <TabsTrigger value="unverified" className="rounded-xl h-11 px-6 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-primary-custom transition-all shadow-sm">Unverified</TabsTrigger>
+              <TabsTrigger value="inactive" className="rounded-xl h-11 px-6 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-primary-custom transition-all shadow-sm">Inactive</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="all" className="space-y-4">
+            <TabsContent value="all" className="space-y-4 m-0">
               {isLoading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-4 text-muted-foreground">Loading users...</p>
+                <div className="text-center py-20 flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-14 w-14 border-[4px] border-primary-custom/20 border-t-primary-custom"></div>
+                  <p className="mt-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Loading users...</p>
                 </div>
               ) : (
                 <>
@@ -276,45 +237,46 @@ export default function UsersManagementPage() {
                       onUserUpdated={fetchUsers}
                     />
                   ) : (
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground">No users found</p>
+                    <div className="text-center py-20 bg-white/20 dark:bg-slate-800/20 rounded-[2rem] border border-white/40 shadow-inner">
+                      <p className="text-[12px] font-black uppercase tracking-widest text-slate-400">No users found</p>
                     </div>
                   )}
 
-                  {/* Pagination */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Showing {filteredUsers?.length} of {pagination?.total}{" "}
-                      users
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fetchUsers(pagination?.page - 1)}
-                        disabled={pagination?.page === 1}
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm">
-                        Page {pagination?.page} of {pagination?.totalPages}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fetchUsers(pagination?.page + 1)}
-                        disabled={pagination?.page === pagination?.totalPages}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  </div>
+                  {/* Pagination Section */}
+                  {pagination.totalPages > 0 && (
+                    <Pagination
+                      currentPage={pagination.page}
+                      totalPages={pagination.totalPages}
+                      totalItems={pagination.total}
+                      itemsPerPage={pagination.limit}
+                      onPageChange={(page: number) => fetchUsers(page)}
+                      onItemsPerPageChange={(limit: number) => {
+                        setPagination(prev => ({ ...prev, limit, page: 1 }));
+                        // We push a re-fetch using the new limit and page 1
+                        setIsLoading(true);
+                        getAllUsers(`?page=1&limit=${limit}&searchTerm=${searchQuery}`).then(result => {
+                          if (result.success && result.data) {
+                            setUsers(result.data);
+                            setFilteredUsers(result.data);
+                            setPagination({
+                              page: result.page || 1,
+                              limit: result.limit || limit,
+                              total: result.total || result.data.length,
+                              totalPages: result.totalPages || Math.ceil((result.total || result.data.length) / (result.limit || limit)),
+                            });
+                          }
+                          setIsLoading(false);
+                        });
+                      }}
+                      className="mt-6 pt-6 border-t border-slate-200/50 dark:border-slate-800/50"
+                    />
+                  )}
                 </>
               )}
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <UserCreateDialog
         open={isCreateDialogOpen}

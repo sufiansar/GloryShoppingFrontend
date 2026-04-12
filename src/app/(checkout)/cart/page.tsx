@@ -74,16 +74,16 @@ export default function CartPage() {
       }
 
       console.log("[CartPage] Raw parsed items:", items);
-      
+
       const validItems = items.filter(item => item !== null && typeof item === 'object');
-      
+
       const normalizedItems: CartItem[] = validItems.map((item) => {
         let productImage = "/placeholder.png";
         if (item.productImage) productImage = item.productImage;
         else if (item.product?.images && item.product.images.length > 0) productImage = item.product.images[0];
         else if (item.image) productImage = item.image;
         else if (item.variant?.image) productImage = item.variant.image;
-        
+
         return {
           id: item.id || item._id || Math.random().toString(),
           productId: item.productId || item.product?.id || item.variantId || item.id,
@@ -396,7 +396,7 @@ export default function CartPage() {
                               {Math.round(
                                 ((item.originalPrice - item.price) /
                                   item.originalPrice) *
-                                  100,
+                                100,
                               )}
                               %
                             </Badge>

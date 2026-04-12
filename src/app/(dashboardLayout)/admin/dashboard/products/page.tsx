@@ -42,37 +42,25 @@ export default async function ProductsPage({
 
   const result = await getAllProducts(queryString);
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 pt-4 px-2">
+      {/* Premium Header Card */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            Products
+          </h1>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
             Manage your products ({result?.meta?.total || 0} total)
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin/dashboard/products/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Product
-          </Link>
-        </Button>
-      </div>
-
-      {/* Simple Search */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search products..."
-            defaultValue={searchTerm}
-            className="pl-10"
-            readOnly
-          />
+        <div className="flex items-center gap-3">
+          <Button asChild className="rounded-2xl h-12 px-8 bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all border-none">
+            <Link href="/admin/dashboard/products/create">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Product
+            </Link>
+          </Button>
         </div>
-        <Button variant="outline">
-          <Filter className="mr-2 h-4 w-4" />
-          Filters
-        </Button>
       </div>
 
       <ProductsTable

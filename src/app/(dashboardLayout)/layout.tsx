@@ -32,7 +32,7 @@ export default async function AdminDashboard({
   const navItems = getNavItemsByRole(role);
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-slate-50/50 aura-bg overflow-hidden">
       <SidebarProvider
         style={
           {
@@ -42,10 +42,10 @@ export default async function AdminDashboard({
         }
       >
         <AppSidebar userInfo={userInfo} navItems={navItems} variant="inset" />
-        <SidebarInset className="bg-transparent">
+        <SidebarInset className="bg-transparent/20 backdrop-blur-3xl">
           <SiteHeader userInfo={userInfo} />
-          <main className="flex-1 overflow-y-auto dashboard-gradient-bg">
-            <div className="mx-auto w-full max-w-7xl animate-in fade-in duration-700">
+          <main className="flex-1 overflow-y-auto scrollbar-premium dashboard-gradient-bg">
+            <div className="mx-auto w-full max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
               <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
                 {children}
               </div>

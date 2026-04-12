@@ -1,5 +1,5 @@
 "use client";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -45,8 +45,8 @@ export default function SearchForm({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <div className="relative flex-1 group">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
         <Input
           placeholder="Search brands by name..."
           value={searchTerm}
@@ -54,23 +54,23 @@ export default function SearchForm({
             setSearchTerm(e.target.value);
             handleSearch(e.target.value);
           }}
-          className="pl-10"
+          className="h-14 pl-11 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
         />
         {searchTerm && (
           <Button
             type="button"
             variant="ghost"
-            size="sm"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 px-2"
+            size="icon"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded-xl"
             onClick={handleClear}
           >
-            Clear
+            <X className="h-4 w-4 text-slate-500" />
           </Button>
         )}
       </div>
-      <Button variant="outline">
+      <Button variant="outline" className="rounded-2xl h-14 px-6 border-white/40 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 transition-all shadow-sm">
         <Filter className="mr-2 h-4 w-4" />
-        Filter
+        Filters
       </Button>
     </div>
   );

@@ -36,14 +36,15 @@ export default async function ProductsPage({
   }).toString();
 
   const result = await getAllProducts(queryString);
+  // console.log(result.meta, "Result");
 
   return (
     <div className="container mx-auto px-4 py-8">
       <ProductGrid
         products={result?.data || []}
         currentPage={page}
-        totalPages={result?.meta?.totalPages || 1}
-        totalItems={result?.meta?.total || 0}
+        totalPages={result?.totalPages || result?.meta?.totalPages || 1}
+        totalItems={result?.total || result?.meta?.total || 0}
         itemsPerPage={limit}
       />
     </div>

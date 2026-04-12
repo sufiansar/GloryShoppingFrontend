@@ -127,118 +127,150 @@ export default function UsersTable({ users, onUserUpdated }: UsersTableProps) {
 
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users?.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarImage src={user.profileImage || ""} />
-                      <AvatarFallback className="bg-primary/10">
-                        {getInitials(user.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        ID: {user.id.substring(0, 8)}...
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-sm">{user.email}</span>
-                    </div>
-                    {user.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm">{user.phone}</span>
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={getRoleColor(user.role)}
-                  >
-                    {user.role}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <Badge
-                      variant="secondary"
-                      className={getStatusColor(user.isActive, user.isVerified)}
-                    >
-                      {user.isActive
-                        ? user.isVerified
-                          ? "Active"
-                          : "Pending"
-                        : "Inactive"}
-                    </Badge>
-                    <div className="text-xs text-muted-foreground">
-                      {user.addresses.length} address
-                      {user.addresses.length !== 1 ? "es" : ""}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    {format(new Date(user.createdAt), "MMM dd, yyyy")}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleViewDetails(user)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleRoleChange(user)}>
-                        <Shield className="mr-2 h-4 w-4" />
-                        Change Role
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDeleteUser(user)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+      {/* Users Intelligent List - Premium Card Experience */}
+      <div className="rounded-[2.5rem] bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/40 dark:border-slate-800/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="overflow-x-auto scrollbar-premium">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-200/30 dark:border-slate-800/30 hover:bg-transparent px-6 text-left">
+                <TableHead className="py-6 pl-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">User</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Contact</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Role</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Joined</TableHead>
+                <TableHead className="text-right py-6 pr-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {users?.map((user) => (
+                <TableRow key={user.id} className="premium-table-row border-b border-slate-100/30 dark:border-slate-800/20 group/row">
+                  <TableCell className="py-5 pl-8">
+                    <div className="flex items-center gap-4">
+                      <div className="relative group/avatar">
+                        <div className="absolute -inset-1.5 bg-linear-to-tr from-primary-custom/40 to-indigo-500/40 rounded-2xl blur-md opacity-0 group-hover/avatar:opacity-100 transition duration-500" />
+                        <Avatar className="h-12 w-12 rounded-2xl ring-2 ring-white dark:ring-slate-800 shadow-sm relative z-10">
+                          <AvatarImage src={user.profileImage || ""} className="object-cover" />
+                          <AvatarFallback className="bg-primary-custom/10 text-primary-custom font-black">
+                            {getInitials(user.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-black text-slate-900 dark:text-white group-hover/row:text-primary-custom transition-colors">
+                          {user.name}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <code className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                            ID: {user.id.substring(0, 8)}...
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2 px-2 py-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-lg border border-slate-200/30 w-fit">
+                        <Mail className="h-3 w-3 text-slate-400" />
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{user.email}</span>
+                      </div>
+                      {user.phone && (
+                        <div className="flex items-center gap-2 px-2 py-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-lg border border-slate-200/30 w-fit">
+                          <Phone className="h-3 w-3 text-slate-400" />
+                          <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{user.phone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl border font-black text-[9px] uppercase tracking-widest ${
+                      user.role === 'SUPER_ADMIN' ? 'bg-rose-500/5 border-rose-500/20 text-rose-600' :
+                      user.role === 'ADMIN' ? 'bg-blue-500/5 border-blue-500/20 text-blue-600' :
+                      'bg-emerald-500/5 border-emerald-500/20 text-emerald-600'
+                    }`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        user.role === 'SUPER_ADMIN' ? 'bg-rose-500' :
+                        user.role === 'ADMIN' ? 'bg-blue-500' :
+                        'bg-emerald-500'
+                      }`} />
+                      {user.role}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-2">
+                       <div className={`inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tighter ${
+                        user.isActive && user.isVerified ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 
+                        !user.isActive ? 'bg-slate-500/10 text-slate-600 border border-slate-500/20' :
+                        'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                      }`}>
+                        {user.isActive ? (user.isVerified ? "Active" : "Pending") : "Inactive"}
+                      </div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                        <div className="w-1 h-1 rounded-full bg-slate-300" />
+                        {user.addresses.length} address{user.addresses.length !== 1 ? "es" : ""}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                        {format(new Date(user.createdAt), "MMM dd, yyyy")}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right pr-8">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-white dark:hover:bg-slate-800 rounded-xl shadow-sm transition-all active:scale-90">
+                          <MoreHorizontal className="h-5 w-5 text-slate-400" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-60 p-2 rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-3xl glass-card animate-in zoom-in-95 duration-200">
+                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 py-2">Actions</DropdownMenuLabel>
+                        <DropdownMenuItem 
+                          onClick={() => handleViewDetails(user)}
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                            <Eye className="h-4 w-4 text-blue-500" />
+                          </div>
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleEditUser(user)}
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                            <Edit className="h-4 w-4 text-amber-500" />
+                          </div>
+                          Edit Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleRoleChange(user)}
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                            <Shield className="h-4 w-4 text-purple-500" />
+                          </div>
+                          Change Role
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="mx-2 bg-slate-100 dark:bg-slate-800/50" />
+                        <DropdownMenuItem
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-rose-500/10 focus:text-rose-500 transition-all cursor-pointer font-bold text-rose-500"
+                          onClick={() => handleDeleteUser(user)}
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                            <Trash2 className="h-4 w-4" />
+                          </div>
+                          Delete User
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <RoleChangeDialog

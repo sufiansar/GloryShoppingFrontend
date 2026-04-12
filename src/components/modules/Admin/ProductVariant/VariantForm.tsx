@@ -3,16 +3,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Upload, X, Plus, Package, Trash2 } from "lucide-react";
+import { Upload, X, Plus, Package, Trash2, Box, Layers, Coins, Hash, AlertTriangle, CheckCircle2, Loader2, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import ProductSelectionDialog from "./ProductSelectionDialog";
 import { Product } from "@/types/product.interface";
 import { createProductVariant } from "@/action/variants/variants.action";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function CreateVariantForm() {
   const router = useRouter();
@@ -84,7 +84,7 @@ export default function CreateVariantForm() {
 
     if (name === "stock" || name === "lowStockThreshold" || name === "price") {
       const numericValue = Math.max(0, Number(value));
-      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      setFormData((prev) => ({ ...prev, [name]: (numericValue || "").toString() }));
       return;
     }
 
@@ -102,13 +102,6 @@ export default function CreateVariantForm() {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // const handleAddImageUrl = () => {
-  //   const url = prompt("Enter image URL:");
-  //   if (url && url.trim()) {
-  //     setImages((prev) => [...prev, url.trim()]);
-  //   }
-  // };
-
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
     setError(null);
@@ -119,50 +112,65 @@ export default function CreateVariantForm() {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Product Selection Card */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Select Product *</Label>
+    <div className="w-full max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700 pb-20">
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 md:p-12 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm relative overflow-hidden">
+        {/* Decorative Background Blob */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-custom/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="h-14 w-14 rounded-2xl bg-primary-custom/10 dark:bg-primary-custom/20 flex items-center justify-center border border-primary-custom/20 shadow-inner">
+              <Layers className="h-7 w-7 text-primary-custom" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Create Product Variant</h1>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] -mt-1">Define Stock/Size Specifications</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-10">
+            {/* Product Selection Section */}
+            <div className="bg-white/40 dark:bg-slate-800/20 p-6 rounded-3xl border border-white/40 dark:border-slate-800/50 space-y-6">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-primary-custom" />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Product *</Label>
+                </div>
                 {selectedProduct && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={handleRemoveProduct}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="h-8 rounded-lg px-3 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 transition-all"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                     Remove
                   </Button>
                 )}
               </div>
 
               {selectedProduct ? (
-                <div className="border rounded-lg p-4 bg-accent/50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      {selectedProduct?.thumbleImage?.[0] && (
-                        <div className="relative w-12 h-12">
-                          <Image
-                            src={selectedProduct.thumbleImage}
-                            alt={selectedProduct.name}
-                            fill
-                            className="object-cover rounded"
-                          />
+                <div className="bg-white/60 dark:bg-slate-800/40 backdrop-blur-md rounded-2xl p-5 border border-primary/40 dark:border-primary/40 shadow-inner group transition-all duration-500">
+                  <div className="flex items-center gap-5">
+                    <div className="relative h-20 w-20 rounded-xl overflow-hidden shadow-lg ring-4 ring-white/30 group-hover:scale-105 transition-transform duration-500">
+                      <Image
+                        src={Array.isArray(selectedProduct.thumbleImage) ? selectedProduct.thumbleImage[0] : selectedProduct.thumbleImage || "/placeholder.png"}
+                        alt={selectedProduct.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">{selectedProduct.name}</h3>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                           <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">SLUG:</span>
+                           <span className="text-[9px] font-bold text-slate-600 dark:text-slate-400">{selectedProduct.slug || "N/A"}</span>
                         </div>
-                      )}
-                      <div>
-                        <h3 className="font-medium">{selectedProduct.name}</h3>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>SLUG: {selectedProduct.slug || "N/A"}</span>
-                          <span>
-                            Price: $
-                            {selectedProduct.price?.toFixed(2) || "0.00"}
-                          </span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary-custom/10 border border-primary-custom/20">
+                           <span className="text-[8px] font-black text-primary-custom uppercase tracking-widest">Base Price:</span>
+                           <span className="text-[9px] font-black text-primary-custom">${selectedProduct.price?.toFixed(2) || "0.00"}</span>
                         </div>
                       </div>
                     </div>
@@ -172,193 +180,223 @@ export default function CreateVariantForm() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-20 border-dashed"
+                  className="w-full h-32 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/30 dark:bg-slate-900/10 hover:border-primary-custom hover:bg-white dark:hover:bg-slate-800/50 transition-all duration-500 group"
                   onClick={() => setProductDialogOpen(true)}
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <Package className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-sm">Click to select a product</span>
-                    <span className="text-xs text-muted-foreground">
-                      Required for creating variant
-                    </span>
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                      <Box className="h-6 w-6 text-slate-300 dark:text-slate-600 group-hover:text-primary-custom" />
+                    </div>
+                    <div className="text-center">
+                      <span className="block text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">Click to select a product</span>
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-tighter opacity-70">Required for creating variant</span>
+                    </div>
                   </div>
                 </Button>
               )}
 
-              <p className="text-xs text-muted-foreground">
-                Variant will inherit base price from selected product
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Variant Details Card */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="size">Size *</Label>
-                  <Input
-                    id="size"
-                    name="size"
-                    value={formData.size}
-                    onChange={handleChange}
-                    placeholder="e.g., S, M, L, XL or 10, 12, 14"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price">Variant Price (Optional)</Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={handleChange}
-                    placeholder="Leave empty to use product price"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Stock Quantity</Label>
-                  <Input
-                    id="stock"
-                    name="stock"
-                    type="number"
-                    value={formData.stock}
-                    onChange={handleChange}
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lowStockThreshold">Low Stock Threshold</Label>
-                <Input
-                  id="lowStockThreshold"
-                  name="lowStockThreshold"
-                  type="number"
-                  value={formData.lowStockThreshold}
-                  onChange={handleChange}
-                  placeholder="10"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Alert when stock falls below this number
+              <div className="flex items-center gap-2 px-1 opacity-60">
+                <Box className="h-3 w-3 text-slate-400" />
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                  Variant will inherit base price from selected product
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Images Card */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Variant Images</Label>
-                <div className="flex gap-2">
-                  {/* <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddImageUrl}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add URL
-                  </Button> */}
-                  <div>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        document.getElementById("image-upload")?.click()
-                      }
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload
-                    </Button>
+            {/* Variant Details Section */}
+            <div className="bg-white/40 dark:bg-slate-800/20 p-8 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 space-y-8">
+               <div className="flex items-center gap-2 mb-2 px-1">
+                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                    <Plus className="h-4 w-4 text-indigo-500" />
                   </div>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Variant Details
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 ml-1">
+                      <Box className="h-3.5 w-3.5 text-primary-custom" />
+                      <Label htmlFor="size" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Size *</Label>
+                    </div>
+                    <Input
+                      id="size"
+                      name="size"
+                      value={formData.size}
+                      onChange={handleChange}
+                      placeholder="e.g., S, M, L, XL or 10, 12, 14"
+                      required
+                      className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 ml-1">
+                      <Coins className="h-3.5 w-3.5 text-primary-custom" />
+                      <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Variant Price (Optional)</Label>
+                    </div>
+                    <Input
+                      id="price"
+                      name="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={handleChange}
+                      placeholder="Leave empty"
+                      className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 ml-1">
+                      <Hash className="h-3.5 w-3.5 text-primary-custom" />
+                      <Label htmlFor="stock" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Stock Quantity</Label>
+                    </div>
+                    <Input
+                      id="stock"
+                      name="stock"
+                      type="number"
+                      value={formData.stock}
+                      onChange={handleChange}
+                      placeholder="0"
+                      className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2 ml-1">
+                    <AlertTriangle className="h-3.5 w-3.5 text-primary-custom" />
+                    <Label htmlFor="lowStockThreshold" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Low Stock Threshold</Label>
+                  </div>
+                  <Input
+                    id="lowStockThreshold"
+                    name="lowStockThreshold"
+                    type="number"
+                    value={formData.lowStockThreshold}
+                    onChange={handleChange}
+                    placeholder="10"
+                    className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
+                  />
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter ml-1 opacity-70">
+                    Alert when stock falls below this number
+                  </p>
+                </div>
+            </div>
+
+            {/* Images Section */}
+            <div className="bg-white/40 dark:bg-slate-800/20 p-8 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 space-y-6">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-primary-custom" />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Variant Images</Label>
+                </div>
+                <div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => document.getElementById("image-upload")?.click()}
+                    className="h-10 rounded-xl px-4 bg-primary-custom/10 text-primary-custom font-black uppercase tracking-widest text-[9px] hover:bg-primary-custom/20 transition-all"
+                  >
+                    <Upload className="mr-2 h-3.5 w-3.5" />
+                    Upload Files
+                  </Button>
                 </div>
               </div>
 
               {images.length > 0 ? (
-                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 pt-2">
                   {images.map((file, index) => {
-                    const imageUrl = URL.createObjectURL(file); // create temporary URL
+                    const imageUrl = URL.createObjectURL(file);
                     return (
-                      <div key={index} className="relative aspect-square group">
+                      <div key={index} className="relative aspect-square group rounded-[1.25rem] overflow-hidden shadow-sm border border-slate-200/50 ring-4 ring-white/30 transition-transform duration-500 hover:scale-[1.05]">
                         <Image
                           src={imageUrl}
                           alt={`Variant image ${index + 1}`}
                           fill
-                          className="object-cover rounded-lg border"
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleRemoveImage(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="destructive"
+                            className="h-9 w-9 rounded-full shadow-lg scale-90 group-hover:scale-100 transition-transform"
+                            onClick={() => handleRemoveImage(index)}
+                          >
+                            <X className="h-5 w-5" />
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center">
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">
-                    No images uploaded yet
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Upload images or add image URLs
-                  </p>
+                <div className="py-12 flex flex-col items-center justify-center bg-slate-50/20 dark:bg-slate-900/10 rounded-[2rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
+                  <div className="h-16 w-16 rounded-[1.25rem] bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center mb-4">
+                    <Upload className="h-8 w-8 text-slate-200 dark:text-slate-700" />
+                  </div>
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">No images uploaded yet</p>
+                  <p className="text-[9px] font-bold text-slate-400/60 uppercase tracking-tighter">Upload visuals to showcase this variant</p>
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-            {error}
-          </div>
-        )}
+            {error && (
+              <div className="p-5 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 animate-pulse">
+                <AlertTriangle className="h-5 w-5 text-rose-500 shrink-0" />
+                <p className="text-[11px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-wide leading-tight">{error}</p>
+              </div>
+            )}
 
-        <div className="flex items-center gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting || !selectedProduct}>
-            {isSubmitting ? "Creating..." : "Create Variant"}
-          </Button>
+            {/* Action Bar */}
+            <div className="flex items-center justify-end gap-6 pt-6 border-t border-white/20 dark:border-slate-800/50">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => router.back()}
+                disabled={isSubmitting}
+                className="rounded-xl h-12 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
+              >
+                Cancel Session
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || !selectedProduct}
+                className="rounded-2xl h-14 min-w-[220px] px-10 bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all active:scale-[0.98] disabled:opacity-50 border-none"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Spawning...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Create Variant
+                  </div>
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
 
-      {/* Product Selection Dialog */}
+      {/* Product Selection Dialog - Assuming this already exists and is styled elsewhere or works as is */}
       <ProductSelectionDialog
         open={productDialogOpen}
         onOpenChange={setProductDialogOpen}
         onSelect={handleProductSelect}
       />
-    </>
+    </div>
   );
 }

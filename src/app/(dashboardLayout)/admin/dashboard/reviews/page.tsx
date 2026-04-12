@@ -44,80 +44,83 @@ export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
   }).toString();
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 pt-4 px-2">
+      {/* Premium Header Card */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reviews</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage and moderate customer reviews
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            Reviews Management
+          </h1>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+            Manage and moderate customer reviews and ratings
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="rounded-2xl h-12 px-6 border-white/40 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 transition-all shadow-sm">
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
         </div>
       </div>
 
-      <Card className="p-4">
-        <form className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-1 items-center gap-2">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      {/* Filter & Command Center */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm">
+        <form className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 type="search"
                 name="search"
                 placeholder="Search by comment or product..."
-                className="pl-8"
+                className="h-14 pl-11 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300 w-full"
                 defaultValue={searchParams.search}
               />
             </div>
-            <Button variant="outline" size="icon" type="submit">
-              <Filter className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <Select name="rating" defaultValue={searchParams.rating}>
-              <SelectTrigger className="w-35">
-                <SelectValue placeholder="All Ratings" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Ratings</SelectItem>
-                <SelectItem value="5">5 Stars</SelectItem>
-                <SelectItem value="4">4 Stars</SelectItem>
-                <SelectItem value="3">3 Stars</SelectItem>
-                <SelectItem value="2">2 Stars</SelectItem>
-                <SelectItem value="1">1 Star</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              name="sortBy"
-              defaultValue={searchParams.sortBy || "createdAt"}
-            >
-              <SelectTrigger className="w-35">
-                <SelectValue placeholder="Sort By" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="createdAt">Date</SelectItem>
-                <SelectItem value="rating">Rating</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              name="sortOrder"
-              defaultValue={searchParams.sortOrder || "desc"}
-            >
-              <SelectTrigger className="w-35">
-                <SelectValue placeholder="Sort Order" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="desc">Descending</SelectItem>
-                <SelectItem value="asc">Ascending</SelectItem>
-              </SelectContent>
-            </Select>
+            
+            <div className="flex flex-wrap items-center gap-3">
+              <Select name="rating" defaultValue={searchParams.rating}>
+                <SelectTrigger className="w-full sm:w-40 h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus:ring-primary-custom/30 font-bold transition-all duration-300 uppercase text-[10px] tracking-widest">
+                  <SelectValue placeholder="All Ratings" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
+                  <SelectItem value="all" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">All Ratings</SelectItem>
+                  <SelectItem value="5" className="rounded-xl font-bold text-yellow-500">5 Stars</SelectItem>
+                  <SelectItem value="4" className="rounded-xl font-bold">4 Stars</SelectItem>
+                  <SelectItem value="3" className="rounded-xl font-bold">3 Stars</SelectItem>
+                  <SelectItem value="2" className="rounded-xl font-bold">2 Stars</SelectItem>
+                  <SelectItem value="1" className="rounded-xl font-bold">1 Star</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select name="sortBy" defaultValue={searchParams.sortBy || "createdAt"}>
+                <SelectTrigger className="w-full sm:w-36 h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus:ring-primary-custom/30 font-bold transition-all duration-300 uppercase text-[10px] tracking-widest">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
+                  <SelectItem value="createdAt" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Date</SelectItem>
+                  <SelectItem value="rating" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Rating</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select name="sortOrder" defaultValue={searchParams.sortOrder || "desc"}>
+                <SelectTrigger className="w-full sm:w-40 h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus:ring-primary-custom/30 font-bold transition-all duration-300 uppercase text-[10px] tracking-widest">
+                  <SelectValue placeholder="Sort Order" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
+                  <SelectItem value="desc" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Descending</SelectItem>
+                  <SelectItem value="asc" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button type="submit" className="h-14 px-8 rounded-2xl bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all border-none">
+                <Filter className="mr-2 h-4 w-4" />
+                Apply Filters
+              </Button>
+            </div>
           </div>
         </form>
-      </Card>
+      </div>
 
       <Suspense fallback={<ReviewsTableSkeleton />}>
         <ReviewsTableContainer queryString={queryString} />

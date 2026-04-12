@@ -47,9 +47,8 @@ export default function ProductCard({
               alt={product.name}
               width={350}
               height={350}
-              className={`w-full h-full object-cover transition-transform duration-500 ${
-                isHovered ? "scale-105" : "scale-100"
-              }`}
+              className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? "scale-105" : "scale-100"
+                }`}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -120,11 +119,11 @@ export default function ProductCard({
                   <span>
                     {product?.reviews && product.reviews.length > 0
                       ? (
-                          product.reviews.reduce(
-                            (sum, r) => sum + r.rating,
-                            0,
-                          ) / product.reviews.length
-                        ).toFixed(1)
+                        product.reviews.reduce(
+                          (sum, r) => sum + r.rating,
+                          0,
+                        ) / product.reviews.length
+                      ).toFixed(1)
                       : "0"}
                   </span>
                 </div>

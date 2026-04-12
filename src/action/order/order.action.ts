@@ -1,7 +1,7 @@
 "use server";
 
 import { CheckoutInput, OrderResponse } from "@/types/checkout.interface";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 
 const ORDER_BASE = "/order";
 

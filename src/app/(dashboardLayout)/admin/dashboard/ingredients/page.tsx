@@ -21,18 +21,19 @@ export default async function IngredientsPage({ searchParams }: PageProps) {
   const ingredients = await getAllIngredients(query);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 pt-4 px-2 w-full">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Ingredients</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Ingredients</h1>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
             Manage your product ingredients
           </p>
         </div>
         <CreateIngredientButton />
       </div>
 
-      <div className="rounded-lg border bg-card p-6">
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm overflow-hidden flex flex-col p-6 lg:p-8">
         <IngredientTable
           ingredients={ingredients?.data || []}
           pagination={ingredients?.pagination || {}}

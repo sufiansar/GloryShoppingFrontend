@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 import { redirect } from "next/navigation";
 
 export const createProduct = async (formData: FormData) => {
@@ -91,6 +91,7 @@ export const updateProduct = async (id: string, formData: FormData) => {
   }
 };
 export const getAllProducts = async (queryString: string) => {
+
   try {
     const searchParams = new URLSearchParams(queryString);
     const page = searchParams.get("page") || "1";

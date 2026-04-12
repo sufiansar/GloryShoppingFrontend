@@ -99,64 +99,89 @@ export default function CategoryTable({
 
   return (
     <>
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Visibility</TableHead>
-              <TableHead>Images</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell className="font-medium">{category.name}</TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {category.description || "No description"}
-                </TableCell>
-
-                <TableCell>
-                  <Badge variant="outline">
-                    {category.images?.length || 0} images
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {new Date(category?.createdAt!).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleView(category)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEdit(category)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDeleteClick(category)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+      <div className="rounded-[2.5rem] bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/40 dark:border-slate-800/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="overflow-x-auto scrollbar-premium">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-200/30 dark:border-slate-800/30 hover:bg-transparent px-6 text-left">
+                <TableHead className="py-6 pl-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Name</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Description</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Images</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Created At</TableHead>
+                <TableHead className="text-right py-6 pr-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category) => (
+                <TableRow key={category.id} className="premium-table-row border-b border-slate-100/30 dark:border-slate-800/20 group/row">
+                  <TableCell className="py-5 pl-8">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-black text-slate-900 dark:text-white group-hover/row:text-primary-custom transition-colors">
+                        {category.name}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Classification</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 max-w-xs line-clamp-2 italic">
+                      {category.description || "No narrative established"}
+                    </p>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-custom/5 text-primary-custom rounded-full text-[10px] font-black uppercase tracking-widest border border-primary-custom/10">
+                      {category.images?.length || 0} Assets
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                      {new Date(category?.createdAt!).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right pr-8">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-white dark:hover:bg-slate-800 rounded-xl shadow-sm transition-all active:scale-90">
+                          <MoreVertical className="h-5 w-5 text-slate-400" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-3xl glass-card animate-in zoom-in-95 duration-200">
+                        <DropdownMenuItem
+                          onClick={() => handleView(category)}
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                            <Eye className="h-4 w-4 text-blue-500" />
+                          </div>
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleEdit(category)}
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                            <Edit className="h-4 w-4 text-amber-500" />
+                          </div>
+                          Edit
+                        </DropdownMenuItem>
+                        <div className="h-[1px] bg-slate-100 dark:bg-slate-800/50 my-1 mx-2" />
+                        <DropdownMenuItem
+                          className="flex items-center gap-3 p-3 rounded-xl focus:bg-rose-500/10 focus:text-rose-500 transition-all cursor-pointer font-bold text-rose-500"
+                          onClick={() => handleDeleteClick(category)}
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                            <Trash2 className="h-4 w-4" />
+                          </div>
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Reusable Pagination Component */}

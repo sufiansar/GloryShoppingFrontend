@@ -1,6 +1,6 @@
 "use server";
 
-import { makeApiCall } from "../apiClinet";
+import { makeApiCall } from "../apiClient";
 
 export const getShippingConfigs = async () => {
   try {

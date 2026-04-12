@@ -159,45 +159,48 @@ export default function AddProductsPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-6xl py-8">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 pt-4 px-2 max-w-6xl mx-auto">
       <Link href="/admin/dashboard/skin-management">
-        <Button variant="ghost" className="mb-6">
+        <Button variant="ghost" className="mb-2 rounded-2xl h-12 px-6 hover:bg-white/40 dark:hover:bg-slate-800/40 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 transition-all">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Skin Management
         </Button>
       </Link>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm overflow-hidden flex flex-col p-8 lg:p-12">
+        <div className="mb-10">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
             Add Products to Skin Concern
-          </CardTitle>
-        </CardHeader>
+          </h2>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+            Configure product recommendations for specific skin profiles
+          </p>
+        </div>
 
-        <CardContent className="space-y-8">
+        <div className="space-y-10">
           {success && (
-            <div className="flex items-center rounded-lg border border-green-200 bg-green-50 p-4">
-              <CheckCircle2 className="mr-2 h-5 w-5 text-green-600" />
-              <span className="text-green-800">
+            <div className="flex items-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 shadow-sm animate-in zoom-in-95 duration-300">
+              <CheckCircle2 className="mr-3 h-6 w-6 text-emerald-600 font-black" />
+              <span className="text-[12px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
                 Products added successfully
               </span>
             </div>
           )}
 
           {/* Skin Concern & Type */}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-2 p-8 rounded-[2rem] bg-white/20 dark:bg-slate-800/20 border border-white/40 dark:border-slate-800/50 shadow-inner">
             <div className="space-y-3">
-              <Label>Skin Concern *</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Skin Concern *</Label>
               <Select
                 value={selectedSkinConcern}
                 onValueChange={setSelectedSkinConcern}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/40 dark:border-slate-700/50 rounded-2xl shadow-sm focus:ring-primary-custom/30 font-bold transition-all duration-300">
                   <SelectValue placeholder="Select concern" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
                   {skinConcerns.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
+                    <SelectItem key={c.id} value={c.id} className="rounded-xl font-bold py-3 cursor-pointer focus:bg-primary-custom/10 focus:text-primary-custom">
                       {c.name}
                     </SelectItem>
                   ))}
@@ -206,17 +209,17 @@ export default function AddProductsPage() {
             </div>
 
             <div className="space-y-3">
-              <Label>Skin Type *</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Skin Type *</Label>
               <Select
                 value={selectedSkinType}
                 onValueChange={setSelectedSkinType}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/40 dark:border-slate-700/50 rounded-2xl shadow-sm focus:ring-primary-custom/30 font-bold transition-all duration-300">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
                   {skinTypes.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
+                    <SelectItem key={t.id} value={t.id} className="rounded-xl font-bold py-3 cursor-pointer focus:bg-primary-custom/10 focus:text-primary-custom">
                       {t.name}
                     </SelectItem>
                   ))}
@@ -227,15 +230,15 @@ export default function AddProductsPage() {
 
           {/* Selected Products */}
           {selectedProducts.length > 0 && (
-            <div className="space-y-2">
-              <Label>Selected Products</Label>
-              <div className="flex flex-wrap gap-2">
+            <div className="space-y-4 p-8 rounded-[2rem] bg-primary-custom/5 border border-primary-custom/10 shadow-inner">
+              <Label className="text-[12px] font-black uppercase tracking-widest text-primary-custom">Selected Products ({selectedProducts.length})</Label>
+              <div className="flex flex-wrap gap-3">
                 {getSelectedProducts().map((product) => (
-                  <Badge key={product.id} variant="secondary">
+                  <Badge key={product.id} className="bg-white dark:bg-slate-800 hover:bg-white/80 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200/50 dark:border-slate-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm transition-all group">
                     {product.name}
                     <button
                       onClick={() => removeProduct(product.id)}
-                      className="ml-2"
+                      className="ml-3 h-5 w-5 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-rose-500/10 group-hover:text-rose-500 transition-colors"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -246,14 +249,14 @@ export default function AddProductsPage() {
           )}
 
           {/* Search */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Select Products *</Label>
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <div className="space-y-6 pt-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <Label className="text-[12px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Select Products *</Label>
+              <div className="relative w-full md:w-80 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary-custom transition-colors" />
                 <Input
-                  className="pl-8"
-                  placeholder="Search products..."
+                  className="pl-11 h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/40 dark:border-slate-700/50 rounded-2xl shadow-sm focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
+                  placeholder="Search globally..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -261,45 +264,52 @@ export default function AddProductsPage() {
             </div>
 
             {fetchingProducts ? (
-              <div className="flex justify-center py-10">
-                <Loader2 className="h-8 w-8 animate-spin" />
+              <div className="flex flex-col items-center justify-center py-20">
+                 <div className="animate-spin rounded-full h-14 w-14 border-[4px] border-primary-custom/20 border-t-primary-custom"></div>
+                 <p className="mt-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Loading directory...</p>
               </div>
             ) : (
               <>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {filteredProducts.map((product) => (
-                    <Card
+                    <div
                       key={product.id}
                       onClick={() => toggleProduct(product.id)}
-                      className={`cursor-pointer transition ${
+                      className={`relative overflow-hidden cursor-pointer rounded-[2rem] border p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${
                         selectedProducts.includes(product.id)
-                          ? "border-primary bg-primary/5"
-                          : ""
+                          ? "border-primary-custom bg-primary-custom/5 shadow-primary-custom/10"
+                          : "border-white/40 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 shadow-sm"
                       }`}
                     >
-                      <CardContent className="p-4">
-                        <h4 className="font-semibold">{product.name}</h4>
+                      {selectedProducts.includes(product.id) && (
+                        <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-primary-custom text-white flex items-center justify-center shadow-md animate-in zoom-in-50">
+                          <CheckCircle2 className="h-4 w-4" />
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-200 pr-8">{product.name}</h4>
 
                         {product.price && (
-                          <p className="text-sm text-green-600">
+                          <p className="mt-2 text-xs font-black text-primary-custom bg-primary-custom/10 px-2.5 py-1 rounded-lg w-fit">
                             {formatPrice(product.price)}
                           </p>
                         )}
 
                         {product.description && (
-                          <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                          <p className="mt-3 line-clamp-2 text-[11px] font-medium text-slate-500">
                             {product.description}
                           </p>
                         )}
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   ))}
                 </div>
 
                 {currentPage < totalPages && (
-                  <div className="flex justify-center pt-4">
+                  <div className="flex justify-center pt-8">
                     <Button
                       variant="outline"
+                      className="rounded-2xl h-12 px-8 border-slate-200/50 bg-white/40 dark:bg-slate-800/40 hover:bg-white text-[10px] font-black uppercase tracking-widest shadow-sm transition-all"
                       onClick={() => fetchMoreProducts(currentPage + 1)}
                     >
                       Load More Products
@@ -311,10 +321,9 @@ export default function AddProductsPage() {
           </div>
 
           {/* Submit */}
-          <div className="border-t pt-6">
+          <div className="border-t border-slate-200/50 dark:border-slate-800/50 pt-8 mt-10">
             <Button
-              size="lg"
-              className="w-full md:w-auto"
+              className="w-full md:w-auto rounded-2xl h-14 px-10 bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-lg shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all border-none"
               disabled={
                 loading ||
                 !selectedSkinConcern ||
@@ -325,16 +334,16 @@ export default function AddProductsPage() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                  Adding Products...
                 </>
               ) : (
-                `Add ${selectedProducts.length} Product(s)`
+                `Confirm & Add ${selectedProducts.length} Product(s)`
               )}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

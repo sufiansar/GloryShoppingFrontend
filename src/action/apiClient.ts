@@ -32,7 +32,7 @@ export const makeApiCall = async <T>(
       headers.set("x-session-id", sessionIdFromCookie);
     } else {
     }
-  } catch (error) {}
+  } catch (error) { }
 
   if (session?.accessToken) {
     headers.set("Authorization", `Bearer ${session.accessToken}`);
@@ -59,7 +59,7 @@ export const makeApiCall = async <T>(
   const isGetRequest = options.method === "GET" || !options.method;
   const isAuthenticatedRequest = session?.accessToken;
   const hasGuestSession = headers.has("x-session-id") || headers.has("Cookie");
-  
+
   const fetchOptions: any = {
     ...options,
     headers,

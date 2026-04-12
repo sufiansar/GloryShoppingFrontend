@@ -184,11 +184,10 @@ export default function CategoryProductsContent({
               {category.images.slice(0, 3).map((image, index) => (
                 <div
                   key={index}
-                  className={`h-48 md:h-64 rounded-xl overflow-hidden ${
-                    index === 0 && category?.images?.length === 1
+                  className={`h-48 md:h-64 rounded-xl overflow-hidden ${index === 0 && category?.images?.length === 1
                       ? "md:col-span-3"
                       : ""
-                  }`}
+                    }`}
                 >
                   <img
                     src={image}
@@ -289,11 +288,10 @@ export default function CategoryProductsContent({
                     <a
                       key={cat.id}
                       href={`/categorys/${cat.slug}`}
-                      className={`block px-3 py-2 rounded-lg transition-colors ${
-                        currentCategorySlug === cat.slug
+                      className={`block px-3 py-2 rounded-lg transition-colors ${currentCategorySlug === cat.slug
                           ? "bg-pink-600 text-white font-medium"
                           : "text-gray-700 hover:bg-gray-100"
-                      }`}
+                        }`}
                     >
                       {cat.name}
                     </a>

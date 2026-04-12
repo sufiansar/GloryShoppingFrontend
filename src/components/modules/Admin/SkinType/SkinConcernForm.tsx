@@ -58,7 +58,10 @@ export function SkinConcernForm({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={mode === "create" ? "default" : "outline"}>
+        <Button 
+          variant={mode === "create" ? "default" : "outline"}
+          className={mode === "create" ? "bg-[#ca428b] hover:bg-[#b8387c] text-white" : ""}
+        >
           {mode === "create" ? "Create Skin Concern" : "Edit"}
         </Button>
       </DialogTrigger>

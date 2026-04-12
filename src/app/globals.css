@@ -191,7 +191,101 @@
     background: radial-gradient(circle at top right, rgba(202, 66, 139, 0.05), transparent 40%),
                 radial-gradient(circle at bottom left, rgba(107, 32, 90, 0.03), transparent 40%);
   }
+
+  /* Unique Premium Dashboard UI */
+  .aura-bg {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .aura-bg::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(194, 88, 145, 0.08) 0%, transparent 50%);
+    animation: rotate-aura 20s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  @keyframes rotate-aura {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .premium-glass {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  .dark .premium-glass {
+    background: rgba(15, 15, 15, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .premium-table-row {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .premium-table-row:hover {
+    background: rgba(194, 88, 145, 0.03) !important;
+    transform: scale(1.002);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+  }
+
+  .dark .premium-table-row:hover {
+    background: rgba(194, 88, 145, 0.08) !important;
+  }
+
+  .premium-input-focus {
+    transition: all 0.3s ease;
+  }
+
+  .premium-input-focus:focus {
+    box-shadow: 0 0 0 4px rgba(194, 88, 145, 0.15);
+    border-color: rgba(194, 88, 145, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .scrollbar-premium::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-premium::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-premium::-webkit-scrollbar-thumb {
+    background: rgba(194, 88, 145, 0.2);
+    border-radius: 10px;
+  }
+
+  .scrollbar-premium::-webkit-scrollbar-thumb:hover {
+    background: rgba(194, 88, 145, 0.4);
+  }
+
+  .premium-glass-dialog {
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border border-white/40 dark:border-slate-800/50 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.15)] rounded-[2.5rem];
+  }
+
+  .premium-static-surface {
+    @apply bg-white/30 dark:bg-slate-900/20 backdrop-blur-md border border-white/20 dark:border-slate-800/40 shadow-xs rounded-2xl;
+  }
+
+  .premium-input-static {
+    @apply h-12 bg-white/50 dark:bg-slate-900/50 border border-primary/40 dark:border-primary/40 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
+  }
 }
+
 /* Add to your global.css */
 [data-radix-navigation-menu-trigger] {
   color: white !important;
@@ -203,4 +297,36 @@
 
 .navigation-menu-trigger {
   color: white !important;
+}
+
+/* Base card improvements */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::after {
+  content: "";
+  position: absolute;
+  top: -110%;
+  left: -210%;
+  width: 200%;
+  height: 200%;
+  opacity: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transition: all 0.6s ease;
+  transform: rotate(-15deg);
+}
+
+.card-shine:hover::after {
+  opacity: 1;
+  top: -40%;
+  left: -40%;
 }

@@ -314,11 +314,10 @@ export default function ProductDetailsPage({
                 {allImages.map((img, index) => (
                   <Card
                     key={`${img}-${index}`}
-                    className={`cursor-pointer overflow-hidden transition-all duration-300 rounded-2xl hover:scale-105 ${
-                      selectedImage === img
+                    className={`cursor-pointer overflow-hidden transition-all duration-300 rounded-2xl hover:scale-105 ${selectedImage === img
                         ? "ring-2 ring-[oklch(52.801%_0.15987_344.323)] shadow-lg scale-105"
                         : "hover:ring-2 hover:ring-rose-300 shadow-md"
-                    }`}
+                      }`}
                     onClick={() => setSelectedImage(img)}
                   >
                     <CardContent className="p-0">
@@ -349,17 +348,16 @@ export default function ProductDetailsPage({
                       <button
                         key={variant.id}
                         onClick={() => handleVariantSelect(variant)}
-                        className={`px-5 py-3 border-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 ${
-                          selectedVariant?.id === variant.id
+                        className={`px-5 py-3 border-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 ${selectedVariant?.id === variant.id
                             ? "border-[oklch(52.801%_0.15987_344.323)] text-white shadow-lg"
                             : "border-rose-200 bg-white hover:border-rose-300 hover:shadow-md"
-                        }`}
+                          }`}
                         style={
                           selectedVariant?.id === variant.id
                             ? {
-                                backgroundColor:
-                                  "oklch(52.801% 0.15987 344.323)",
-                              }
+                              backgroundColor:
+                                "oklch(52.801% 0.15987 344.323)",
+                            }
                             : {}
                         }
                       >
@@ -662,8 +660,8 @@ export default function ProductDetailsPage({
                       style={
                         expandedSections.description
                           ? {
-                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
-                            }
+                            backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                          }
                           : {}
                       }
                     >
@@ -726,8 +724,8 @@ export default function ProductDetailsPage({
                       style={
                         expandedSections.ingredients
                           ? {
-                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
-                            }
+                            backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                          }
                           : {}
                       }
                     >
@@ -741,7 +739,7 @@ export default function ProductDetailsPage({
                   {expandedSections?.ingredients && (
                     <div className="px-5 pb-5 border-t-2 border-rose-50 bg-rose-50/30">
                       {product?.ingredients &&
-                      product?.ingredients?.length > 0 ? (
+                        product?.ingredients?.length > 0 ? (
                         <div className="pt-5 space-y-4">
                           {product?.ingredients?.map((item, idx) => {
                             const ingredient = item?.ingredient;
@@ -802,13 +800,12 @@ export default function ProductDetailsPage({
                                 {ingredient?.safetyLevel && (
                                   <Badge
                                     variant="outline"
-                                    className={`mt-3 font-semibold ${
-                                      ingredient?.safetyLevel === "SAFE"
+                                    className={`mt-3 font-semibold ${ingredient?.safetyLevel === "SAFE"
                                         ? "border-emerald-500 text-emerald-700 bg-emerald-50"
                                         : ingredient?.safetyLevel === "MODERATE"
                                           ? "border-amber-500 text-amber-700 bg-amber-50"
                                           : "border-red-500 text-red-700 bg-red-50"
-                                    }`}
+                                      }`}
                                   >
                                     {ingredient?.safetyLevel}
                                   </Badge>
@@ -840,8 +837,8 @@ export default function ProductDetailsPage({
                       style={
                         expandedSections.specifications
                           ? {
-                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
-                            }
+                            backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                          }
                           : {}
                       }
                     >
@@ -1017,16 +1014,15 @@ export default function ProductDetailsPage({
                       REVIEWS ({product?.reviewCount || 0})
                     </span>
                     <div
-                      className={`rounded-full p-1 transition-all duration-300 ${
-                        expandedSections.reviews
+                      className={`rounded-full p-1 transition-all duration-300 ${expandedSections.reviews
                           ? "text-white"
                           : "bg-rose-100 text-gray-600"
-                      }`}
+                        }`}
                       style={
                         expandedSections.reviews
                           ? {
-                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
-                            }
+                            backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                          }
                           : {}
                       }
                     >
@@ -1086,11 +1082,10 @@ export default function ProductDetailsPage({
                                       {[1, 2, 3, 4, 5].map((star) => (
                                         <Star
                                           key={star}
-                                          className={`h-4 w-4 ${
-                                            star <= (review.rating || 0)
+                                          className={`h-4 w-4 ${star <= (review.rating || 0)
                                               ? "fill-amber-400 text-amber-400"
                                               : "text-slate-300"
-                                          }`}
+                                            }`}
                                         />
                                       ))}
                                     </div>
@@ -1101,8 +1096,8 @@ export default function ProductDetailsPage({
                                   <span className="text-xs text-slate-400">
                                     {review.createdAt
                                       ? new Date(
-                                          review.createdAt,
-                                        ).toDateString()
+                                        review.createdAt,
+                                      ).toDateString()
                                       : ""}
                                   </span>
                                 </div>
@@ -1196,8 +1191,8 @@ export default function ProductDetailsPage({
                       style={
                         expandedSections.faq
                           ? {
-                              backgroundColor: "oklch(52.801% 0.15987 344.323)",
-                            }
+                            backgroundColor: "oklch(52.801% 0.15987 344.323)",
+                          }
                           : {}
                       }
                     >

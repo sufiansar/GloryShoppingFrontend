@@ -1,10 +1,9 @@
 // components/admin/orders/UpdateStatusDialog.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -16,9 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle, Info, CheckCircle2, Truck, XCircle } from "lucide-react";
 import { IOrder, OrderStatus } from "@/types/order.interface";
+import { Badge } from "@/components/ui/badge";
 
 interface UpdateStatusDialogProps {
   order: IOrder;
@@ -33,20 +32,20 @@ const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({
   onClose,
   onUpdate,
 }) => {
-  const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(
-    order.status,
-  );
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(order.status);
   const [updating, setUpdating] = useState(false);
 
+  useEffect(() => {
+    setSelectedStatus(order.status);
+  }, [order.status, isOpen]);
+
   const statusOptions = [
-    { value: OrderStatus.PENDING, label: "Pending" },
-    { value: OrderStatus.PAID, label: "Paid" },
-    { value: OrderStatus.SHIPPED, label: "Shipped" },
-    { value: OrderStatus.COMPLETED, label: "Completed" },
-    { value: OrderStatus.CANCELLED, label: "Cancelled" },
+    { value: OrderStatus.PENDING, label: "Pending", icon: Info, color: "text-yellow-500" },
+    { value: OrderStatus.PAID, label: "Paid", icon: CheckCircle2, color: "text-blue-500" },
+    { value: OrderStatus.SHIPPED, label: "Shipped", icon: Truck, color: "text-purple-500" },
+    { value: OrderStatus.COMPLETED, label: "Completed", icon: CheckCircle2, color: "text-green-500" },
+    { value: OrderStatus.CANCELLED, label: "Cancelled", icon: XCircle, color: "text-red-500" },
   ];
-  // Show all possible statuses so admin can pick any status directly
-  const validStatuses = statusOptions.map((opt) => opt.value);
 
   const handleUpdate = async () => {
     if (!order.id) return;
@@ -76,70 +75,124 @@ const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({
     }
   };
 
+  const getStatusBadgeColor = (status: OrderStatus) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+      case OrderStatus.PAID:
+        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+      case OrderStatus.SHIPPED:
+        return "bg-purple-500/10 text-purple-500 border-purple-500/20";
+      case OrderStatus.COMPLETED:
+        return "bg-green-500/10 text-green-500 border-green-500/20";
+      case OrderStatus.CANCELLED:
+        return "bg-red-500/10 text-red-500 border-red-500/20";
+      default:
+        return "bg-gray-500/10 text-gray-400 border-gray-500/20";
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Update Order Status</DialogTitle>
-          <DialogDescription>
-            Update the status for order #{order.id?.slice(-8).toUpperCase()}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium mb-2">Current Status</p>
-            <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-              {order.status}
+      <DialogContent className="max-w-xl p-0 overflow-hidden premium-glass-dialog border-none rounded-[2.5rem] shadow-2xl">
+        <div className="p-8 space-y-8">
+          <DialogHeader className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary-custom/10 flex items-center justify-center border border-primary-custom/20">
+                <RefreshCw className="h-5 w-5 text-primary-custom" />
+              </div>
+              <div className="text-left">
+                <DialogTitle className="text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white leading-none">
+                  Update Order Status
+                </DialogTitle>
+                <DialogDescription className="text-[11px] font-bold text-slate-500 uppercase tracking-widest pt-1">
+                  Order #{order.id?.slice(-8).toUpperCase()}
+                </DialogDescription>
+              </div>
             </div>
-          </div>
+          </DialogHeader>
 
-          <div>
-            <p className="text-sm font-medium mb-2">New Status</p>
-            <Select
-              value={selectedStatus}
-              onValueChange={(value: OrderStatus) => setSelectedStatus(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedStatus && (
-              <p className="text-sm text-gray-500 mt-2">
-                {getStatusDescription(selectedStatus)}
-              </p>
+          <div className="space-y-6">
+            <div className="p-6 rounded-[1.5rem] bg-white/40 dark:bg-slate-800/40 border border-white/20 dark:border-slate-800/50 shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Current Status</p>
+              <Badge className={`h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300 ${getStatusBadgeColor(order.status)}`}>
+                {order.status}
+              </Badge>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Select New Status</label>
+              <Select
+                value={selectedStatus}
+                onValueChange={(value: OrderStatus) => setSelectedStatus(value)}
+              >
+                <SelectTrigger className="h-14 rounded-2xl bg-white/60 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-sm font-black focus:ring-primary-custom/20 shadow-sm transition-all active:scale-[0.99]">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-3xl glass-card p-1">
+                  {statusOptions.map((option) => (
+                    <SelectItem 
+                      key={option.value} 
+                      value={option.value} 
+                      className="rounded-xl p-3 focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <option.icon className={`h-4 w-4 ${option.color}`} />
+                        {option.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {selectedStatus && (
+                <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+                  <Info className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+                  <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
+                    {getStatusDescription(selectedStatus)}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {selectedStatus === OrderStatus.CANCELLED && (
+              <div className="flex items-start gap-4 p-5 rounded-2xl bg-rose-50/50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/20">
+                <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                  <AlertCircle className="h-4 w-4 text-rose-500" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.1em] text-rose-600 mb-1">Critical Notice</p>
+                  <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
+                    Cancelling an order is irreversible. The customer will be notified about the cancellation.
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 
-          {selectedStatus === OrderStatus.CANCELLED && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> Cancelling an order is irreversible. The
-                customer will be notified about the cancellation.
-              </p>
-            </div>
-          )}
+          <div className="flex gap-4 pt-4 pb-2">
+            <Button 
+              variant="outline" 
+              onClick={onClose} 
+              disabled={updating}
+              className="flex-1 h-14 rounded-2xl border-slate-200 dark:border-slate-800 font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-[0.98]"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdate}
+              disabled={updating || selectedStatus === order.status}
+              className="flex-[1.5] h-14 rounded-2xl bg-primary-custom text-white font-black uppercase tracking-widest text-[10px] hover:shadow-primary-custom/40 transition-all shadow-xl shadow-primary-custom/10 active:scale-[0.98] border-none"
+            >
+              {updating ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+              )}
+              Update Status
+            </Button>
+          </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={updating}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpdate}
-            disabled={updating || selectedStatus === order.status}
-          >
-            {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Update Status
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

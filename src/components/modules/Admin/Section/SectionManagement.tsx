@@ -86,6 +86,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import CreateSectionForm from "../../Sections/SectionsCreate";
 import UpdateSectionForm from "../../Sections/UpdateSectionForm";
+import Pagination from "@/components/Shared/Pagination";
 
 interface SectionManagementProps {
   initialSections?: Section[];
@@ -241,613 +242,499 @@ export default function SectionManagement({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Premium Header Card */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
             Section Management
           </h1>
-          <p className="text-muted-foreground">
-            Create, edit, and manage your website sections
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+            Create, edit, and manage your website home page sections
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant="outline"
-            size="sm"
             onClick={fetchSections}
             disabled={isLoading}
+            className="rounded-2xl h-12 px-6 border-white/40 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 transition-all shadow-sm"
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 mr-2 text-primary-custom ${isLoading ? "animate-spin" : ""}`}
             />
             Refresh
           </Button>
 
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="rounded-2xl h-12 px-8 bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all border-none">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Section
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New Section</DialogTitle>
-                <DialogDescription>
-                  Add a new section to your website. Fill in the required
-                  fields.
-                </DialogDescription>
-              </DialogHeader>
-              {React.createElement(
-                CreateSectionForm as React.ComponentType<any>,
-                {
-                  onSuccess: handleSectionCreated,
-                },
-              )}
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto premium-glass-dialog p-0 border-none">
+              <div className="p-8 space-y-6">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black uppercase tracking-tight">Create New Section</DialogTitle>
+                  <DialogDescription className="font-medium text-slate-500">
+                    Add a new section to your website. Fill in the required fields.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="bg-white/30 dark:bg-slate-800/30 rounded-3xl p-6 border border-white/20">
+                  {React.createElement(
+                    CreateSectionForm as React.ComponentType<any>,
+                    {
+                      onSuccess: handleSectionCreated,
+                    },
+                  )}
+                </div>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+
+      {/* Stats Cards - Bento Style */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-none bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] shadow-sm group hover:shadow-md transition-all duration-500 border border-white/20 overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <FileText className="h-16 w-16" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
               Total Sections
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sections.length}</div>
-            <p className="text-xs text-muted-foreground">
-              All sections in the system
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-1">{sections.length}</div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              System Total
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Visible</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+        <Card className="border-none bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] shadow-sm group hover:shadow-md transition-all duration-500 border border-white/20 overflow-hidden">
+           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-emerald-500">
+            <Eye className="h-16 w-16" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Visible</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-black text-emerald-500 tracking-tighter mb-1">
               {
                 (Array.isArray(sections) ? sections : []).filter(
                   (s) => s?.isVisible,
                 ).length
               }
             </div>
-            <p className="text-xs text-muted-foreground">
-              Currently visible sections
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Live Assets
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hero Sections</CardTitle>
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        <Card className="border-none bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] shadow-sm group hover:shadow-md transition-all duration-500 border border-white/20 overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-primary-custom">
+            <ImageIcon className="h-16 w-16" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Hero Sections</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-black text-primary-custom tracking-tighter mb-1">
               {
                 (Array.isArray(sections) ? sections : []).filter(
                   (s) => s.type === SECTION_TYPE.HERO,
                 ).length
               }
             </div>
-            <p className="text-xs text-muted-foreground">
-              Main banner sections
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Prime Spots
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Images</CardTitle>
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+        <Card className="border-none bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] shadow-sm group hover:shadow-md transition-all duration-500 border border-white/20 overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-primary-custom">
+            <ImageIcon className="h-16 w-16" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Images</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-black text-primary-custom tracking-tighter mb-1">
               {(Array.isArray(sections) ? sections : []).reduce(
                 (acc, s) => acc + (s.images?.length || 0),
                 0,
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Total images across all sections
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Gallery Total
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>
-            Filter sections by status, type, or search
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search sections..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-35">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="visible">
-                    <div className="flex items-center gap-2">
-                      <Eye className="h-3 w-3" />
-                      Visible
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="hidden">
-                    <div className="flex items-center gap-2">
-                      <EyeOff className="h-3 w-3" />
-                      Hidden
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value={SECTION_TYPE.HERO}>Hero</SelectItem>
-                  <SelectItem value={SECTION_TYPE.PROMOTIONAL}>
-                    Promotional
-                  </SelectItem>
-                  <SelectItem value={SECTION_TYPE.BENEFITS}>
-                    Benefits
-                  </SelectItem>
-                  <SelectItem value={SECTION_TYPE.NEW_ARRIVALS}>
-                    New Arrivals
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchQuery("");
-                  setStatusFilter("all");
-                  setTypeFilter("all");
-                }}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Clear
-              </Button>
-            </div>
+      {/* Filter & Command Center */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative group">
+            <div className="absolute inset-0 bg-primary-custom/5 blur-xl group-focus-within:bg-primary-custom/10 transition-all duration-500 rounded-3xl" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 group-focus-within:text-primary-custom transition-colors" />
+            <Input
+              placeholder="Search sections..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 h-14 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border-white/20 dark:border-slate-800/50 rounded-2xl shadow-sm focus-visible:ring-primary-custom/30 focus-visible:border-primary-custom/50 transition-all duration-500 font-medium relative z-10"
+            />
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex gap-3">
+             <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-14 w-[160px] bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-2xl border-primary/40 dark:border-primary/40 font-bold text-slate-600 dark:text-slate-300">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-slate-200 dark:border-slate-800 backdrop-blur-3xl bg-white/80 dark:bg-slate-900/80 p-2">
+                <SelectItem value="all" className="rounded-xl font-bold">All Status</SelectItem>
+                <SelectItem value="visible" className="rounded-xl font-bold text-emerald-500">Visible</SelectItem>
+                <SelectItem value="hidden" className="rounded-xl font-bold text-slate-400">Hidden</SelectItem>
+              </SelectContent>
+            </Select>
 
-      {/* Sections Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Sections</CardTitle>
-          <CardDescription>
-            Manage all your website sections. Click on a section to view
-            details.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          ) : filteredSections?.length === 0 ? (
-            <div className="text-center py-12">
-              <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No sections found</h3>
-              <p className="text-muted-foreground mb-6">
-                {sections.length === 0
-                  ? "Get started by creating your first section"
-                  : "Try adjusting your filters or search query"}
-              </p>
-              {sections.length === 0 && (
-                <Button onClick={() => setShowCreateDialog(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Section
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-20">Image</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Images</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSections?.map((section) => {
-                    const typeBadge = getSectionTypeBadge(section.type);
-                    return (
-                      <TableRow key={section.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <div className="relative h-10 w-16 rounded-md overflow-hidden border">
-                            {section.images?.[0] ? (
-                              <Image
-                                src={section.images[0]}
-                                alt={section.title || "Section"}
-                                fill
-                                className="object-cover"
-                                sizes="64px"
-                              />
-                            ) : (
-                              <div className="h-full w-full bg-muted flex items-center justify-center">
-                                <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-14 w-[180px] bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-2xl border-primary/40 dark:border-primary/40 font-bold text-slate-600 dark:text-slate-300">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-slate-200 dark:border-slate-800 backdrop-blur-3xl bg-white/80 dark:bg-slate-900/80 p-2">
+                <SelectItem value="all" className="rounded-xl font-bold">All Types</SelectItem>
+                <SelectItem value={SECTION_TYPE.HERO} className="rounded-xl font-bold">Hero</SelectItem>
+                <SelectItem value={SECTION_TYPE.PROMOTIONAL} className="rounded-xl font-bold">Promotional</SelectItem>
+                <SelectItem value={SECTION_TYPE.BENEFITS} className="rounded-xl font-bold">Benefits</SelectItem>
+                <SelectItem value={SECTION_TYPE.NEW_ARRIVALS} className="rounded-xl font-bold">New Arrivals</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-14 w-14 rounded-2xl border-white/20 dark:border-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all active:scale-90"
+              onClick={() => {
+                setSearchQuery("");
+                setStatusFilter("all");
+                setTypeFilter("all");
+              }}
+            >
+              <Filter className="h-5 w-5 text-slate-400" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Sections Table - Intelligent List */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto scrollbar-premium">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-slate-200/30 dark:border-slate-800/30 hover:bg-transparent px-6 text-left">
+                <TableHead className="w-24 py-6 pl-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Visual</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Title</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Type</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Gallery</TableHead>
+                <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
+                <TableHead className="text-right py-6 pr-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-20">
+                     <div className="flex flex-col items-center gap-4 animate-pulse">
+                        <div className="h-12 w-12 rounded-2xl bg-slate-200/50 dark:bg-slate-800/50 flex items-center justify-center">
+                          <RefreshCw className="h-6 w-6 animate-spin text-primary-custom" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Accessing Cloud Assets...</span>
+                      </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredSections?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-20">
+                    <div className="flex flex-col items-center gap-2">
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Empty Domain: No Sections Sequenced</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredSections?.map((section) => {
+                  const typeBadge = getSectionTypeBadge(section.type);
+                  return (
+                    <TableRow key={section.id} className="premium-table-row border-b border-slate-100/30 dark:border-slate-800/20 group/row">
+                      <TableCell className="py-5 pl-8">
+                        <div className="relative h-14 w-24 rounded-2xl overflow-hidden shadow-sm ring-2 ring-white/50 dark:ring-slate-800/50 group-hover/row:scale-105 transition-transform duration-500">
+                          {section.images?.[0] ? (
+                            <Image
+                              src={section.images[0]}
+                              alt={section.title || "Section"}
+                              fill
+                              className="object-cover"
+                              sizes="120px"
+                            />
+                          ) : (
+                            <div className="h-full w-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                              <ImageIcon className="h-5 w-5 text-slate-300" />
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col max-w-xs">
+                          <span className="text-sm font-black text-slate-900 dark:text-white group-hover/row:text-primary-custom transition-colors truncate">
+                            {section.title || "Untitled Section"}
+                          </span>
+                          {section.description && (
+                            <span className="text-[10px] font-bold text-slate-400 truncate opacity-70">
+                              {section.description}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`inline-flex items-center px-3 py-1 rounded-xl font-black text-[9px] uppercase tracking-widest border border-slate-200/50 dark:border-slate-800/50 bg-white/50 dark:bg-slate-800/50 shadow-xs`}>
+                          {typeBadge.label}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex -space-x-2">
+                            {section.images?.slice(0, 3).map((img, i) => (
+                              <div key={i} className="h-7 w-7 rounded-lg ring-2 ring-white dark:ring-slate-900 overflow-hidden bg-slate-100">
+                                <Image src={img} alt="" width={28} height={28} className="object-cover" />
+                              </div>
+                            ))}
+                            {(section.images?.length || 0) > 3 && (
+                              <div className="h-7 w-7 rounded-lg ring-2 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[8px] font-black">
+                                +{section.images!.length - 3}
                               </div>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-medium">
-                              {section.title || "Untitled Section"}
-                            </span>
-                            {section.description && (
-                              <span className="text-sm text-muted-foreground truncate max-w-50">
-                                {section.description}
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={typeBadge.variant}>
-                            {typeBadge.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">
-                              {section.images?.length || 0}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              images
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              section.isVisible ? "default" : "secondary"
-                            }
-                            className="gap-1"
-                          >
-                            {section.isVisible ? (
-                              <>
-                                <Eye className="h-3 w-3" />
-                                Visible
-                              </>
-                            ) : (
-                              <>
-                                <EyeOff className="h-3 w-3" />
-                                Hidden
-                              </>
-                            )}
-                          </Badge>
-                        </TableCell>
-                        {/* <TableCell>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-3 w-3" />
-                            {formatDate(section.createdAt)}
-                          </div>
-                        </TableCell> */}
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleViewClick(section)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>View Details</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleEditClick(section)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Edit Section</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem
-                                  onClick={() => handleViewClick(section)}
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => handleEditClick(section)}
-                                >
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => handleDeleteClick(section.id)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                            {section.images?.length || 0} Assets
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${section.isVisible ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600' : 'bg-slate-500/5 border-slate-500/20 text-slate-500'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${section.isVisible ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-400'}`} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">
+                            {section.isVisible ? "Visible" : "Hidden"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-8">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-white dark:hover:bg-slate-800 rounded-xl shadow-sm transition-all active:scale-90">
+                              <MoreVertical className="h-5 w-5 text-slate-400" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-3xl glass-card">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 py-2">Operations</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => handleViewClick(section)}
+                              className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                            >
+                              <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                <Eye className="h-4 w-4 text-blue-500" />
+                              </div>
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleEditClick(section)}
+                              className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                            >
+                              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                <Edit className="h-4 w-4 text-amber-500" />
+                              </div>
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="mx-2 bg-slate-100 dark:bg-slate-800/50" />
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(section.id)}
+                              className="flex items-center gap-3 p-3 rounded-xl focus:bg-rose-500/10 focus:text-rose-500 transition-all cursor-pointer font-bold text-rose-500"
+                            >
+                              <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                                <Trash2 className="h-4 w-4" />
+                              </div>
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
 
           {/* Pagination */}
-          {filteredSections.length > 0 && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {filteredSections.length} of {sections.length} sections
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" disabled>
-                  Previous
-                </Button>
-                <Button variant="outline" size="sm" disabled>
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <Pagination
+            currentPage={1}
+            totalPages={1}
+            totalItems={filteredSections.length}
+            itemsPerPage={filteredSections.length || 10}
+            className="mt-6"
+            showItemsPerPage={false}
+          />
 
-      {/* View Section Dialog */}
+      {/* View Section Dialog - Premium Static Static */}
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto premium-glass-dialog p-0 border-none">
           {viewSection && (
-            <>
+            <div className="p-8 space-y-8">
               <DialogHeader>
-                <DialogTitle>Section Details</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white">Section Details</DialogTitle>
+                <DialogDescription className="font-medium text-slate-500">
                   View detailed information about this section
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold">
-                      {viewSection.title || "Untitled Section"}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge
-                        variant={getSectionTypeBadge(viewSection.type).variant}
-                      >
-                        {getSectionTypeBadge(viewSection.type).label}
-                      </Badge>
-                      <Badge
-                        variant={
-                          viewSection.isVisible ? "default" : "secondary"
-                        }
-                      >
-                        {viewSection.isVisible ? "Visible" : "Hidden"}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    ID: {viewSection.id.slice(0, 8)}...
-                  </div>
-                </div>
-
-                {/* Images Grid */}
-                <div>
-                  <h4 className="font-medium mb-3">
-                    Images ({viewSection.images?.length || 0})
-                  </h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Images Column */}
+                <div className="md:col-span-1 space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Cloud Assets ({viewSection.images?.length || 0})</h4>
+                  <div className="grid grid-cols-2 gap-3">
                     {viewSection.images?.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <div className="aspect-square rounded-lg overflow-hidden border">
+                      <div key={index} className="relative group/asset shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 rounded-2xl overflow-hidden aspect-square">
                           <Image
                             src={image}
-                            alt={`Image ${index + 1}`}
+                            alt={`Asset ${index + 1}`}
                             fill
                             className="object-cover"
-                            sizes="(max-width: 768px) 50vw, 25vw"
                           />
-                        </div>
-                        {index === 0 && (
-                          <Badge className="absolute top-2 left-2">Main</Badge>
-                        )}
+                          {index === 0 && (
+                            <Badge className="absolute top-2 left-2 bg-primary-custom text-[8px] font-black uppercase">Main</Badge>
+                          )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Description</h4>
-                      <p className="text-sm text-muted-foreground">
+                {/* Details Column */}
+                <div className="md:col-span-2 space-y-8">
+                   <div className="flex flex-col gap-4 bg-white/30 dark:bg-slate-800/20 p-6 rounded-3xl border border-white/20">
+                      <div className="flex items-center justify-between">
+                         <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                          {viewSection.title || "Untitled Section"}
+                        </h3>
+                        <Badge
+                          variant={getSectionTypeBadge(viewSection.type).variant}
+                          className="font-black text-[9px] uppercase tracking-widest rounded-xl"
+                        >
+                          {getSectionTypeBadge(viewSection.type).label}
+                        </Badge>
+                      </div>
+                      <p className="text-sm font-medium text-slate-500 leading-relaxed">
                         {viewSection.description || "No description provided"}
                       </p>
-                    </div>
+                   </div>
 
-                    <div>
-                      <h4 className="font-medium mb-2">CTA Text</h4>
-                      <p className="text-sm">
-                        {viewSection.ctaText || "Not set"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Link</h4>
-                      {viewSection.link ? (
-                        <a
-                          href={viewSection.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                        >
-                          {viewSection.link}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Not set</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <h4 className="font-medium mb-2">Metadata</h4>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            Created:
-                          </span>
-                          {/* <span>{formatDate(viewSection.createdAt)}</span> */}
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Call to Action</span>
+                          <p className="text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/50 px-4 py-3 rounded-2xl">
+                            {viewSection.ctaText || "Not configured"}
+                          </p>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            Updated:
-                          </span>
-                          {/* <span>{formatDate(viewSection.updatedAt)}</span> */}
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destination Link</span>
+                           <div className="bg-slate-100 dark:bg-slate-800/50 px-4 py-3 rounded-2xl group/link">
+                             {viewSection.link ? (
+                                <a
+                                  href={viewSection.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-bold text-blue-500 hover:text-blue-600 truncate block flex items-center gap-2"
+                                >
+                                  {viewSection.link}
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              ) : (
+                                <p className="text-xs font-bold text-slate-400">Not configured</p>
+                              )}
+                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Colors */}
-                {(viewSection.primaryColor || viewSection.secondaryColor) && (
-                  <div>
-                    <h4 className="font-medium mb-3">Colors</h4>
-                    <div className="flex gap-4">
-                      {viewSection.primaryColor && (
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-6 w-6 rounded border"
-                            style={{
-                              backgroundColor: viewSection.primaryColor,
-                            }}
-                          />
-                          <span className="text-sm">
-                            {viewSection.primaryColor}
-                          </span>
+                      <div className="space-y-6">
+                        <div className="space-y-3">
+                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Visualization</span>
+                           <div className="flex gap-4">
+                              {viewSection.primaryColor && (
+                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
+                                  <div className="h-6 w-6 rounded-lg ring-1 ring-white/20" style={{ backgroundColor: viewSection.primaryColor }} />
+                                  <span className="text-[10px] font-bold font-mono">{viewSection.primaryColor}</span>
+                                </div>
+                              )}
+                              {viewSection.secondaryColor && (
+                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
+                                  <div className="h-6 w-6 rounded-lg ring-1 ring-white/20" style={{ backgroundColor: viewSection.secondaryColor }} />
+                                  <span className="text-[10px] font-bold font-mono">{viewSection.secondaryColor}</span>
+                                </div>
+                              )}
+                           </div>
                         </div>
-                      )}
-                      {viewSection.secondaryColor && (
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="h-6 w-6 rounded border"
-                            style={{
-                              backgroundColor: viewSection.secondaryColor,
-                            }}
-                          />
-                          <span className="text-sm">
-                            {viewSection.secondaryColor}
-                          </span>
+
+                         <div className="space-y-3">
+                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Visibility State</span>
+                           <div className={`px-4 py-2 rounded-2xl border w-fit font-black text-[10px] uppercase tracking-widest ${viewSection.isVisible ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-slate-500/10 border-slate-500/20 text-slate-500'}`}>
+                             {viewSection.isVisible ? "Public Display" : "Private Archive"}
+                           </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                      </div>
+                   </div>
+                </div>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Edit Section Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Section</DialogTitle>
-            <DialogDescription>
-              Update the section details and images
-            </DialogDescription>
-          </DialogHeader>
-          {selectedSection &&
-            React.createElement(UpdateSectionForm as React.ComponentType<any>, {
-              section: selectedSection,
-              onSuccess: handleSectionUpdated,
-            })}
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto premium-glass-dialog p-0 border-none">
+          <div className="p-8 space-y-6">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white">Edit Section</DialogTitle>
+              <DialogDescription className="font-medium text-slate-500">
+                Update the section details and images
+              </DialogDescription>
+            </DialogHeader>
+            <div className="bg-white/30 dark:bg-slate-800/30 rounded-3xl p-6 border border-white/20">
+              {selectedSection &&
+                React.createElement(UpdateSectionForm as React.ComponentType<any>, {
+                  section: selectedSection,
+                  onSuccess: handleSectionUpdated,
+                })}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-[2.5rem] premium-glass-dialog border-none p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              section and remove all associated data from our servers.
+            <AlertDialogTitle className="text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-slate-500">
+              This action cannot be undone. This will permanently delete the section and remove all associated data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="mt-8">
+            <AlertDialogCancel className="rounded-2xl border-slate-200 dark:border-slate-800 font-bold uppercase tracking-widest text-[10px] py-4">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteSection}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-rose-500 text-white hover:bg-rose-600 rounded-2xl font-bold uppercase tracking-widest text-[10px] py-4"
             >
               Delete
             </AlertDialogAction>

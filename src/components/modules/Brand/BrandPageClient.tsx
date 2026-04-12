@@ -133,11 +133,10 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
               <div className="space-y-1">
                 <button
                   onClick={() => handleBrandClick(null)}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
-                    selectedBrand === null
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${selectedBrand === null
                       ? "bg-[#ca428b] text-white font-semibold"
                       : "text-gray-700 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   All Brands
                 </button>
@@ -145,11 +144,10 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
                   <button
                     key={brand.id}
                     onClick={() => handleBrandClick(brand)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-xs ${
-                      selectedBrand?.id === brand.id
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-xs ${selectedBrand?.id === brand.id
                         ? "bg-[#ca428b] text-white font-semibold"
                         : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     {brand.logoUrl && (
                       <img

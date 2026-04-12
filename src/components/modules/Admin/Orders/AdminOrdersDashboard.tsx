@@ -65,6 +65,7 @@ import {
 import OrderDetailsDialog from "./OrderDetailsDialog";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import DeleteOrderDialog from "./DeleteOrderDialog";
+import Pagination from "@/components/Shared/Pagination";
 
 interface OrdersResponse {
   data: IOrder[];
@@ -272,223 +273,203 @@ const AdminOrdersDashboard = () => {
   };
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle>All Orders</CardTitle>
-              <CardDescription>
-                Manage customer orders and track their status
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={fetchOrders}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
 
-        <CardContent>
-          {/* Filters */}
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by Order ID, Customer..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="pl-9"
-              />
-            </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="PROCESSING">Processing</SelectItem>
-                <SelectItem value="SHIPPED">Shipped</SelectItem>
-                <SelectItem value="DELIVERED">Delivered</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2">
-              <Button onClick={handleSearch} className="flex-1">
-                <Filter className="h-4 w-4 mr-2" />
-                Apply Filters
-              </Button>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear
-              </Button>
-            </div>
+      {/* Filter Matrix */}
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/40 dark:border-slate-800/50 shadow-sm relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Search by Order ID, Customer..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              className="h-14 pl-11 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
+            />
           </div>
 
-          {/* Orders Table */}
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <div className="flex justify-center">
-                        <RefreshCw className="h-6 w-6 animate-spin" />
-                      </div>
-                    </TableCell>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus:ring-primary-custom/30 font-bold transition-all duration-300 uppercase text-[10px] tracking-widest">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-2xl">
+              <SelectItem value="all" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">All Status</SelectItem>
+              <SelectItem value="PENDING" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-amber-500">Pending</SelectItem>
+              <SelectItem value="PROCESSING" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-blue-500">Processing</SelectItem>
+              <SelectItem value="SHIPPED" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-purple-500">Shipped</SelectItem>
+              <SelectItem value="DELIVERED" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-green-500">Delivered</SelectItem>
+              <SelectItem value="CANCELLED" className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-rose-500">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-3 h-14">
+            <Button 
+              onClick={handleSearch} 
+              className="flex-1 rounded-2xl h-full bg-primary-custom text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary-custom/20 hover:shadow-primary-custom/40 transition-all border-none"
+            >
+              <Filter className="h-3.5 w-3.5 mr-2" />
+              Apply Filters
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={clearFilters}
+              className="rounded-2xl h-full px-6 border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-500 transition-all"
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+      </div>
+
+          {/* Orders Intelligent List - Premium Card Experience */}
+          <div className="rounded-[2.5rem] bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/40 dark:border-slate-800/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <div className="overflow-x-auto scrollbar-premium">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-slate-200/30 dark:border-slate-800/30 hover:bg-transparent px-6 text-left">
+                    <TableHead className="py-6 pl-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Order ID</TableHead>
+                    <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Customer</TableHead>
+                    <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Date</TableHead>
+                    <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Amount</TableHead>
+                    <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</TableHead>
+                    <TableHead className="py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Items</TableHead>
+                    <TableHead className="text-right py-6 pr-8 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</TableHead>
                   </TableRow>
-                ) : orders.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-center py-8 text-gray-500"
-                    >
-                      No orders found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">
-                        #{order.id?.slice(-8).toUpperCase()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {order.deliveryDetails?.name || "N/A"}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {order.deliveryDetails?.email}
-                          </span>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-20">
+                        <div className="flex flex-col items-center gap-4">
+                          <RefreshCw className="h-8 w-8 animate-spin text-primary-custom" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Loading...</span>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {formatDate(order.orderDate || order.createdAt)}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {formatCurrency(order.amount)}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell>{order.items?.length || 0} items</TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setIsDetailsOpen(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setIsStatusUpdateOpen(true);
-                              }}
-                              disabled={order.status === OrderStatus.CANCELLED}
-                            >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Update Status
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setIsDeleteOpen(true);
-                              }}
-                              disabled={order.status === OrderStatus.CANCELLED}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Cancel Order
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                    </TableRow>
+                  ) : orders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-20">
+                        <div className="flex flex-col items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">No Orders Found</span>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    orders.map((order) => (
+                      <TableRow key={order.id} className="premium-table-row border-b border-slate-100/30 dark:border-slate-800/20 group/row">
+                        <TableCell className="py-5 pl-8">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-xs font-black text-primary-custom bg-primary-custom/5 px-2 py-1 rounded-lg border border-primary-custom/10 w-fit">
+                              #{order.id?.slice(-8).toUpperCase()}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-sm font-black text-slate-900 dark:text-white group-hover/row:text-primary-custom transition-colors">
+                              {order.deliveryDetails?.name || "Anonymous Entity"}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight">
+                              {order.deliveryDetails?.email}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                              {new Date(order.orderDate || order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {new Date(order.orderDate || order.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm font-black text-slate-900 dark:text-white tracking-tighter">
+                            {formatCurrency(order.amount)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(order.status)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-bold text-[10px] text-slate-500 border border-slate-200/50">
+                            {order.items?.length || 0} Units
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right pr-8">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-white dark:hover:bg-slate-800 rounded-xl shadow-sm transition-all active:scale-90">
+                                <MoreHorizontal className="h-5 w-5 text-slate-400" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-white/20 dark:border-slate-800/50 backdrop-blur-3xl glass-card animate-in zoom-in-95 duration-200">
+                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 py-2">Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setIsDetailsOpen(true);
+                                }}
+                                className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                              >
+                                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                  <Eye className="h-4 w-4 text-blue-500" />
+                                </div>
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setIsStatusUpdateOpen(true);
+                                }}
+                                disabled={order.status === OrderStatus.CANCELLED}
+                                className="flex items-center gap-3 p-3 rounded-xl focus:bg-primary-custom/10 focus:text-primary-custom transition-all cursor-pointer font-bold"
+                              >
+                                <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                  <Edit className="h-4 w-4 text-amber-500" />
+                                </div>
+                                Update Status
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="mx-2 bg-slate-100 dark:bg-slate-800/50" />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setIsDeleteOpen(true);
+                                }}
+                                disabled={order.status === OrderStatus.CANCELLED}
+                                className="flex items-center gap-3 p-3 rounded-xl focus:bg-rose-500/10 focus:text-rose-500 transition-all cursor-pointer font-bold text-rose-500"
+                              >
+                                <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                                  <Trash2 className="h-4 w-4" />
+                                </div>
+                                Cancel Order
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {/* Pagination */}
-          {pagination.totalPages >= 1 && (
-            <div className="flex items-center justify-between mt-6">
-              <div className="text-sm text-gray-500">
-                Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
-                of {pagination.total} orders
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(pagination.page - 1)}
-                  disabled={pagination.page === 1}
-                >
-                  Previous
-                </Button>
-                {Array.from(
-                  { length: Math.min(5, pagination.totalPages) },
-                  (_, i) => {
-                    const pageNum = i + 1;
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={
-                          pagination.page === pageNum ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => handlePageChange(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  },
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(pagination.page + 1)}
-                  disabled={pagination.page === pagination.totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
+          {pagination.totalPages > 0 && (
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.total}
+              itemsPerPage={pagination.limit}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={(limit) => setPagination(prev => ({ ...prev, limit, page: 1 }))}
+              className="mt-6 pt-2"
+            />
           )}
-        </CardContent>
-      </Card>
 
       {/* Dialogs */}
       {selectedOrder && (
@@ -527,7 +508,7 @@ const AdminOrdersDashboard = () => {
           />
         </>
       )}
-    </>
+    </div>
   );
 };
 
