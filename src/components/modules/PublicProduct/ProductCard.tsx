@@ -137,6 +137,7 @@ export default function ProductCard({
           {product.id && (
             <AddToCartButton
               productId={product.id}
+              variantId={product.variants?.[0]?.id}
               quantity={1}
               isOutOfStock={product.stock === 0}
               className="w-full mt-1.5 text-xs py-1.5 px-2"

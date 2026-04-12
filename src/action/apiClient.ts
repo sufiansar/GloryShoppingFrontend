@@ -85,8 +85,22 @@ export const makeApiCall = async <T>(
     fetchOptions.cache = "no-store"; // No cache for authenticated or session-based requests
   }
 
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_API || "";
+  
+  // Production Safeguard: Ensure the API URL is absolute and has a protocol
+  if (baseUrl && !baseUrl.startsWith("http")) {
+    const protocol = typeof window !== "undefined" ? window.location.protocol : "https:";
+    const host = typeof window !== "undefined" ? window.location.host : "localhost:3000";
+    console.warn(`⚠️ [makeApiCall] Relative API URL detected: ${baseUrl}. Deriving absolute URL.`);
+    baseUrl = `${protocol}//${host}${baseUrl}`;
+  }
+
+  if (!baseUrl) {
+    console.error("❌ [makeApiCall] NEXT_PUBLIC_BASE_API is not defined. API calls will fail.");
+  }
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_API}${endpoint}`,
+    `${baseUrl}${endpoint}`,
     fetchOptions,
   );
 

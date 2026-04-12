@@ -10,6 +10,7 @@ import { toast as toastNotification } from "sonner";
 
 interface AddToCartButtonProps {
   productId: string;
+  variantId?: string;
   quantity?: number;
   size?: "default" | "lg" | "sm" | "icon";
   variant?: "default" | "secondary" | "outline";
@@ -22,6 +23,7 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({
   productId,
+  variantId,
   quantity = 1,
   size = "lg",
   variant = "default",
@@ -39,40 +41,56 @@ export default function AddToCartButton({
   const handleAddToCart = async () => {
     if (isOutOfStock || disabled || isLoading) return;
 
+    console.log("🛒 [AddToCartButton] Adding product:", productId, "variant:", variantId, "qty:", quantity);
     setIsLoading(true);
+    
     try {
       const result = await addToCart({
         productId,
+        variantId,
         quantity,
       });
 
-      console.log("result", result);
-      if (result?.cartItem || result?.success) {
+      console.log("🛒 [AddToCartButton] API Result:", result);
+
+      // Robust check for success across different API response formats
+      const isSuccessful = 
+        result?.success === true || 
+        !!result?.cartItem || 
+        !!result?.data?.cartItem ||
+        result?.status === "success";
+
+      if (isSuccessful) {
         setIsSuccess(true);
-
-        // Refresh cart count from backend
-        await refreshCartCount();
-
         toastNotification.success("Product added to cart!");
 
-        // Redirect to cart page after 1 second
+        // Refresh cart count from backend to sync navbar
+        try {
+          await refreshCartCount();
+        } catch (refreshError) {
+          console.error("🛒 [AddToCartButton] Failed to refresh cart count:", refreshError);
+        }
+
+        // Redirect to cart page after a short delay for feedback
         setTimeout(() => {
           router.push("/cart");
-        }, 1000);
-
-        // Reset success state after 2 seconds
-        setTimeout(() => {
-          setIsSuccess(false);
-        }, 2000);
+        }, 800);
 
         onSuccess?.();
       } else {
-        toastNotification.error(result?.message || "Failed to add to cart");
+        const errorMessage = result?.message || result?.error || "Failed to add to cart";
+        console.error("🛒 [AddToCartButton] Server rejected add to cart:", errorMessage);
+        toastNotification.error(errorMessage);
+        
+        // If it's an auth issue, the message might be "Unauthorized"
+        if (errorMessage.toLowerCase().includes("unauthorized") || result?.statusCode === 401) {
+          toastNotification.error("Please login to add items to your cart");
+        }
       }
-    } catch (error) {
-      console.error("Add to cart error:", error);
+    } catch (error: any) {
+      console.error("🛒 [AddToCartButton] Critical Error:", error);
       toastNotification.error(
-        "Failed to add product to cart. Please try again.",
+        error?.message || "Failed to add product to cart. Please check your connection."
       );
     } finally {
       setIsLoading(false);

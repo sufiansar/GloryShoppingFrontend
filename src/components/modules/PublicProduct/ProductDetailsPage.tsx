@@ -455,6 +455,7 @@ export default function ProductDetailsPage({
                   <div className="flex-[3] flex gap-2">
                     <AddToCartButton
                       productId={product.id!}
+                      variantId={selectedVariant?.id || product?.variants?.[0]?.id}
                       quantity={quantity}
                       isOutOfStock={(selectedVariant?.stock || product?.stock) === 0}
                       className="flex-[2] h-14 rounded-2xl text-base font-bold shadow-lg shadow-pink-500/5"
@@ -696,6 +697,7 @@ export default function ProductDetailsPage({
               <div className="flex-[3]">
                 <AddToCartButton
                   productId={product.id!}
+                  variantId={selectedVariant?.id || product.variants?.[0]?.id}
                   quantity={quantity}
                   isOutOfStock={(selectedVariant?.stock || product?.stock) === 0}
                   className="w-full h-14 rounded-2xl font-bold shadow-lg"

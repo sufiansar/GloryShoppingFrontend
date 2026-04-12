@@ -33,13 +33,19 @@ export const getCartCount = async () => {
 
 export const addToCart = async ({
   productId,
+  variantId,
   quantity = 1,
-}: { productId: string, quantity?: number }) => {
+}: { 
+  productId?: string, 
+  variantId?: string, 
+  quantity?: number 
+}) => {
   try {
     const result = await makeApiCall<any>("/cart", {
       method: "POST",
       body: {
         productId,
+        variantId,
         quantity,
       },
     });
