@@ -47,7 +47,7 @@ export default function ProductCard({
               alt={product.name}
               width={350}
               height={350}
-              className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? "scale-105" : "scale-100"
+              className={`w-full h-full object-contain p-2 transition-transform duration-500 ${isHovered ? "scale-105" : "scale-100"
                 }`}
             />
           ) : (

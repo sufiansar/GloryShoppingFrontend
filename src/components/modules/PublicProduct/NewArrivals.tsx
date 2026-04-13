@@ -32,9 +32,10 @@ export default function BestProductSlider() {
     loop: true,
     slides: { perView: 5, spacing: 15 },
     breakpoints: {
+      "(max-width: 1280px)": { slides: { perView: 4, spacing: 15 } },
       "(max-width: 1024px)": { slides: { perView: 3, spacing: 15 } },
       "(max-width: 768px)": { slides: { perView: 2, spacing: 12 } },
-      "(max-width: 480px)": { slides: { perView: 2, spacing: 12 } },
+      "(max-width: 480px)": { slides: { perView: 2, spacing: 10 } },
     },
     created(s) {
       startAutoPlay(s);
@@ -69,9 +70,9 @@ export default function BestProductSlider() {
       {error ? (
         <p className="text-red-600 text-center">Failed to load products</p>
       ) : products.length > 0 ? (
-        <div ref={sliderRef} className="keen-slider">
+        <div ref={sliderRef} className="keen-slider cursor-grab w-full overflow-hidden">
           {products.map((product) => (
-            <div key={product.id} className="keen-slider__slide !flex flex-col items-stretch h-auto">
+            <div key={product.id} className="keen-slider__slide w-full min-w-0 h-auto">
               <ProductCard product={product} />
             </div>
           ))}

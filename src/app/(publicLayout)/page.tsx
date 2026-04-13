@@ -40,7 +40,7 @@ const MainCategoryGroup = async ({
 
   try {
     const productResponses = await Promise.all(
-      categoryIds.map((id) => getAllProductByCategory("limit=12", id || "")),
+      categoryIds.map((id) => getAllProductByCategory("limit=15", id || "")),
     );
 
     const allProducts = productResponses.flatMap(
@@ -54,7 +54,7 @@ const MainCategoryGroup = async ({
     if (uniqueProducts.length === 0) return null;
 
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-10 mb-3 md:mb-20 last:mb-0 scale-up">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-6 mb-3 md:mb-8 last:mb-0 w-full overflow-hidden">
         <CategoryShowcase
           category={mainCategory}
           initialProducts={uniqueProducts}
@@ -140,8 +140,8 @@ const PublicPage = async ({
           <CategoryMarquee categories={allCategories} />
         </div>
 
-        <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-2 md:py-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-6 mb-3 md:mb-8 scale-up">
+        <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-2 md:py-6 w-full overflow-x-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-6 mb-3 md:mb-8 w-full overflow-hidden">
             <BestProductSlider />
           </div>
           {navItems
@@ -164,7 +164,7 @@ const PublicPage = async ({
             ))}
         </div>
 
-        <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-4 md:py-8 mb-2 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-4 md:py-8 mb-2 flex flex-col md:flex-row items-center justify-between gap-4 w-full overflow-hidden">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               RECOMMENDED FOR YOU

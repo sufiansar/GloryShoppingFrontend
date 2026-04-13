@@ -165,9 +165,10 @@ export default function CategoryShowcase({
       spacing: 15,
     },
     breakpoints: {
-      "(max-width: 1024px)": { slides: { perView: 3, spacing: 10 } },
+      "(max-width: 1280px)": { slides: { perView: 4, spacing: 15 } },
+      "(max-width: 1024px)": { slides: { perView: 3, spacing: 15 } },
       "(max-width: 768px)": { slides: { perView: 2, spacing: 10 } },
-      "(max-width: 480px)": { slides: { perView: 2, spacing: 12 } },
+      "(max-width: 480px)": { slides: { perView: 2, spacing: 10 } },
     },
     loop: true,
     created(s) {
@@ -233,9 +234,9 @@ export default function CategoryShowcase({
           </div>
         )
       ) : products.length > 0 ? (
-        <div ref={sliderRef} className="keen-slider cursor-grab">
+        <div ref={sliderRef} className="keen-slider cursor-grab w-full overflow-hidden">
           {products.map((product) => (
-            <div key={product.id} className="keen-slider__slide !flex flex-col items-stretch h-auto">
+            <div key={product.id} className="keen-slider__slide w-full min-w-0 h-auto">
               <ProductCard product={product} />
             </div>
           ))}

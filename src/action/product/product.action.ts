@@ -238,13 +238,10 @@ export const getAllProductByCategory = async (
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
     const searchTerm = searchParams.get("searchTerm") || "";
-    let builtQueryString = `?page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+
+    let builtQueryString = `page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
     if (searchTerm) {
-      builtQueryString = `page=${page}&limit=${limit}&searchTerm=${encodeURIComponent(
-        searchTerm,
-      )}`;
-    } else {
-      builtQueryString = `page=${page}&limit=${limit}`;
+      builtQueryString += `&searchTerm=${encodeURIComponent(searchTerm)}`;
     }
 
     const result = await makeApiCall<any>(
