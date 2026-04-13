@@ -23,7 +23,6 @@ interface CategoryMarqueeProps {
 }
 
 export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isMarqueeHovered, setIsMarqueeHovered] = useState(false);
   const marqueeRef = useRef<HTMLDivElement>(null);
 
@@ -139,7 +138,6 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           className="relative skincare-card group cursor-pointer"
           onMouseEnter={() => {
             setIsHovered(true);
-            setActiveIndex(index);
           }}
           onMouseLeave={() => {
             setIsHovered(false);
@@ -555,26 +553,6 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
         </div>
       </div>
 
-      {/* Category Indicator */}
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-        <div className="skincare-dimension-tracker bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-          {categories.map((_, idx) => (
-            <div
-              key={idx}
-              className={`skincare-tracker-dot ${
-                idx === activeIndex ? "active" : ""
-              }`}
-              //   style={
-              //     {
-              //       "--dot-color":
-              //         skincareColorSchemes[idx % skincareColorSchemes.length]
-              //           .glow,
-              //     } as React.CSSProperties
-              //   }
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -586,26 +564,6 @@ const marqueeStyles = `
     100% { transform: translateX(100%); }
   }
 
-  .skincare-dimension-tracker {
-    display: flex;
-    gap: 6px;
-    padding: 8px 16px;
-  }
-
-  .skincare-tracker-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #E5E7EB;
-    transition: all 0.3s;
-  }
-
-  .skincare-tracker-dot.active {
-    width: 20px;
-    border-radius: 4px;
-    background: var(--dot-color);
-    box-shadow: 0 0 8px var(--dot-color);
-  }
 
 `;
 

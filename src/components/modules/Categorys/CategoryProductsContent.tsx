@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Filter, Grid, List, Search, SlidersHorizontal } from "lucide-react";
+import { Filter, Grid, List, Search, ChevronRight, ChevronLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Category } from "@/types/categorys.interface";
 import { getAllProductByCategoryBySlug } from "@/action/categories/categories.action";
@@ -164,10 +164,10 @@ export default function CategoryProductsContent({
 
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-6 md:py-12">
         {/* Category Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-[#ca428b] mb-4 tracking-tight">
             {category.name}
           </h1>
           {category.description && (
@@ -200,100 +200,127 @@ export default function CategoryProductsContent({
           </div>
         )}
 
-        <Separator className="my-8" />
+        <Separator className="my-4 md:my-8" />
 
-        {/* Mobile Filter Sheet */}
-        <Sheet>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder={`Search in ${category.name}...`}
-                  defaultValue={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 h-11 rounded-full border-2 border-gray-200 focus:border-primary"
-                />
+        {/* Unified Premium Filter Bar */}
+        <div className="bg-white/95 backdrop-blur-md p-2 rounded-[2rem] border-2 border-pink-50 shadow-xl shadow-pink-500/5 mb-10 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/10">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2">
+            {/* Search Section */}
+            <div className="flex-1 relative group">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-pink-400 group-focus-within:text-pink-600 transition-colors" />
               </div>
+              <Input
+                placeholder={`Find your perfect ${category.name.toLowerCase()}...`}
+                defaultValue={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-13 h-14 w-full bg-transparent border-none focus-visible:ring-0 text-lg font-medium placeholder:text-gray-400"
+              />
             </div>
 
-            <div className="flex items-center gap-2">
-              <SheetTrigger asChild>
-                <Button variant="outline" className="md:hidden">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
+            {/* Desktop Controls Divider */}
+            <div className="hidden lg:block w-px h-8 bg-pink-100 mx-2" />
 
-              <Select value={sort} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-45 h-11">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="price_low_high">
-                    Price: Low to High
-                  </SelectItem>
-                  <SelectItem value="price_high_low">
-                    Price: High to Low
-                  </SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="popular">Most Popular</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2 p-1">
+              {/* Mobile Filter Trigger */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" className="lg:hidden h-12 px-6 rounded-2xl text-pink-600 hover:bg-pink-50 font-bold border border-pink-100">
+                    <Filter className="h-5 w-5 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[85vw] sm:w-[400px] border-r-pink-50">
+                  <div className="mt-8">
+                    <FilterSidebar
+                      onFilterChange={handleFilterChange}
+                      initialFilters={{
+                        minPrice: minPrice ? parseInt(minPrice) : undefined,
+                        maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+                      }}
+                      brands={brands}
+                      categories={categories}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
 
-              <div className="hidden md:flex items-center border rounded-lg overflow-hidden">
+              {/* Sort Selection */}
+              <div className="flex-1 lg:flex-none">
+                <Select value={sort} onValueChange={handleSortChange}>
+                  <SelectTrigger className="h-12 w-full lg:w-48 bg-gray-50/50 border-none rounded-xl focus:ring-2 focus:ring-pink-500/20 font-semibold px-4">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <span className="text-gray-400 text-xs uppercase tracking-wider font-bold">Sort</span>
+                      <SelectValue placeholder="Featured" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-2 border-pink-50 shadow-2xl">
+                    <SelectItem value="featured" className="rounded-lg">Featured</SelectItem>
+                    <SelectItem value="newest" className="rounded-lg">Newest Arrival</SelectItem>
+                    <SelectItem value="price_low_high" className="rounded-lg">Price: Low to High</SelectItem>
+                    <SelectItem value="price_high_low" className="rounded-lg">Price: High to Low</SelectItem>
+                    <SelectItem value="rating" className="rounded-lg">Highest Rated</SelectItem>
+                    <SelectItem value="popular" className="rounded-lg">Most Popular</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Desktop View Toggles */}
+              <div className="hidden lg:flex items-center bg-gray-50 p-1 rounded-xl gap-1">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="icon"
                   onClick={() => setViewMode("grid")}
-                  className="h-10 w-10 rounded-none"
+                  className={`h-10 w-10 rounded-lg transition-all duration-300 ${viewMode === "grid"
+                      ? "bg-pink-600 text-white shadow-md shadow-pink-200"
+                      : "text-gray-400 hover:text-pink-600 hover:bg-pink-50"
+                    }`}
                 >
-                  <Grid className="h-4 w-4" />
+                  <Grid className="h-5 w-5" />
                 </Button>
                 <Button
                   variant={viewMode === "list" ? "default" : "ghost"}
                   size="icon"
                   onClick={() => setViewMode("list")}
-                  className="h-10 w-10 rounded-none"
+                  className={`h-10 w-10 rounded-lg transition-all duration-300 ${viewMode === "list"
+                      ? "bg-pink-600 text-white shadow-md shadow-pink-200"
+                      : "text-gray-400 hover:text-pink-600 hover:bg-pink-50"
+                    }`}
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-5 w-5" />
                 </Button>
               </div>
             </div>
           </div>
-
-          <SheetContent side="left" className="w-75 sm:w-100">
-            <FilterSidebar
-              onFilterChange={handleFilterChange}
-              initialFilters={{
-                minPrice: minPrice ? parseInt(minPrice) : undefined,
-                maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
-              }}
-              brands={brands}
-            />
-          </SheetContent>
-        </Sheet>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Desktop Sidebar */}
           <div className="hidden lg:block lg:col-span-1 space-y-6">
             {/* Categories Sidebar */}
             {categories && categories.length > 0 && (
-              <div className="bg-white p-6 rounded-xl border shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Categories</h3>
-                <div className="space-y-2">
+              <div className="bg-white p-6 rounded-2xl border shadow-sm premium-shadow-hover">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-gray-900">Categories</h3>
+                  <span className="bg-pink-50 text-pink-600 text-xs font-bold px-2 py-1 rounded-full">
+                    {categories.length}
+                  </span>
+                </div>
+                <div className="space-y-1 max-h-[400px] overflow-y-auto scrollbar-premium pr-2">
                   {categories.map((cat) => (
                     <a
                       key={cat.id}
                       href={`/categorys/${cat.slug}`}
-                      className={`block px-3 py-2 rounded-lg transition-colors ${currentCategorySlug === cat.slug
-                          ? "bg-pink-600 text-white font-medium"
-                          : "text-gray-700 hover:bg-gray-100"
+                      className={`group flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 ${currentCategorySlug === cat.slug || category.slug === cat.slug
+                          ? "bg-pink-600 text-white shadow-md shadow-pink-200"
+                          : "text-gray-600 hover:bg-pink-50 hover:text-pink-600"
                         }`}
                     >
-                      {cat.name}
+                      <span className="text-sm font-medium truncate">{cat.name}</span>
+                      <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${currentCategorySlug === cat.slug || category.slug === cat.slug
+                          ? "translate-x-0 opacity-100"
+                          : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+                        }`} />
                     </a>
                   ))}
                 </div>
@@ -312,7 +339,7 @@ export default function CategoryProductsContent({
           </div>
 
           {/* Products Section */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 flex flex-col">
             {loading ? (
               <div className="space-y-4">
                 {[...Array(6)].map((_, i) => (
@@ -344,10 +371,10 @@ export default function CategoryProductsContent({
             ) : (
               <>
                 <div
-                  className={`mb-8 ${viewMode === "list" ? "space-y-6" : ""}`}
+                  className={`flex-1 mb-8 ${viewMode === "list" ? "space-y-6" : ""}`}
                 >
                   {viewMode === "grid" ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                       {products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                       ))}
@@ -363,96 +390,89 @@ export default function CategoryProductsContent({
 
                 {/* Pagination */}
                 {pagination.totalPages >= 1 && (
-                  <div className="mt-8">
-                    <div className="flex justify-center">
-                      <div className="flex items-center gap-2">
+                  <div className="mt-auto mb-4 py-6 md:py-10 border-t border-pink-50">
+                    <div className="flex flex-col items-center gap-6 md:gap-10">
+                      {/* Page Numbers */}
+                      <div className="flex items-center gap-4">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          onClick={() =>
-                            handlePageChange(pagination.currentPage - 1)
-                          }
+                          onClick={() => handlePageChange(pagination.currentPage - 1)}
                           disabled={pagination.currentPage === 1}
+                          className="h-12 w-12 rounded-full border border-gray-100 hover:bg-pink-50 hover:text-pink-600 transition-all duration-300 disabled:opacity-20"
                         >
-                          ←
+                          <ChevronLeft className="h-5 w-5" />
                         </Button>
 
-                        {[...Array(Math.min(5, pagination.totalPages))].map(
-                          (_, i) => {
-                            let pageNum;
-                            if (pagination.totalPages <= 5) {
-                              pageNum = i + 1;
-                            } else if (pagination.currentPage <= 3) {
-                              pageNum = i + 1;
-                            } else if (
-                              pagination.currentPage >=
-                              pagination.totalPages - 2
+                        <div className="flex items-center gap-2">
+                          {[...Array(pagination.totalPages)].map((_, i) => {
+                            const pageNum = i + 1;
+                            if (
+                              pagination.totalPages > 7 &&
+                              pageNum !== 1 &&
+                              pageNum !== pagination.totalPages &&
+                              Math.abs(pageNum - pagination.currentPage) > 1
                             ) {
-                              pageNum = pagination.totalPages - 4 + i;
-                            } else {
-                              pageNum = pagination.currentPage - 2 + i;
+                              if (Math.abs(pageNum - pagination.currentPage) === 2) {
+                                return <span key={pageNum} className="w-8 text-center text-gray-300 font-bold">...</span>;
+                              }
+                              return null;
                             }
 
                             return (
                               <Button
                                 key={pageNum}
-                                variant={
-                                  pagination.currentPage === pageNum
-                                    ? "default"
-                                    : "outline"
-                                }
+                                variant={pagination.currentPage === pageNum ? "default" : "ghost"}
+                                size="icon"
                                 onClick={() => handlePageChange(pageNum)}
+                                className={`h-12 w-12 rounded-full text-base font-bold transition-all duration-500 ${pagination.currentPage === pageNum
+                                    ? "bg-pink-600 text-white shadow-[0_10px_20px_-5px_rgba(202,66,139,0.4)] scale-110"
+                                    : "text-gray-500 hover:bg-pink-50 hover:text-pink-600 hover:scale-105"
+                                  }`}
                               >
                                 {pageNum}
                               </Button>
                             );
-                          },
-                        )}
+                          })}
+                        </div>
 
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          onClick={() =>
-                            handlePageChange(pagination.currentPage + 1)
-                          }
-                          disabled={
-                            pagination.currentPage === pagination.totalPages
-                          }
+                          onClick={() => handlePageChange(pagination.currentPage + 1)}
+                          disabled={pagination.currentPage === pagination.totalPages}
+                          className="h-12 w-12 rounded-full border border-gray-100 hover:bg-pink-50 hover:text-pink-600 transition-all duration-300 disabled:opacity-20"
                         >
-                          →
+                          <ChevronRight className="h-5 w-5" />
                         </Button>
                       </div>
-                    </div>
 
-                    <div className="mt-4 text-center text-sm text-gray-600">
-                      Showing{" "}
-                      {(pagination.currentPage - 1) * pagination.itemsPerPage +
-                        1}{" "}
-                      to{" "}
-                      {Math.min(
-                        pagination.currentPage * pagination.itemsPerPage,
-                        pagination.totalItems,
-                      )}{" "}
-                      of {pagination.totalItems} products
-                    </div>
+                      {/* Info & Settings */}
+                      <div className="flex flex-col md:flex-row items-center gap-6 px-8 py-4 bg-gray-50/50 rounded-2xl border border-gray-100 backdrop-blur-sm">
+                        <p className="text-sm font-semibold text-gray-500">
+                          Showing <span className="text-pink-600 font-extrabold italic mx-1 text-base">{(pagination.currentPage - 1) * pagination.itemsPerPage + 1}—{Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}</span> of <span className="text-gray-900 font-bold">{pagination.totalItems}</span> products
+                        </p>
 
-                    <div className="mt-4 flex justify-center">
-                      <Select
-                        value={pagination.itemsPerPage.toString()}
-                        onValueChange={(value) =>
-                          handleItemsPerPageChange(parseInt(value))
-                        }
-                      >
-                        <SelectTrigger className="w-30">
-                          <SelectValue placeholder="Items per page" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="12">12 per page</SelectItem>
-                          <SelectItem value="24">24 per page</SelectItem>
-                          <SelectItem value="48">48 per page</SelectItem>
-                          <SelectItem value="96">96 per page</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <div className="hidden md:block w-px h-4 bg-gray-200" />
+
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Per Page</span>
+                          <Select
+                            value={pagination.itemsPerPage.toString()}
+                            onValueChange={(value) => handleItemsPerPageChange(parseInt(value))}
+                          >
+                            <SelectTrigger className="w-[120px] h-9 rounded-lg border-2 border-white bg-white shadow-sm focus:ring-pink-500/20 font-bold text-gray-700">
+                              <SelectValue placeholder="12" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-2 border-pink-50 shadow-2xl">
+                              <SelectItem value="12" className="font-medium text-gray-600">12 Products</SelectItem>
+                              <SelectItem value="24" className="font-medium text-gray-600">24 Products</SelectItem>
+                              <SelectItem value="48" className="font-medium text-gray-600">48 Products</SelectItem>
+                              <SelectItem value="96" className="font-medium text-gray-600">96 Products</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

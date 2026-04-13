@@ -1,6 +1,6 @@
 import { getSections } from "@/action/section/section.action";
 import { fetchAllCategories } from "@/action/categories/categories.action";
-import CategoryMarquee from "@/components/modules/category.marqieu";
+import CategoryMarquee from "@/components/modules/category.marquee";
 import CategoryShowcase from "@/components/modules/CategoryShowcase/CategoryShowcase";
 import HeroSliderWrapper from "@/components/modules/Sections/HeroSectionSlider";
 import { SkincareMarquee } from "@/components/SkincareMarquee";
@@ -54,7 +54,7 @@ const MainCategoryGroup = async ({
     if (uniqueProducts.length === 0) return null;
 
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 mb-12 md:mb-20 last:mb-0 scale-up">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-10 mb-3 md:mb-20 last:mb-0 scale-up">
         <CategoryShowcase
           category={mainCategory}
           initialProducts={uniqueProducts}
@@ -82,7 +82,7 @@ const PublicPage = async ({
   }>;
 }) => {
   const params = await searchParams;
-  const limit = params.limit || "12";
+  const limit = params.limit || "15";
 
   try {
     const sectionsResponse = await getSections();
@@ -108,35 +108,42 @@ const PublicPage = async ({
     const heroSection: Section | undefined = heroSections[0];
 
     return (
-      <div>
-        {heroSection ? (
-          <section className="hidden md:block w-full">
-            <HeroSliderWrapper
-              section={heroSection}
-              autoPlay={true}
-              autoPlayInterval={5000}
-              showNavigation={true}
-              showDots={true}
-              pauseOnHover={true}
-              height="calc(100vh - 280px)"
-              className="shadow-2xl"
-              showText={false}
-            />
-          </section>
-        ) : (
-          <section className="hidden md:block p-2">
-            <div className="container mx-auto h-100 bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-              <p className="text-gray-500">No hero slides available</p>
-            </div>
-          </section>
-        )}
-        <div className="hidden md:block">
-          <SkincareMarquee />
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-none flex flex-col md:h-[calc(100vh-64px)] overflow-hidden">
+          {heroSection ? (
+            <section className="hidden md:block w-full flex-1 min-h-0">
+              <HeroSliderWrapper
+                section={heroSection}
+                autoPlay={true}
+                autoPlayInterval={5000}
+                showNavigation={true}
+                showDots={true}
+                pauseOnHover={true}
+                height="100%"
+                className="shadow-2xl h-full"
+                showText={false}
+              />
+            </section>
+          ) : (
+            <section className="hidden md:block p-2 flex-1 min-h-0">
+              <div className="container mx-auto h-full bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                <p className="text-gray-500">No hero slides available</p>
+              </div>
+            </section>
+          )}
+          <div className="hidden md:block flex-none">
+            <SkincareMarquee />
+          </div>
         </div>
-        <CategoryMarquee categories={allCategories} />
 
-        <div className="container mx-auto px-4 py-12">
-          <BestProductSlider />
+        <div className="z-30 bg-white">
+          <CategoryMarquee categories={allCategories} />
+        </div>
+
+        <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-2 md:py-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 md:p-6 mb-3 md:mb-8 scale-up">
+            <BestProductSlider />
+          </div>
           {navItems
             .filter((item) =>
               [
@@ -157,7 +164,7 @@ const PublicPage = async ({
             ))}
         </div>
 
-        <div className="container mx-auto px-4 py-8 mb-2 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-4 md:py-8 mb-2 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               RECOMMENDED FOR YOU
@@ -183,7 +190,7 @@ const PublicPage = async ({
   } catch (error) {
     console.error("Error in PublicPage:", error);
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
+      <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-20 text-center">
         <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
         <ProductsPage searchParams={Promise.resolve({ limit })} />
       </div>

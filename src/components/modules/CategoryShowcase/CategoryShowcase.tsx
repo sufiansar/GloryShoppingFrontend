@@ -161,13 +161,13 @@ export default function CategoryShowcase({
 
   const [sliderRef, slider] = useKeenSlider<HTMLDivElement>({
     slides: {
-      perView: 4,
+      perView: 5,
       spacing: 15,
     },
     breakpoints: {
       "(max-width: 1024px)": { slides: { perView: 3, spacing: 10 } },
       "(max-width: 768px)": { slides: { perView: 2, spacing: 10 } },
-      "(max-width: 480px)": { slides: { perView: 1, spacing: 5 } },
+      "(max-width: 480px)": { slides: { perView: 2, spacing: 12 } },
     },
     loop: true,
     created(s) {
@@ -194,7 +194,7 @@ export default function CategoryShowcase({
 
   return (
     <div
-      className={`space-y-4 ${isSubCategory ? "mb-6" : "mb-12 border-b border-gray-100 pb-8 last:border-b-0"
+      className={`space-y-4 ${isSubCategory ? "mb-6" : "mb-3 md:mb-12 border-b border-gray-100 pb-4 md:pb-8 last:border-b-0"
         }`}
     >
       {/* Category Header */}
@@ -235,7 +235,7 @@ export default function CategoryShowcase({
       ) : products.length > 0 ? (
         <div ref={sliderRef} className="keen-slider cursor-grab">
           {products.map((product) => (
-            <div key={product.id} className="keen-slider__slide">
+            <div key={product.id} className="keen-slider__slide !flex flex-col items-stretch h-auto">
               <ProductCard product={product} />
             </div>
           ))}

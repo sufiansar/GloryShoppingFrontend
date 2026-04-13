@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { LayoutChat } from "@/components/LayoutChat";
 import { TokenSyncProvider } from "@/providers/TokenSyncProvider";
 import { Suspense } from "react";
+import { FacebookPixel } from "@/components/Shared/FacebookPixel";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -35,6 +37,7 @@ export default function RootLayout({
       >
         <AuthProviders>
           <Suspense fallback={null}>
+            <FacebookPixel />
             <TokenSyncProvider>
               <SocketProvider>
                 <CartProvider>

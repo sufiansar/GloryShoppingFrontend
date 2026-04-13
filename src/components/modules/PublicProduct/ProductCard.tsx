@@ -34,9 +34,9 @@ export default function ProductCard({
   };
 
   return (
-    <Link href={`/product/${product.slug || product.id}`} className="block">
+    <Link href={`/product/${product.slug || product.id}`} className="block h-full">
       <Card
-        className="group transition-all duration-300 hover:shadow-lg overflow-hidden border border-gray-200 rounded-lg bg-white cursor-pointer p-0"
+        className="group transition-all duration-300 hover:shadow-lg overflow-hidden border border-gray-200 rounded-lg bg-white cursor-pointer p-0 h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -64,7 +64,7 @@ export default function ProductCard({
           )}
         </div>
 
-        <CardContent className="p-2.5 flex flex-col h-full space-y-1.5">
+        <CardContent className="p-2 sm:p-2.5 flex flex-col flex-1 space-y-1 sm:space-y-1.5">
           <div className="grow space-y-1">
             <div className="flex items-center gap-1 flex-wrap">
               {product?.brand?.country && (
@@ -95,7 +95,7 @@ export default function ProductCard({
             </div>
 
             <h3
-              className="font-semibold text-sm leading-tight text-gray-900 hover:text-pink-600 transition-colors truncate"
+              className="font-semibold text-[13px] md:text-sm leading-tight text-gray-900 hover:text-pink-600 transition-colors line-clamp-2 min-h-[2.5rem]"
               title={product.name}
             >
               {product.name}
@@ -134,15 +134,17 @@ export default function ProductCard({
             </div>
           </div>
 
-          {product.id && (
-            <AddToCartButton
-              productId={product.id}
-              variantId={product.variants?.[0]?.id}
-              quantity={1}
-              isOutOfStock={product.stock === 0}
-              className="w-full mt-1.5 text-xs py-1.5 px-2"
-            />
-          )}
+          <div className="mt-auto">
+            {product.id && (
+              <AddToCartButton
+                productId={product.id}
+                variantId={product.variants?.[0]?.id}
+                quantity={1}
+                isOutOfStock={product.stock === 0}
+                className="w-full mt-1.5 text-[11px] md:text-xs py-1.5 md:py-2 px-2"
+              />
+            )}
+          </div>
         </CardContent>
       </Card>
     </Link>

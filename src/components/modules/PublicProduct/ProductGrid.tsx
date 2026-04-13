@@ -54,7 +54,7 @@ export default function ProductGrid({
       <div
         className={
           view === "grid"
-            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-8 transition-all duration-300"
+            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6 mb-8 transition-all duration-300 items-stretch"
             : "flex flex-col gap-4 mb-8 transition-all duration-300"
         }
       >
@@ -62,7 +62,7 @@ export default function ProductGrid({
           <div
             key={product.id}
             className={
-              view === "list" ? "border rounded-xl p-4 flex gap-6 bg-white" : ""
+              view === "list" ? "border rounded-xl p-4 flex gap-6 bg-white h-full" : "h-full"
             }
           >
             <ProductCard product={product} />
@@ -77,7 +77,7 @@ export default function ProductGrid({
           totalPages={totalPages}
           totalItems={totalItems}
           itemsPerPage={itemsPerPage}
-          itemsPerPageOptions={[12, 24, 48, 96]}
+          itemsPerPageOptions={[15, 30, 45, 90]}
           onPageChange={handlePageChange}
           onItemsPerPageChange={handleItemsPerPageChange}
           className="mt-8"

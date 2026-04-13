@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import ProductCard from "@/components/modules/PublicProduct/ProductCard";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getAllProducts } from "@/action/product/product.action";
+import { getBrandBySlugWithProducts } from "@/action/brand/brand.action";
 
 interface Brand {
   id: string;
@@ -23,17 +25,17 @@ interface Product {
 
 interface BrandPageClientProps {
   brands: Brand[];
+  initialProducts: Product[];
 }
 
-export default function BrandPageClient({ brands }: BrandPageClientProps) {
+export default function BrandPageClient({ brands, initialProducts }: BrandPageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const brandSlug = searchParams.get("brand");
 
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(initialProducts || []);
   const [loading, setLoading] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
     if (!brandSlug || brands.length === 0) {
@@ -50,22 +52,28 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
 
   // Fetch products for selected brand
   useEffect(() => {
-    if (!selectedBrand) {
-      setProducts([]);
+    // Skip fetching on initial load if we already have initialProducts and no brand is selected
+    if (!selectedBrand && initialProducts?.length > 0 && products === initialProducts) {
       return;
     }
 
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const API_BASE = process.env.NEXT_PUBLIC_BASE_API;
-        const slug = selectedBrand.slug || generateSlug(selectedBrand.name);
-        const response = await fetch(
-          `${API_BASE}/brand/slug/${slug}?page=1&limit=20`,
-          { credentials: "include" },
-        );
-        const data = await response.json();
-        setProducts(data?.data?.data?.products || []);
+        
+        let result;
+        if (selectedBrand) {
+          const slug = selectedBrand.slug || generateSlug(selectedBrand.name);
+          result = await getBrandBySlugWithProducts("page=1&limit=20", slug);
+          // Try multiple common paths for brand-specific products
+          const brandProducts = result?.data?.products || result?.data?.data?.products || result?.data || [];
+          setProducts(Array.isArray(brandProducts) ? brandProducts : []);
+        } else {
+          result = await getAllProducts("page=1&limit=20&sortBy=createdAt&sortOrder=desc");
+          // Try multiple common paths for global products
+          const allProducts = result?.data?.data || result?.data || [];
+          setProducts(Array.isArray(allProducts) ? allProducts : []);
+        }
       } catch (error) {
         console.error("Failed to fetch products:", error);
         setProducts([]);
@@ -77,19 +85,7 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
     fetchProducts();
   }, [selectedBrand]);
 
-  // Scroll brand list
-  const scroll = (direction: "left" | "right") => {
-    const container = document.getElementById("brand-scroll-container");
-    if (container) {
-      const scrollAmount = 300;
-      const newPosition =
-        direction === "left"
-          ? scrollPosition - scrollAmount
-          : scrollPosition + scrollAmount;
-      container.scrollLeft = newPosition;
-      setScrollPosition(newPosition);
-    }
-  };
+  // Removed scroll brand list logic as the slider was removed
 
   const generateSlug = (name: string): string => {
     return name
@@ -111,14 +107,14 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-12">
+      <div className="max-w-[1600px] mx-auto px-2 md:px-4 py-12">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-[#ca428b] mb-4">
             Shop by Brand
           </h1>
           <p className="text-gray-600 text-lg">
-            Select a brand to explore all products
+            Browse products from your favorite brands below
           </p>
         </div>
 
@@ -198,99 +194,19 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
               </div>
             )}
 
-            {/* Brand Slider Navigation */}
-            {!selectedBrand && brands.length > 0 && (
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Popular Brands
-                  </h2>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => scroll("left")}
-                      className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                      aria-label="Scroll left"
-                    >
-                      <ChevronLeft className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button
-                      onClick={() => scroll("right")}
-                      className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                      aria-label="Scroll right"
-                    >
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  id="brand-scroll-container"
-                  className="flex overflow-x-auto gap-4 pb-4 scroll-smooth"
-                  style={{ scrollBehavior: "smooth" }}
-                >
-                  {brands.map((brand) => (
-                    <button
-                      key={brand.id}
-                      onClick={() => handleBrandClick(brand)}
-                      className="shrink-0 group"
-                    >
-                      <div className="w-24 h-24 bg-white rounded-lg shadow-md hover:shadow-xl transition-all flex items-center justify-center p-3 hover:scale-105">
-                        {brand.logoUrl ? (
-                          <img
-                            src={brand.logoUrl}
-                            alt={brand.name}
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <span className="text-2xl font-bold text-[#ca428b]">
-                            {brand.name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs font-medium text-gray-600 text-center mt-2 line-clamp-2">
-                        {brand.name}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Brand Slider Navigation Removed as per user request */}
 
             {/* Products Grid */}
-            {selectedBrand ? (
-              loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ca428b]"></div>
-                </div>
-              ) : products.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product as any} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-20">
-                  <svg
-                    className="w-16 h-16 text-gray-300 mx-auto mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M20 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
-                    />
-                  </svg>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Products Found
-                  </h3>
-                  <p className="text-gray-600">
-                    This brand doesn't have any products yet.
-                  </p>
-                </div>
-              )
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ca428b]"></div>
+              </div>
+            ) : products.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product as any} />
+                ))}
+              </div>
             ) : (
               <div className="text-center py-20">
                 <svg
@@ -303,14 +219,16 @@ export default function BrandPageClient({ brands }: BrandPageClientProps) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={1.5}
-                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    d="M20 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
                   />
                 </svg>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Select a Brand
+                  No Products Found
                 </h3>
                 <p className="text-gray-600">
-                  Choose a brand from the sidebar or the scrollable list above
+                  {selectedBrand
+                    ? `This brand doesn't have any products yet.`
+                    : "No products available at the moment."}
                 </p>
               </div>
             )}

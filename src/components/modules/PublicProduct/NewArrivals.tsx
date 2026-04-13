@@ -30,11 +30,11 @@ export default function BestProductSlider() {
 
   const [sliderRef, slider] = useKeenSlider<HTMLDivElement>({
     loop: true,
-    slides: { perView: 4, spacing: 15 },
+    slides: { perView: 5, spacing: 15 },
     breakpoints: {
-      "(max-width: 1024px)": { slides: { perView: 3 } },
-      "(max-width: 768px)": { slides: { perView: 2 } },
-      "(max-width: 480px)": { slides: { perView: 2 } },
+      "(max-width: 1024px)": { slides: { perView: 3, spacing: 15 } },
+      "(max-width: 768px)": { slides: { perView: 2, spacing: 12 } },
+      "(max-width: 480px)": { slides: { perView: 2, spacing: 12 } },
     },
     created(s) {
       startAutoPlay(s);
@@ -53,9 +53,9 @@ export default function BestProductSlider() {
   };
 
   return (
-    <section className="space-y-6 mb-12">
+    <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl md:text-3xl font-bold uppercase">
+        <h2 className="text-xl md:text-3xl font-bold uppercase">
           New Arrivals
         </h2>
 
@@ -71,7 +71,7 @@ export default function BestProductSlider() {
       ) : products.length > 0 ? (
         <div ref={sliderRef} className="keen-slider">
           {products.map((product) => (
-            <div key={product.id} className="keen-slider__slide">
+            <div key={product.id} className="keen-slider__slide !flex flex-col items-stretch h-auto">
               <ProductCard product={product} />
             </div>
           ))}

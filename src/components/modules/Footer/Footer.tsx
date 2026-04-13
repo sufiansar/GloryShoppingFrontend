@@ -69,7 +69,7 @@ const Footer = () => {
 
   const trustBadges = [
     { icon: Shield, label: "Secure Payments" },
-    { icon: RefreshCw, label: "30-Day Returns" },
+    { icon: RefreshCw, label: "Return 1 week" },
     { icon: CreditCard, label: "Price Match Guarantee" },
   ];
 
@@ -91,28 +91,28 @@ const Footer = () => {
 
   return (
     <footer className="relative bg-white border-t border-gray-200">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 md:py-12">
         {/* Top Section - Trust Badges */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-3 gap-2 md:gap-6 mb-6 md:mb-12">
           {trustBadges.map((badge, index) => (
             <div
               key={index}
-              className="flex items-center justify-center gap-3 p-4 rounded-xl bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 border border-gray-100"
+              className="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-3 p-2 md:p-4 rounded-xl bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 border border-gray-100 text-center md:text-left"
             >
-              <badge.icon className="w-6 h-6 text-[#ca428b]" />
-              <span className="font-medium text-sm text-gray-700">
+              <badge.icon className="w-5 h-5 md:w-6 md:h-6 text-[#ca428b]" />
+              <span className="font-bold text-[10px] md:text-sm text-gray-700 leading-tight">
                 {badge.label}
               </span>
             </div>
           ))}
         </div>
 
-        <Separator className="my-8 bg-gray-200" />
+        <Separator className="my-4 md:my-8 bg-gray-200" />
 
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 mb-6 md:mb-12">
           {/* Newsletter Column */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2 lg:col-span-2">
             <div className="mb-6">
               <h2 className="text-2xl font-bold mb-2 text-gray-800">
                 Stay Updated
@@ -154,9 +154,8 @@ const Footer = () => {
             </form>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-800 relative inline-block">
+          <div className="col-span-1">
+            <h3 className="font-bold text-base md:text-lg mb-4 text-gray-800 relative inline-block">
               Shop
               <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#ca428b] rounded-full"></span>
             </h3>
@@ -183,9 +182,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
-          <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-800 relative inline-block">
+          <div className="col-span-1">
+            <h3 className="font-bold text-base md:text-lg mb-4 text-gray-800 relative inline-block">
               Support
               <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#ca428b] rounded-full"></span>
             </h3>
@@ -203,9 +201,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Company */}
-          <div>
-            <h3 className="font-bold text-lg mb-4 text-gray-800 relative inline-block">
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="font-bold text-base md:text-lg mb-4 text-gray-800 relative inline-block">
               Company
               <span className="absolute -bottom-1 left-0 w-12 h-0.5 bg-[#ca428b] rounded-full"></span>
             </h3>
@@ -224,7 +221,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <Separator className="my-8 bg-gray-200" />
+        <Separator className="my-4 md:my-8 bg-gray-200" />
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
