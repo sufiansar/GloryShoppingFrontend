@@ -109,7 +109,8 @@ const PublicPage = async ({
 
     return (
       <div className="flex flex-col min-h-screen">
-        <div className="flex-none flex flex-col md:h-[calc(100vh-64px)] overflow-hidden">
+        {/* Integrated First Screen: Hero Slider + Brand Marquee (Pink Bar) ONLY */}
+        <div className="flex flex-col md:h-[calc(100vh-168px)] overflow-hidden">
           {heroSection ? (
             <section className="hidden md:block w-full flex-1 min-h-0">
               <HeroSliderWrapper
@@ -131,11 +132,15 @@ const PublicPage = async ({
               </div>
             </section>
           )}
-          <div className="hidden md:block flex-none">
-            <SkincareMarquee />
+
+          <div className="flex-none">
+            <div className="hidden md:block">
+              <SkincareMarquee />
+            </div>
           </div>
         </div>
 
+        {/* Category Cards start here (requires scrolling) */}
         <div className="z-30 bg-white">
           <CategoryMarquee categories={allCategories} />
         </div>

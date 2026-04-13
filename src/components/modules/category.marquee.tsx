@@ -266,7 +266,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           );
           position: relative;
           overflow: hidden;
-          min-height: 350px;
+          min-height: 310px;
           border-top: 1px solid rgba(0, 0, 0, 0.05);
           border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
