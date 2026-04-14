@@ -22,7 +22,7 @@ export const makeApiCall = async <T>(
   try {
     const cookieStore = await cookies();
     let cookieHeader = cookieStore.toString();
-    
+
     // If we have a session token, remove stale accessToken/refreshToken from raw cookies
     // to prevent the backend from using old social login cookies.
     if (session?.accessToken && cookieHeader) {
@@ -45,9 +45,8 @@ export const makeApiCall = async <T>(
 
   if (session?.accessToken) {
     headers.set("Authorization", `Bearer ${session.accessToken}`);
-  } else {
-    console.warn("❌ No accessToken found in session");
   }
+
 
   const isFormData = options.body instanceof FormData;
 
@@ -86,7 +85,7 @@ export const makeApiCall = async <T>(
   }
 
   let baseUrl = process.env.NEXT_PUBLIC_BASE_API || "";
-  
+
   // Production Safeguard: Ensure the API URL is absolute and has a protocol
   if (baseUrl && !baseUrl.startsWith("http")) {
     const protocol = typeof window !== "undefined" ? window.location.protocol : "https:";
@@ -117,7 +116,7 @@ export const makeApiCall = async <T>(
   try {
     // 1. Check if sessionId is in the response data (as seen in user response)
     const sessionIdFromData = data?.sessionId || data?.data?.sessionId;
-    
+
     // 2. Check if sessionId is in Set-Cookie header
     let sessionIdFromHeader = null;
     const setCookie = res.headers.get("Set-Cookie");

@@ -12,6 +12,7 @@ interface Brand {
   name: string;
   slug?: string;
   logoUrl?: string | null;
+  country?: string | null;
 }
 
 interface Product {
@@ -26,12 +27,18 @@ interface Product {
 interface BrandPageClientProps {
   brands: Brand[];
   initialProducts: Product[];
+  initialBrandSlug?: string; // New prop
 }
 
-export default function BrandPageClient({ brands, initialProducts }: BrandPageClientProps) {
+export default function BrandPageClient({ 
+  brands, 
+  initialProducts,
+  initialBrandSlug 
+}: BrandPageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const brandSlug = searchParams.get("brand");
+  const brandParam = searchParams.get("brand");
+  const brandSlug = brandParam || initialBrandSlug;
 
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [products, setProducts] = useState<Product[]>(initialProducts || []);
@@ -99,7 +106,7 @@ export default function BrandPageClient({ brands, initialProducts }: BrandPageCl
     setSelectedBrand(brand);
     if (brand) {
       const slug = brand.slug || generateSlug(brand.name);
-      router.push(`/categorys/brand?brand=${slug}`, { scroll: false });
+      router.push(`/categorys/brand/${slug}`, { scroll: false });
     } else {
       router.push("/categorys/brand", { scroll: false });
     }
@@ -161,39 +168,6 @@ export default function BrandPageClient({ brands, initialProducts }: BrandPageCl
 
           {/* Main Content */}
           <main className="lg:col-span-4">
-            {/* Brand Header Card with Slider */}
-            {selectedBrand && (
-              <div className="mb-8 bg-white rounded-lg shadow-md p-8 border-l-4 border-[#ca428b] animate-in slide-in-from-right duration-500">
-                <div className="flex items-center gap-6">
-                  {selectedBrand.logoUrl ? (
-                    <div className="w-24 h-24 shrink-0 flex items-center justify-center bg-[#ca428b]/10 rounded-lg">
-                      <img
-                        src={selectedBrand.logoUrl}
-                        alt={selectedBrand.name}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-24 h-24 shrink-0 bg-[#ca428b]/10 rounded-lg flex items-center justify-center">
-                      <span className="text-3xl font-bold text-[#ca428b]">
-                        {selectedBrand.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                      {selectedBrand.name}
-                    </h2>
-                    <p className="text-gray-600">
-                      {products.length > 0
-                        ? `${products.length} products available`
-                        : "No products available"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Brand Slider Navigation Removed as per user request */}
 
             {/* Products Grid */}

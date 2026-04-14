@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 import { skincareBrands } from "./utility/brandName";
+import Link from "next/link";
+
+const generateSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/\./g, "")
+    .replace(/&/g, "and")
+    .replace(/[^\w\-]+/g, "") // Remove non-word chars
+    .replace(/\-\-+/g, "-")   // Replace multiple - with single -
+    .trim();
+};
 
 export function SkincareMarquee() {
   const [isPaused, setIsPaused] = useState(false);
@@ -46,30 +58,32 @@ export function SkincareMarquee() {
           {/* First set - Single line */}
           <div className="flex items-center gap-6 md:gap-8 px-4">
             {skincareBrands.map((brand, index) => (
-              <div
+              <Link
                 key={`set1-${index}`}
-                className="flex items-center gap-6 md:gap-8 shrink-0"
+                href={`/categorys/brand/${generateSlug(brand)}`}
+                className="flex items-center gap-6 md:gap-8 shrink-0 hover:scale-110 transition-transform duration-200"
               >
                 <span className="text-base md:text-lg font-bold text-white whitespace-nowrap drop-shadow-sm">
                   {brand}
                 </span>
                 <span className="text-lg text-white/70">•</span>
-              </div>
+              </Link>
             ))}
           </div>
 
           {/* Duplicate set for infinite loop */}
           <div className="flex items-center gap-6 md:gap-8 px-4">
             {skincareBrands.map((brand, index) => (
-              <div
+              <Link
                 key={`set2-${index}`}
-                className="flex items-center gap-6 md:gap-8 shrink-0"
+                href={`/categorys/brand/${generateSlug(brand)}`}
+                className="flex items-center gap-6 md:gap-8 shrink-0 hover:scale-110 transition-transform duration-200"
               >
                 <span className="text-base md:text-lg font-bold text-white whitespace-nowrap drop-shadow-sm">
                   {brand}
                 </span>
                 <span className="text-lg text-white/70">•</span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

@@ -155,11 +155,10 @@ export default function HeroSliderWrapper({
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`transition-all duration-300 rounded-full ${
-                currentIndex === index
+              className={`transition-all duration-300 rounded-full ${currentIndex === index
                   ? "bg-white w-8 h-3"
                   : "bg-white/60 hover:bg-white/80 w-3 h-3"
-              }`}
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
