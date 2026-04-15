@@ -34,10 +34,6 @@ export default async function EditIngredientPage({
               id: ingredient.id,
               name: ingredient.name,
               description: ingredient.description,
-              benefits: ingredient.benefits,
-              sideEffects: ingredient.sideEffects,
-              usage: ingredient.usage,
-              precautions: ingredient.precautions,
               safetyLevel: ingredient.safetyLevel,
             }}
             isEdit

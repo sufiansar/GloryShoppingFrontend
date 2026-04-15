@@ -43,12 +43,8 @@ export interface Product {
     ingredient: {
       name: string;
       description?: string;
-      benefits?: string;
-      sideEffects?: string;
-      usage?: string;
-      precautions?: string;
       isActive?: boolean;
-      safetyLevel: "SAFE" | "MODERATE" | "RESTRICTED";
+      safetyLevel: "SAFE" | "MODERATE" | "RESTRICTED" | "CAUTION" | "UNSAFE";
     };
   }[];
   brand?: {

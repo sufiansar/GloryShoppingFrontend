@@ -40,6 +40,7 @@ import {
   IconCertificate,
 } from "@tabler/icons-react";
 import { ReviewForm } from "../Review/CreateReview";
+import { cn } from "@/lib/utils";
 
 interface Variant {
   id?: string;
@@ -179,6 +180,17 @@ export default function ProductDetailsPage({
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     setMousePosition({ x, y });
+  };
+
+  const getSafetyColor = (level?: string) => {
+    switch (level) {
+      case "SAFE": return "bg-emerald-100 text-emerald-700 hover:bg-emerald-100";
+      case "MODERATE": return "bg-amber-100 text-amber-700 hover:bg-amber-100";
+      case "CAUTION": return "bg-orange-100 text-orange-700 hover:bg-orange-100";
+      case "RESTRICTED": return "bg-purple-100 text-purple-700 hover:bg-purple-100";
+      case "UNSAFE": return "bg-rose-100 text-rose-700 hover:bg-rose-100";
+      default: return "bg-slate-100 text-slate-700 hover:bg-slate-100";
+    }
   };
 
   if (!product) {
@@ -602,11 +614,22 @@ export default function ProductDetailsPage({
                      <ChevronDown className={`w-4 h-4 text-slate-300 transition-transform duration-500 ${expandedSections.ingredients ? "rotate-180" : ""}`} />
                    </button>
                    {expandedSections.ingredients && (
-                     <div className="px-6 pb-5 pt-1 space-y-3">
-                         {product.ingredients.map((item, idx) => (
-                           <div key={idx} className="p-3 rounded-xl bg-slate-50/50 border border-slate-100">
-                              <h5 className="text-xs font-bold text-slate-800">{item?.ingredient?.name}</h5>
-                              {item?.ingredient?.benefits && <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">{item.ingredient.benefits}</p>}
+                     <div className="px-6 pb-5 pt-1 space-y-4">
+                         {product.ingredients.map((item: any, idx: number) => (
+                           <div key={idx} className="p-5 rounded-[1.5rem] bg-slate-50/30 border border-slate-100/50 space-y-3 transition-all hover:bg-white hover:shadow-sm">
+                              <div className="flex items-center justify-between gap-4">
+                                 <h5 className="text-sm font-black text-slate-900 uppercase tracking-tight line-clamp-1">{item?.ingredient?.name}</h5>
+                                 <Badge className={cn("text-[9px] font-bold px-3 py-1 border-0 uppercase tracking-widest shrink-0 rounded-full", getSafetyColor(item?.ingredient?.safetyLevel))}>
+                                   {item?.ingredient?.safetyLevel || "SAFE"}
+                                 </Badge>
+                              </div>
+                              {item?.ingredient?.description && (
+                                <div 
+                                  className="text-[11px] text-slate-500 leading-relaxed font-medium prose prose-slate prose-xs max-w-none 
+                                    [&_b]:font-black [&_strong]:font-black [&_p]:mb-1 last:[&_p]:mb-0"
+                                  dangerouslySetInnerHTML={{ __html: item.ingredient.description }}
+                                />
+                              )}
                            </div>
                          ))}
                      </div>

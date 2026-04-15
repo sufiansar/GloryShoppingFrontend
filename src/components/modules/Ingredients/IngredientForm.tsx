@@ -35,13 +35,17 @@ import {
 } from "@/action/ingredian/ingrediant.action";
 import { cn } from "@/lib/utils";
 
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
+const QuillEditor = dynamic(() => import("react-quill-new"), {
+  ssr: false,
+  loading: () => <div className="h-40 w-full bg-slate-100/50 animate-pulse rounded-2xl border border-slate-200" />,
+});
+
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  benefits: z.string().optional(),
-  sideEffects: z.string().optional(),
-  usage: z.string().optional(),
-  precautions: z.string().optional(),
   isActive: z.boolean(),
   safetyLevel: z.enum(["SAFE", "MODERATE", "RESTRICTED", "CAUTION", "UNSAFE"]),
 });
@@ -65,10 +69,6 @@ export default function IngredientForm({
     defaultValues: initialData || {
       name: "",
       description: "",
-      benefits: "",
-      sideEffects: "",
-      usage: "",
-      precautions: "",
       isActive: true,
       safetyLevel: "SAFE",
     },
@@ -202,102 +202,28 @@ export default function IngredientForm({
                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Description</FormLabel>
                       </div>
                       <FormControl>
-                        <Textarea
-                          placeholder="Enter ingredient description"
-                          className="min-h-[120px] bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300 resize-none px-5 py-4"
-                          {...field}
-                        />
+                        <div className="bg-white/60 dark:bg-slate-800/40 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 dark:border-slate-800/50 shadow-inner min-h-[250px] ingredient-quill">
+                          <QuillEditor
+                            theme="snow"
+                            value={field.value}
+                            onChange={field.onChange}
+                            modules={{
+                              toolbar: [
+                                [{ header: [1, 2, 3, false] }, { size: ["small", false, "large", "huge"] }],
+                                ["bold", "italic", "underline", "strike"],
+                                [{ list: "ordered" }, { list: "bullet" }],
+                                [{ color: [] }, { background: [] }],
+                                ["clean"],
+                              ],
+                            }}
+                            placeholder="Enter ingredient description..."
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage className="text-[10px] uppercase font-black tracking-widest text-rose-500 ml-1" />
                     </FormItem>
                   )}
                 />
-
-                <div className="grid gap-8 md:grid-cols-2 pt-4">
-                  <FormField
-                    control={form.control}
-                    name="benefits"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <div className="flex items-center gap-2 ml-1">
-                          <HeartPulse className="h-3.5 w-3.5 text-emerald-500" />
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Benefits</FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter benefits"
-                            className="min-h-[100px] bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-emerald-500/30 font-bold transition-all duration-300 resize-none px-5 py-4"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-black tracking-widest text-rose-500 ml-1" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="sideEffects"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <div className="flex items-center gap-2 ml-1">
-                          <ShieldAlert className="h-3.5 w-3.5 text-rose-500" />
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Side Effects</FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter side effects"
-                            className="min-h-[100px] bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-rose-500/30 font-bold transition-all duration-300 resize-none px-5 py-4"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-black tracking-widest text-rose-500 ml-1" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="usage"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <div className="flex items-center gap-2 ml-1">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-primary-custom" />
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Usage Instructions</FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter usage instructions"
-                            className="min-h-[100px] bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300 resize-none px-5 py-4"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-black tracking-widest text-rose-500 ml-1" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="precautions"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <div className="flex items-center gap-2 ml-1">
-                          <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Precautions</FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter precautions"
-                            className="min-h-[100px] bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-white/20 dark:border-slate-800/50 rounded-2xl shadow-inner focus-visible:ring-amber-500/30 font-bold transition-all duration-300 resize-none px-5 py-4"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-black tracking-widest text-rose-500 ml-1" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
               </div>
 
               {/* Action Bar */}
