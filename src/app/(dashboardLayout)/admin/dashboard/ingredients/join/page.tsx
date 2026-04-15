@@ -8,7 +8,7 @@ import JoinProductsForm from "@/components/modules/Ingredients/JoinProductsForm"
 
 export default async function JoinProductsPage() {
   // Fetch all ingredients
-  const ingredientsResult = await getAllIngredients("?limit=100");
+  const ingredientsResult = await getAllIngredients("limit=500&sortBy=createdAt&sortOrder=desc");
   const ingredients = ingredientsResult?.data || [];
 
   return (

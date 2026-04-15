@@ -19,7 +19,7 @@ export function SkincareMarquee() {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <div className="w-full py-4 bg-linear-to-r from-[#ca428b] via-[#ca428b] to-[#ca428b] border-y border-[#b83a7d]/30 shadow-md">
+    <div className="w-full h-16 bg-linear-to-r from-[#ca428b] via-[#ca428b] to-[#ca428b] border-y border-[#b83a7d]/30 shadow-md flex items-center overflow-hidden">
       {/* Add CSS animation to global scope */}
       <style jsx global>{`
         @keyframes infiniteScroll {
@@ -49,7 +49,7 @@ export function SkincareMarquee() {
 
         {/* Single line marquee with proper animation */}
         <div
-          className="marquee-wrapper py-3"
+          className="marquee-wrapper h-full flex items-center"
           style={{
             animation: `infiniteScroll 80s linear infinite`,
             animationPlayState: isPaused ? "paused" : "running",

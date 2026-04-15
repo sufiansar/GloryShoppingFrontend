@@ -94,6 +94,8 @@ export default function JoinProductsForm({
         const queryString = new URLSearchParams({
           page: pagination?.currentPage?.toString(),
           limit: "10",
+          sortBy: "createdAt",
+          sortOrder: "desc",
           ...(searchTerm && { searchTerm }),
         }).toString();
 

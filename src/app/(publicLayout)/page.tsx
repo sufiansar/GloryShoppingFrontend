@@ -110,33 +110,37 @@ const PublicPage = async ({
     return (
       <div className="flex flex-col min-h-screen">
         {/* Integrated First Screen: Hero Slider + Brand Marquee (Pink Bar) ONLY */}
-        <div className="flex flex-col md:h-[calc(100vh-168px)] overflow-hidden">
-          {heroSection ? (
-            <section className="hidden md:block w-full flex-1 min-h-0">
-              <HeroSliderWrapper
-                section={heroSection}
-                autoPlay={true}
-                autoPlayInterval={5000}
-                showNavigation={true}
-                showDots={true}
-                pauseOnHover={true}
-                height="100%"
-                className="shadow-2xl h-full"
-                showText={false}
-              />
-            </section>
-          ) : (
-            <section className="hidden md:block p-2 flex-1 min-h-0">
-              <div className="container mx-auto h-full bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                <p className="text-gray-500">No hero slides available</p>
-              </div>
-            </section>
-          )}
+        <div className="hidden md:flex flex-col bg-white">
+          <div className="h-[5px] w-full bg-white flex-none" /> {/* Explicit 5px Top Gap */}
+          
+          <div className="flex-none md:h-[470px]">
+            {heroSection ? (
+              <section className="w-full h-full">
+                <HeroSliderWrapper
+                  section={heroSection}
+                  autoPlay={true}
+                  autoPlayInterval={5000}
+                  showNavigation={true}
+                  showDots={true}
+                  pauseOnHover={true}
+                  height="100%"
+                  className="h-full"
+                  showText={false}
+                />
+              </section>
+            ) : (
+              <section className="p-2 h-full">
+                <div className="container mx-auto h-full bg-linear-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                  <p className="text-gray-500">No hero slides available</p>
+                </div>
+              </section>
+            )}
+          </div>
 
+          <div className="h-[5px] w-full bg-white flex-none" /> {/* Explicit 5px Bottom Gap */}
+          
           <div className="flex-none">
-            <div className="hidden md:block">
-              <SkincareMarquee />
-            </div>
+            <SkincareMarquee />
           </div>
         </div>
 
