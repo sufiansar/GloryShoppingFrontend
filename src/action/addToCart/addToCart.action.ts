@@ -59,9 +59,11 @@ export const addToCart = async ({
 
 export const updateCartItem = async ({
   productId,
+  variantId,
   quantity,
 }: {
   productId: string;
+  variantId?: string;
   quantity: number;
 }) => {
   try {
@@ -69,6 +71,7 @@ export const updateCartItem = async ({
       method: "PATCH",
       body: {
         productId,
+        variantId,
         quantity,
       },
     });
@@ -80,9 +83,10 @@ export const updateCartItem = async ({
   }
 };
 
-export const removeCartItem = async (productId: string) => {
+export const removeCartItem = async (productId: string, variantId?: string) => {
   try {
-    const result = await makeApiCall<any>(`/cart/${productId}`, {
+    const url = variantId ? `/cart/${productId}?variantId=${variantId}` : `/cart/${productId}`;
+    const result = await makeApiCall<any>(url, {
       method: "DELETE",
     });
 

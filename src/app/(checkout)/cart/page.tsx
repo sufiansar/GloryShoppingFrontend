@@ -27,11 +27,13 @@ import {
 interface CartItem {
   id: string;
   productId: string;
+  variantId?: string;
   productName: string;
   productImage: string;
   price: number;
   quantity: number;
   originalPrice?: number;
+  slug?: string;
 }
 
 export default function CartPage() {
@@ -88,6 +90,8 @@ export default function CartPage() {
         return {
           id: item.id || item._id || Math.random().toString(),
           productId: item.productId || item.product?.id || item.variantId || item.id,
+          variantId: item.variantId || item.variant?.id,
+          slug: item.slug || item.product?.slug || item.variant?.product?.slug,
           productName: item.productName || item.product?.name || item.name || item.variant?.productName || "Unknown Product",
           productImage: productImage,
           price: item.price || item.unitPrice || item.product?.price || item.variant?.price || 0,
@@ -95,6 +99,9 @@ export default function CartPage() {
           originalPrice: item.originalPrice || item.product?.originalPrice,
         };
       });
+
+      // Sort items purely on frontend to guarantee order stability (jumping prevention)
+      normalizedItems.sort((a, b) => a.id.localeCompare(b.id));
 
       console.log("[CartPage] Normalized items:", normalizedItems);
       setCartItems(normalizedItems);
@@ -112,22 +119,34 @@ export default function CartPage() {
 
   const handleUpdateQuantity = async (
     productId: string,
+    variantId: string | undefined,
     newQuantity: number,
   ) => {
     if (newQuantity < 1) return;
 
     try {
-      await updateCartItem({
+      const result = await updateCartItem({
         productId,
+        variantId,
         quantity: newQuantity,
       });
 
+      if (result && result.success === false) {
+        setError(result.message || "Failed to update quantity");
+        return;
+      }
+
       setCartItems((items) =>
-        items.map((item) =>
-          item.productId === productId
+        items.map((item) => {
+          if (variantId) {
+            return item.productId === productId && item.variantId === variantId
+              ? { ...item, quantity: newQuantity }
+              : item;
+          }
+          return item.productId === productId
             ? { ...item, quantity: newQuantity }
-            : item,
-        ),
+            : item;
+        }),
       );
 
       fetchCart({ showLoader: false });
@@ -139,11 +158,22 @@ export default function CartPage() {
     }
   };
 
-  const handleRemoveItem = async (productId: string) => {
+  const handleRemoveItem = async (productId: string, variantId?: string) => {
     try {
-      await removeCartItem(productId);
+      const result = await removeCartItem(productId, variantId);
+      
+      if (result && result.success === false) {
+        setError(result.message || "Failed to remove item");
+        return;
+      }
+
       setCartItems((items) =>
-        items.filter((item) => item.productId !== productId),
+        items.filter((item) => {
+          if (variantId) {
+            return !(item.productId === productId && item.variantId === variantId);
+          }
+          return item.productId !== productId;
+        }),
       );
       fetchCart({ showLoader: false });
 
@@ -375,7 +405,7 @@ export default function CartPage() {
                     <div className="flex-1 w-full text-center md:text-left">
                       <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
                         <div className="space-y-1">
-                          <Link href={`/product/${item.productId}`}>
+                          <Link href={`/product/${item.slug || item.productId}`}>
                             <h3 className="text-xl md:text-2xl font-bold text-slate-800 hover:opacity-80 transition-opacity line-clamp-2">
                               {item.productName}
                             </h3>
@@ -412,28 +442,28 @@ export default function CartPage() {
                             variant="ghost"
                             size="icon"
                             className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm transition-all text-slate-600"
-                            onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                            onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.quantity - 1)}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
-                          <span className="w-10 text-center font-bold text-lg text-slate-800">
+                          <span className="w-12 text-center font-bold text-slate-800 text-lg">
                             {item.quantity}
                           </span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm transition-all text-slate-600"
-                            onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                            onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.quantity + 1)}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
 
                         <div className="flex items-center gap-4">
-                           <Button
+                            <Button
                              variant="ghost"
                              className="text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl px-4 py-6 transition-all font-semibold flex items-center gap-2"
-                             onClick={() => handleRemoveItem(item.productId)}
+                             onClick={() => handleRemoveItem(item.productId, item.variantId)}
                            >
                              <Trash2 className="h-5 w-5" />
                              <span>Remove</span>

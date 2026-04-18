@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, Star, Percent } from "lucide-react";
 import { useState } from "react";
 import { Product } from "@/types/product.interface";
@@ -18,6 +19,7 @@ export default function ProductCard({
   product,
   showActions = true,
 }: ProductCardProps) {
+  const router = useRouter();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -34,9 +36,12 @@ export default function ProductCard({
   };
 
   return (
-    <Link href={`/product/${product.slug || product.id}`} className="block h-full">
+    <div 
+      className="block h-full cursor-pointer"
+      onClick={() => router.push(`/product/${product.slug || product.id}`)}
+    >
       <Card
-        className="group transition-all duration-300 hover:shadow-lg overflow-hidden border border-gray-200 rounded-lg bg-white cursor-pointer p-0 h-full flex flex-col"
+        className="group transition-all duration-300 hover:shadow-lg overflow-hidden border border-gray-200 rounded-lg bg-white p-0 h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -147,6 +152,6 @@ export default function ProductCard({
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 }

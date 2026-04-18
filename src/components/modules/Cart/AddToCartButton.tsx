@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { addToCart } from "@/action/addToCart/addToCart.action";
@@ -36,9 +36,13 @@ export default function AddToCartButton({
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { refreshCartCount } = useCart();
-  const router = useRouter();
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     if (isOutOfStock || disabled || isLoading) return;
 
     console.log("🛒 [AddToCartButton] Adding product:", productId, "variant:", variantId, "qty:", quantity);
@@ -71,10 +75,10 @@ export default function AddToCartButton({
           console.error("🛒 [AddToCartButton] Failed to refresh cart count:", refreshError);
         }
 
-        // Redirect to cart page after a short delay for feedback
+        // Reset success state after a delay if want consistent behavior, but for now just callback
         setTimeout(() => {
-          router.push("/cart");
-        }, 800);
+          setIsSuccess(false);
+        }, 3000);
 
         onSuccess?.();
       } else {

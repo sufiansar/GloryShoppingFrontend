@@ -178,7 +178,10 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
                 <Card 
                   className="p-6 cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group flex flex-col items-center gap-4 bg-slate-50 dark:bg-slate-800/50"
-                  onClick={() => router.push("/login")}
+                  onClick={() => {
+                    onClose();
+                    router.push("/login");
+                  }}
                 >
                   <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
                     <LogIn className="h-6 w-6" />
