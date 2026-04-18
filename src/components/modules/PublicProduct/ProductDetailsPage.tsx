@@ -463,7 +463,7 @@ export default function ProductDetailsPage({
                   </div>
                </div>
 
-               <div className="flex flex-col sm:flex-row gap-3">
+               <div className="hidden lg:flex flex-col lg:flex-row gap-3">
                   <div className="flex-[3] flex gap-2">
                     <AddToCartButton
                       productId={product.id!}

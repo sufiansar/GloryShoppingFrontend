@@ -52,22 +52,15 @@ export function FloatingChatButtonImproved({
 
   // STABLE HANDLER: handleOpenChat
   const handleOpenChat = useCallback(async (isAutoOpenFromAnotherTab = false) => {
-    // 1. INSTANT UI FEEDBACK (especially for Cross-Tab Sync)
-    if (isAutoOpenFromAnotherTab) setIsExpanded(true);
+    // 1. INSTANT UI FEEDBACK
+    setIsExpanded(true);
+    storage.local.set("isChatExpanded", "true");
 
-    // 2. WAIT FOR SESSION STABILITY
-    if (status === "loading") {
-      console.log("⏳ Session loading, waiting...");
-      return;
-    }
-
-    // 3. DUP PREVENTION
+    // 2. DUP PREVENTION
     if (isInitializingRef.current) return;
     
     if (activeChatRef.current && activeChatRef.current.id) {
       setView("chat");
-      setIsExpanded(true);
-      storage.local.set("isChatExpanded", "true");
       return;
     }
 
@@ -151,8 +144,13 @@ export function FloatingChatButtonImproved({
 
   // STABLE SYNC: Ensure session status is respected
   useEffect(() => {
-    if (status === "authenticated" && !activeChatRef.current && storage.local.get("isChatExpanded") === "true") {
-      handleOpenChat();
+    if (status === "authenticated") {
+      if (storage.local.get("isChatExpanded") === "true" || storage.local.get("autoOpenChat") === "true") {
+        handleOpenChat();
+        if (storage.local.get("autoOpenChat") === "true") {
+          storage.local.remove("autoOpenChat");
+        }
+      }
     }
   }, [status, handleOpenChat]);
 
@@ -280,7 +278,7 @@ export function FloatingChatButtonImproved({
   if (isExpanded) {
     return (
       <div
-        className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 w-full md:w-96 h-full md:h-150 z-50 flex flex-col md:rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-slate-900 transition-all duration-300"
+        className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 w-full md:w-96 h-full md:h-150 z-[1000] flex flex-col md:rounded-2xl shadow-2xl overflow-hidden bg-white dark:bg-slate-900 transition-all duration-300"
         style={{ animation: "slideInUp 0.5s ease-out forwards", boxShadow: "0 20px 60px -15px rgba(209, 42, 122, 0.3)" }}
       >
         <style>{`@keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
@@ -292,8 +290,8 @@ export function FloatingChatButtonImproved({
             tempGuestId={tempGuestId}
             tempGuestName={tempGuestName}
           />
-        ) : (isInitializing || status === "loading") ? (
-          /* Loading State (Existing) */
+        ) : (isInitializing) ? (
+          /* Loading State (Improved) */
           <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-900 relative">
              <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-5" style={{ background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)` }}>
                 <div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full bg-white/20 animate-pulse" /><div className="h-4 w-32 bg-white/30 rounded-full animate-pulse" /></div>
@@ -305,10 +303,10 @@ export function FloatingChatButtonImproved({
                   <Loader2 className="h-8 w-8 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-                  {status === "authenticated" ? "Connecting to Support..." : "Syncing Conversation"}
+                  Please Wait...
                 </h3>
                 <p className="text-sm text-slate-500">
-                  {status === "authenticated" ? "Loading your chat history..." : "Connecting your session across tabs..."}
+                  {status === "authenticated" ? "Loading your chat history..." : "Setting up your secure session..."}
                 </p>
                 
                 {!isInitializing && (
@@ -329,45 +327,67 @@ export function FloatingChatButtonImproved({
           <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden">
              {/* Header */}
              <div className="h-16 flex items-center justify-between px-5 shrink-0" style={{ background: `linear-gradient(135deg, ${GLORY_MAGENTA} 0%, #ec4899 100%)` }}>
-                <h3 className="font-bold text-white tracking-wide">Support Selection</h3>
+                <h3 className="font-bold text-white tracking-wide">Customer Support</h3>
                 <Button variant="ghost" size="icon" onClick={() => { setIsExpanded(false); storage.local.set("isChatExpanded", "false"); }} className="text-white hover:bg-white/20"><X className="h-6 w-6" /></Button>
              </div>
              
-             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 overflow-y-auto">
-                <div className="space-y-1">
-                  <h4 className="text-lg font-bold text-slate-800 dark:text-white">How would you like to chat?</h4>
-                  <p className="text-xs text-slate-500">Pick an option to continue</p>
+             <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 text-center space-y-6 md:space-y-8 overflow-y-auto">
+                <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center mb-2">
+                  <MessageCircle className="h-8 w-8 text-rose-500" />
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Need Assistance?</h4>
+                  <p className="text-xs text-slate-500 font-medium px-4">
+                    Our direct chat is available for members. Please login to chat with our agents and save your history.
+                  </p>
                 </div>
 
-                <div className="w-full space-y-3">
+                {/* Main Action: Login */}
+                <Button 
+                  onClick={() => {
+                    storage.local.set("autoOpenChat", "true");
+                    router.push("/login");
+                  }}
+                  className="w-full text-white rounded-xl h-12 font-bold shadow-lg shadow-pink-200"
+                  style={{ backgroundColor: "oklch(52.801% 0.15987 344.323)" }}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login to Chat
+                </Button>
+
+                <div className="w-full flex items-center gap-3 py-2">
+                  <div className="h-[1px] flex-1 bg-slate-100" />
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Emergency Contact</span>
+                  <div className="h-[1px] flex-1 bg-slate-100" />
+                </div>
+
+                {/* Emergency Options */}
+                <div className="grid grid-cols-2 gap-3 w-full">
                    <button 
-                    onClick={() => router.push("/login")}
-                    className="w-full p-4 rounded-xl border border-rose-100 hover:border-rose-300 hover:bg-rose-50 dark:border-slate-800 dark:hover:bg-slate-800 transition-all flex items-center gap-4 text-left group"
+                    onClick={() => window.open("https://wa.me/8801577437554", "_blank")}
+                    className="p-3 rounded-xl border border-emerald-100 bg-emerald-50/30 hover:bg-emerald-50 transition-all flex flex-col items-center gap-2 group"
                    >
-                      <div className="h-10 w-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
-                        <LogIn className="h-5 w-5" />
+                      <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                        <MessageCircle className="h-4 w-4" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-sm text-slate-800 dark:text-white">Login to Save History</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Recommended for order support</p>
-                      </div>
+                      <span className="font-bold text-[10px] text-emerald-700 uppercase tracking-wider">WhatsApp</span>
                    </button>
 
                    <button 
-                    onClick={() => setView("guest-form")}
-                    className="w-full p-4 rounded-xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 transition-all flex items-center gap-4 text-left group"
+                    onClick={() => window.open("https://www.facebook.com/GloryShopingBD", "_blank")}
+                    className="p-3 rounded-xl border border-blue-100 bg-blue-50/30 hover:bg-blue-50 transition-all flex flex-col items-center gap-2 group"
                    >
-                      <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 group-hover:scale-110 transition-transform">
-                        <Ghost className="h-5 w-5" />
+                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                        <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.453 5.518 3.73 7.234V22l3.352-1.841c.294.041.593.064.898.064 5.523 0 10-4.145 10-9.258S17.523 2 12 2zm1.082 12.186l-2.454-2.62-4.79 2.62 5.267-5.594 2.52 2.62 4.724-2.62-5.267 5.594z"/></svg>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-sm text-slate-800 dark:text-white">Continue as Guest</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">Messages lost on refresh</p>
-                      </div>
+                      <span className="font-bold text-[10px] text-blue-700 uppercase tracking-wider">Messenger</span>
                    </button>
                 </div>
                 
-                <p className="text-[10px] text-slate-400 italic">Glory Support Team typically replies in minutes</p>
+                <p className="text-[10px] text-slate-400 font-medium animate-pulse">
+                  Support typically replies within minutes
+                </p>
              </div>
           </div>
         ) : view === "guest-form" ? (
@@ -398,7 +418,8 @@ export function FloatingChatButtonImproved({
                   <Button 
                     onClick={() => handleStartGuestChat()}
                     disabled={isInitializing}
-                    className="w-full bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl h-11"
+                    className="w-full text-white rounded-xl h-11"
+                    style={{ backgroundColor: "oklch(52.801% 0.15987 344.323)" }}
                   >
                     {isInitializing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MessageCircle className="h-4 w-4 mr-2" />}
                     Start Chatting Now

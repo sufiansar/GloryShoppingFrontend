@@ -123,8 +123,8 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="w-full max-w-2xl h-[600px] bg-white dark:bg-slate-900 flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4">
+      <Card className="w-full h-full md:max-w-2xl md:h-[650px] bg-white dark:bg-slate-900 flex flex-col shadow-2xl md:rounded-2xl border-0 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
           <div className="flex items-center gap-2">
@@ -164,102 +164,67 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
               </div>
             </div>
           ) : view === "selection" ? (
-            /* Selection View */
+            /* Guest Welcome View */
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-8">
+              <div className="w-20 h-20 rounded-full bg-rose-50 flex items-center justify-center mb-2">
+                <MessageCircle className="h-10 w-10 text-rose-500" />
+              </div>
+
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  How would you like to chat?
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                  Need Assistance?
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Save your messages or continue anonymously
+                <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                  Our direct chat is reserved for members. Please login to chat with our support team and save your conversation history.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
-                <Card 
-                  className="p-6 cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group flex flex-col items-center gap-4 bg-slate-50 dark:bg-slate-800/50"
+              <div className="flex flex-col gap-4 w-full max-w-md">
+                <Button 
+                  className="h-14 rounded-xl text-white font-bold text-lg shadow-xl shadow-pink-200 transition-all hover:scale-[1.02]"
+                  style={{ backgroundColor: "oklch(52.801% 0.15987 344.323)" }}
                   onClick={() => {
+                    storage.local.set("autoOpenChat", "true");
                     onClose();
                     router.push("/login");
                   }}
                 >
-                  <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
-                    <LogIn className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">Login / Sign Up</h4>
-                    <p className="text-xs text-gray-500 mt-1">Keep your chat history forever</p>
-                  </div>
-                  <Button variant="outline" className="w-full mt-2 border-purple-200">
-                    Go to Login
-                  </Button>
-                </Card>
+                  <LogIn className="h-5 w-5 mr-3" />
+                  Login to Start Chat
+                </Button>
 
-                <Card 
-                   className="p-6 cursor-pointer hover:border-pink-500 hover:shadow-md transition-all group flex flex-col items-center gap-4 bg-slate-50 dark:bg-slate-800/50"
-                   onClick={() => setView("guest-form")}
-                >
-                  <div className="h-12 w-12 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 group-hover:scale-110 transition-transform">
-                    <Ghost className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">Guest Chat</h4>
-                    <p className="text-xs text-gray-500 mt-1">Fast & anonymous help</p>
-                  </div>
-                  <Button variant="outline" className="w-full mt-2 border-pink-200">
-                    Continue
+                <div className="flex items-center gap-4 py-2">
+                  <div className="h-[1px] flex-1 bg-gray-100 dark:bg-slate-800" />
+                  <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-[0.2em]">Emergency Contact</span>
+                  <div className="h-[1px] flex-1 bg-gray-100 dark:bg-slate-800" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    variant="outline"
+                    className="h-12 border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50 text-emerald-700 font-bold rounded-xl"
+                    onClick={() => window.open("https://wa.me/8801577437554", "_blank")}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    WhatsApp
                   </Button>
-                </Card>
-              </div>
-            </div>
-          ) : (
-            /* Guest Form View (Current Start Chat UI) */
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-              <div className="mb-6 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start gap-3 text-left">
-                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold text-amber-800 dark:text-amber-400">Ephemeral Session</p>
-                  <p className="text-xs text-amber-700 dark:text-amber-500 mt-0.5">
-                    Guest messages will be permanently deleted if you refresh the page or close this session.
-                  </p>
+                  <Button 
+                    variant="outline"
+                    className="h-12 border-blue-200 bg-blue-50/30 hover:bg-blue-50 text-blue-700 font-bold rounded-xl"
+                    onClick={() => window.open("https://www.facebook.com/GloryShopingBD", "_blank")}
+                  >
+                    <svg className="h-4 w-4 mr-2 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.91 1.453 5.518 3.73 7.234V22l3.352-1.841c.294.041.593.064.898.064 5.523 0 10-4.145 10-9.258S17.523 2 12 2zm1.082 12.186l-2.454-2.62-4.79 2.62 5.267-5.594 2.52 2.62 4.724-2.62-5.267 5.594z"/></svg>
+                    Messenger
+                  </Button>
                 </div>
               </div>
 
-              <MessageCircle className="h-16 w-16 text-purple-500 mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Start a Guest Conversation
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Our support team is ready to assist you.
+              <p className="text-xs text-gray-400 italic animate-pulse">
+                Support typically replies within minutes
               </p>
-              
-              <div className="flex gap-4 w-full max-w-sm">
-                <Button
-                  variant="outline"
-                  onClick={() => setView("selection")}
-                  className="flex-1"
-                >
-                  Back
-                </Button>
-                <Button
-                  onClick={handleStartChat}
-                  disabled={isCreatingChat}
-                  className="flex-[2] bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                >
-                  {isCreatingChat ? (
-                    <>
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
-                      Starting...
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Start Chatting
-                    </>
-                  )}
-                </Button>
-              </div>
             </div>
+          ) : (
+            <div className="flex-1" />
           )}
         </div>
       </Card>

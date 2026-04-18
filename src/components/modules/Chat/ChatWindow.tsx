@@ -460,7 +460,7 @@ export function ChatWindow({
       >
         <div ref={messagesContainerRef} className="flex flex-col gap-4 p-4">
           {messages.length === 0 ? (
-            <div className="flex flex-col gap-1.5 p-6 w-full h-full justify-center items-center text-center">
+            <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-10 text-center space-y-6 md:space-y-8 overflow-y-auto">
               <div className="animate-in zoom-in duration-500">
                 <div
                   className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl shadow-rose-200"
@@ -595,7 +595,7 @@ export function ChatWindow({
         </div>
       </div>
       {/* Responsive Input Area */}
-      <div className="px-3 pt-3 pb-8 md:pb-4 border-t border-rose-100 dark:border-rose-900/10 bg-white dark:bg-slate-900 shrink-0">
+      <div className="px-3 pt-3 pb-safe-area border-t border-rose-100 dark:border-rose-900/10 bg-white dark:bg-slate-900 shrink-0" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
         <div className="flex items-center gap-2 max-w-full">
           <Button
             variant="ghost"
