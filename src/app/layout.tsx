@@ -9,6 +9,7 @@ import { LayoutChat } from "@/components/LayoutChat";
 import { TokenSyncProvider } from "@/providers/TokenSyncProvider";
 import { Suspense } from "react";
 import { FacebookPixel } from "@/components/Shared/FacebookPixel";
+import { GoogleTagManager } from "@/components/Shared/GoogleTagManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
         <AuthProviders>
           <Suspense fallback={null}>
             <FacebookPixel />
+            <GoogleTagManager />
             <TokenSyncProvider>
               <SocketProvider>
                 <CartProvider>
