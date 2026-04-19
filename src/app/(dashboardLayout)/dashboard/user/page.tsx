@@ -20,13 +20,13 @@ const UserDashboard = async () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Welcome Header */}
-      <div className="flex flex-col gap-2 p-8 rounded-3xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 relative overflow-hidden">
+      <div className="flex flex-col gap-2 p-8 rounded-3xl bg-primary-custom text-white shadow-xl shadow-primary-custom/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-bold font-heading">
             Welcome back, {user?.name || "Customer"} 👋
           </h1>
-          <p className="text-primary-foreground/80 mt-2 max-w-xl text-lg">
+          <p className="text-white/80 mt-2 max-w-xl text-lg">
             Manage your recent orders, track your packages, and explore new skin care collections tailored for you.
           </p>
         </div>
