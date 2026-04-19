@@ -5,9 +5,15 @@ export const userNavItems: NavSection[] = [
     title: "User",
     items: [
       {
-        title: "My Products",
-        href: "/dashboard/products",
-        icon: "Activity",
+        title: "My Dashboard",
+        href: "/dashboard/user",
+        icon: "LayoutDashboard",
+        roles: ["USER"],
+      },
+      {
+        title: "My Orders",
+        href: "/dashboard/user/orders",
+        icon: "ShoppingBag",
         roles: ["USER"],
       },
     ],

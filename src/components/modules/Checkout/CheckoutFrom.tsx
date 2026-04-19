@@ -237,6 +237,13 @@ export function CheckoutForm({
       const result = await createOrder(checkoutInput);
 
       if (!result?.data) {
+        if (result?.message?.includes("Cart items not found") || result?.message?.includes("not found")) {
+          toast.error("Your cart is out of sync or items were already ordered. Refreshing your cart...");
+          setTimeout(() => {
+            window.location.href = "/product";
+          }, 2000);
+          return;
+        }
         throw new Error(result?.message || "Failed to create order");
       }
 

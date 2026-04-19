@@ -113,3 +113,47 @@ export const cancelOrder = async (id: string) => {
     throw error;
   }
 };
+
+export const getMyOrders = async (options: { page?: number; limit?: number } = {}) => {
+  try {
+    const page = options.page || 1;
+    const limit = options.limit || 10;
+    const result = await makeApiCall<any>(`${ORDER_BASE}/my-orders?page=${page}&limit=${limit}`, {
+      method: "GET",
+    });
+
+    if (!result) return result;
+
+    if (Array.isArray(result.data)) {
+      return {
+        data: result.data,
+        pagination: result.pagination ||
+          result.meta || {
+            page: 1,
+            limit: 10,
+            total: result.data.length || 0,
+            totalPages: 1,
+          },
+      } as any;
+    }
+
+    if (result.data && Array.isArray(result.data.data)) {
+      const items = result.data.data;
+      const meta = result.data.meta || result.meta || {};
+      return {
+        data: items,
+        pagination: {
+          page: meta.page || 1,
+          limit: meta.limit || 10,
+          total: meta.total || 0,
+          totalPages: meta.totalPages || meta.totalPage || 0,
+        },
+      } as any;
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching my orders:", error);
+    throw error;
+  }
+};
