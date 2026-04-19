@@ -71,6 +71,7 @@ export default function EditProductForm({ product }: EditProductFormProps) {
     isFeatured: product.isFeatured || false,
     isTrending: product.isTrending || false,
     isBestSeller: product.isBestSeller || false,
+    isStock: product.isStock || false,
     isActive: product.isActive !== false,
   });
 
@@ -129,6 +130,7 @@ export default function EditProductForm({ product }: EditProductFormProps) {
       formDataObj.append("isFeatured", String(formData.isFeatured));
       formDataObj.append("isTrending", String(formData.isTrending));
       formDataObj.append("isBestSeller", String(formData.isBestSeller));
+      formDataObj.append("isStock", String(formData.isStock));
       formDataObj.append("isActive", String(formData.isActive));
 
       // Relationships
@@ -570,7 +572,8 @@ export default function EditProductForm({ product }: EditProductFormProps) {
                   { id: "isNew", label: "Mark as New" },
                   { id: "isFeatured", label: "Mark as Featured" },
                   { id: "isTrending", label: "Mark as Trending" },
-                  { id: "isBestSeller", label: "Mark as Best Seller" }
+                  { id: "isBestSeller", label: "Mark as Best Seller" },
+                  { id: "isStock", label: "Mark as In Stock" }
                 ].map((flag) => (
                   <div key={flag.id} className="flex items-center justify-between p-4 bg-white/20 dark:bg-slate-800/20 rounded-2xl border border-white/10">
                     <Label htmlFor={flag.id} className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 cursor-pointer">

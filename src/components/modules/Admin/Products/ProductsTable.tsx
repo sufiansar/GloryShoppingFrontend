@@ -389,6 +389,11 @@ export default function ProductsTable({
                             <TrendingUp className="h-2 w-2" /> Trending
                           </span>
                         )}
+                        {product.isStock && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-wider border border-emerald-500/20 flex items-center gap-1">
+                            <Package className="h-2 w-2" /> In Stock
+                          </span>
+                        )}
                       </div>
                     </div>
                   </TableCell>

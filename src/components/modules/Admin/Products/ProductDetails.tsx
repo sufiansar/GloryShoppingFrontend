@@ -86,6 +86,13 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               </div>
             )}
             
+            {product.isStock && (
+              <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                <Package className="h-3 w-3" />
+                <span className="text-[10px] font-black uppercase tracking-widest">In Stock</span>
+              </div>
+            )}
+            
             {product.isBestSeller && (
               <div className="flex items-center gap-1.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 px-3 py-1.5 rounded-full border border-purple-500/20">
                 <Award className="h-3 w-3" />

@@ -72,6 +72,7 @@ export default function CreateProductForm() {
     isFeatured: false,
     isTrending: false,
     isBestSeller: false,
+    isStock: false,
     isActive: true,
   });
 
@@ -115,6 +116,7 @@ export default function CreateProductForm() {
       formDataObj.append("isFeatured", formData.isFeatured.toString());
       formDataObj.append("isTrending", formData.isTrending.toString());
       formDataObj.append("isBestSeller", formData.isBestSeller.toString());
+      formDataObj.append("isStock", formData.isStock.toString());
       formDataObj.append("isActive", formData.isActive.toString());
 
       // Relationships
@@ -574,7 +576,8 @@ export default function CreateProductForm() {
                   { id: "isNew", label: "Mark as New" },
                   { id: "isFeatured", label: "Mark as Featured" },
                   { id: "isTrending", label: "Mark as Trending" },
-                  { id: "isBestSeller", label: "Mark as Best Seller" }
+                  { id: "isBestSeller", label: "Mark as Best Seller" },
+                  { id: "isStock", label: "Mark as In Stock" }
                 ].map((flag) => (
                   <div key={flag.id} className="flex items-center justify-between p-4 bg-white/20 dark:bg-slate-800/20 rounded-2xl border border-white/10">
                     <Label htmlFor={flag.id} className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 cursor-pointer">

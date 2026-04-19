@@ -10,6 +10,7 @@ export interface Product {
   isFeatured: boolean;
   isTrending: boolean;
   isBestSeller: boolean;
+  isStock?: boolean;
   averageRating: number;
   reviewCount: number;
   brandName: string;

@@ -36,7 +36,7 @@ export default function ProductCard({
   };
 
   return (
-    <div 
+    <div
       className="block h-full cursor-pointer"
       onClick={() => router.push(`/product/${product.slug || product.id}`)}
     >
@@ -62,9 +62,20 @@ export default function ProductCard({
           )}
 
           {product.discount && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold flex items-center gap-1">
+            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold flex items-center gap-1 z-10">
               <Percent className="h-3 w-3" />
               {product.discount}%
+            </div>
+          )}
+
+          {/* Stock Badges (Based on isStock boolean) */}
+          {product.isStock ? (
+            <div className="absolute top-2 right-2 bg-emerald-500/90 backdrop-blur-sm text-white px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider z-10 shadow-sm border border-emerald-400">
+              In Stock
+            </div>
+          ) : (
+            <div className="absolute top-2 right-2 bg-gray-900/80 backdrop-blur-sm text-white px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider z-10 shadow-sm border border-gray-700">
+              Out of Stock
             </div>
           )}
         </div>
