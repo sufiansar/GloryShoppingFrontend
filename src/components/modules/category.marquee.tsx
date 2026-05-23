@@ -132,6 +132,13 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
     const categorySlug =
       category.name?.toLowerCase().replace(/\s+/g, "-") || "category";
 
+    // Resolve first image URL from the images array
+    const firstImage = category.images && category.images.length > 0
+      ? typeof category.images[0] === "string"
+        ? category.images[0]
+        : (category.images[0] as { url: string }).url
+      : null;
+
     return (
       <Link href={`/categorys/${categorySlug}`} passHref>
         <div
@@ -162,26 +169,45 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
           {/* Card Content */}
           <div className="relative z-10 h-full flex flex-col items-center justify-center p-4">
-            {/* Dynamic Icon with hover effect */}
+            {/* Category Image or Icon */}
             <div className="relative mb-4">
-              <div
-                className="skincare-icon shadow-lg"
-                style={{ background: scheme.bg }}
-              >
-                {index % 6 === 0 ? (
-                  <Droplets className="w-8 h-8" />
-                ) : index % 6 === 1 ? (
-                  <Leaf className="w-8 h-8" />
-                ) : index % 6 === 2 ? (
-                  <Sparkles className="w-8 h-8" />
-                ) : index % 6 === 3 ? (
-                  <Heart className="w-8 h-8" />
-                ) : index % 6 === 4 ? (
-                  <Moon className="w-8 h-8" />
-                ) : (
-                  <Sun className="w-8 h-8" />
-                )}
-              </div>
+              {firstImage ? (
+                <div
+                  className="skincare-category-img"
+                  style={{
+                    boxShadow: isHovered ? `0 8px 24px ${scheme.glow}55` : `0 4px 12px rgba(0,0,0,0.12)`,
+                    transition: "box-shadow 0.3s ease",
+                  }}
+                >
+                  <img
+                    src={firstImage}
+                    alt={category.name}
+                    className="w-full h-full object-cover"
+                  />
+                  {isHovered && (
+                    <div className="absolute inset-0 rounded-full" style={{ background: `${scheme.glow}22` }} />
+                  )}
+                </div>
+              ) : (
+                <div
+                  className="skincare-icon shadow-lg"
+                  style={{ background: scheme.bg }}
+                >
+                  {index % 6 === 0 ? (
+                    <Droplets className="w-8 h-8" />
+                  ) : index % 6 === 1 ? (
+                    <Leaf className="w-8 h-8" />
+                  ) : index % 6 === 2 ? (
+                    <Sparkles className="w-8 h-8" />
+                  ) : index % 6 === 3 ? (
+                    <Heart className="w-8 h-8" />
+                  ) : index % 6 === 4 ? (
+                    <Moon className="w-8 h-8" />
+                  ) : (
+                    <Sun className="w-8 h-8" />
+                  )}
+                </div>
+              )}
               {isHovered && (
                 <div
                   className="skincare-icon-aura"
@@ -363,6 +389,27 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           color: #4b5563;
           transition: all 0.3s;
           border: 2px solid white;
+        }
+
+        .skincare-category-img {
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          overflow: hidden;
+          position: relative;
+          border: 3px solid white;
+          transition: all 0.3s;
+        }
+
+        .skincare-category-img img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.4s ease;
+        }
+
+        .skincare-category-img:hover img {
+          transform: scale(1.1);
         }
 
         .skincare-icon-aura {

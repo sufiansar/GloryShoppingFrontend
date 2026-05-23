@@ -27,11 +27,13 @@ export const updateProductVariant = async (id: string, formData: FormData) => {
     // Build the variant data with proper types
     const variantData: {
       size: string;
+      price: number;
       stock: number;
       lowStockThreshold: number;
       images?: any[];
     } = {
       size: entries.size as string,
+      price: parseFloat(entries.price as string),
       stock: parseInt(entries.stock as string),
       lowStockThreshold: parseInt(entries.lowStockThreshold as string),
     };
@@ -57,6 +59,7 @@ export const updateProductVariant = async (id: string, formData: FormData) => {
       const uploadFormData = new FormData();
       // Append fields as strings (FormData converts everything to strings anyway)
       uploadFormData.append("size", variantData.size);
+      uploadFormData.append("price", variantData.price.toString());
       uploadFormData.append("stock", variantData.stock.toString());
       uploadFormData.append(
         "lowStockThreshold",

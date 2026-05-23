@@ -244,6 +244,25 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           </div>
         )}
 
+        {/* FAQ & Questions */}
+        {product.faquestions && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <FileText className="h-4 w-4 text-amber-500" />
+              </div>
+              <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">FAQ & Questions</h2>
+            </div>
+            <div className="p-8 bg-white/50 dark:bg-slate-800/50 rounded-[2rem] border border-white/40">
+              <div className="prose prose-slate dark:prose-invert max-w-none text-sm font-medium">
+                <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {product.faquestions}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

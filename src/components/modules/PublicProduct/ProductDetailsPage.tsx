@@ -637,6 +637,31 @@ export default function ProductDetailsPage({
                 </div>
               )}
 
+              {/* FAQ Section */}
+              {product?.faquestions && (
+                <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm transition-all hover:shadow-md">
+                   <button 
+                     onClick={() => setExpandedSections(prev => ({ ...prev, faq: !prev.faq }))}
+                     className="w-full flex items-center justify-between p-5 hover:bg-slate-50/50 transition-colors"
+                   >
+                     <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                           <MessageSquare className="w-4 h-4 text-amber-500" />
+                        </div>
+                        <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">FAQ & Questions</span>
+                     </div>
+                     <ChevronDown className={`w-4 h-4 text-slate-300 transition-transform duration-500 ${expandedSections.faq ? "rotate-180" : ""}`} />
+                   </button>
+                   {expandedSections.faq && (
+                     <div className="px-6 pb-5 pt-1 animate-in fade-in slide-in-from-top-1 duration-300">
+                       <div className="prose prose-slate prose-sm max-w-none text-slate-600 leading-relaxed font-medium text-xs">
+                         <p className="whitespace-pre-wrap">{product.faquestions}</p>
+                       </div>
+                     </div>
+                   )}
+                </div>
+              )}
+
               {/* Reviews Section */}
               <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm transition-all hover:shadow-md">
                  <button 

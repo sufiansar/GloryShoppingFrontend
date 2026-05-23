@@ -28,6 +28,7 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
 
   const [formData, setFormData] = useState({
     size: variant.size,
+    price: variant.price?.toString() || "0",
     stock: variant.stock?.toString() || "",
     lowStockThreshold: variant.lowStockThreshold?.toString() || "10",
   });
@@ -41,6 +42,7 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
 
       const formDataObj = new FormData();
       formDataObj.append("size", formData.size);
+      formDataObj.append("price", formData.price);
       formDataObj.append("stock", formData.stock);
       formDataObj.append("lowStockThreshold", formData.lowStockThreshold);
 
@@ -97,7 +99,7 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-700 w-full max-w-4xl mx-auto pb-32">
+    <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-700 w-full max-w-4xl mx-auto pb-40">
       <div className="flex flex-col gap-8">
         
         {/* Product Details Header */}
@@ -175,15 +177,21 @@ export default function EditVariantForm({ variant }: EditVariantFormProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Price</Label>
+              <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Price *</Label>
               <Input
                 id="price"
-                value={`$${variant.price?.toFixed(2) || "0.00"}`}
-                disabled
-                className="h-14 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner text-slate-400 font-bold transition-all duration-300"
+                name="price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="0.00"
+                required
+                className="h-14 bg-white/60 dark:bg-slate-800/40 backdrop-blur-md border-primary/40 dark:border-primary/40 rounded-2xl shadow-inner focus-visible:ring-primary-custom/30 font-bold transition-all duration-300"
               />
               <p className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-tighter opacity-70">
-                Inherited from parent product
+                Override variant price
               </p>
             </div>
 

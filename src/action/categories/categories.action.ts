@@ -6,9 +6,24 @@ import { makeApiCall } from "../apiClient";
 
 export const createCategoriesAction = async (categoryData: FormData) => {
   try {
-    const result = await makeApiCall<any>("/category/", {
+    // Backend expects: form-data with 'data' (JSON string) + 'images' (files)
+    const name = categoryData.get("name") as string;
+    const description = categoryData.get("description") as string | null;
+
+    const payload = new FormData();
+    payload.append("data", JSON.stringify({ name, description: description || "" }));
+
+    // Attach all image files
+    const imageEntries = categoryData.getAll("images");
+    imageEntries.forEach((img) => {
+      if (img instanceof File && img.size > 0) {
+        payload.append("images", img);
+      }
+    });
+
+    const result = await makeApiCall<any>("/categories", {
       method: "POST",
-      body: categoryData,
+      body: payload,
     });
 
     if (result?.success || result?.data?.id) {
@@ -28,31 +43,32 @@ export const updateCategoriesAction = async (
   id: string,
   categoryData: FormData,
 ) => {
-  const categoryInfo = Object.fromEntries(categoryData.entries());
-
-  const modify: any = {
-    name: categoryInfo.name,
-    description: categoryInfo.description,
-    images: categoryInfo.images
-      ? JSON.parse(categoryInfo.images as string)
-      : [],
-  };
-
-  console.log("Updating category:", id, modify);
-
   try {
-    const result = await makeApiCall<any>(`/category/${id}`, {
+    // Backend expects: form-data with 'data' (JSON string) + optional 'images' (files)
+    const name = categoryData.get("name") as string;
+    const description = categoryData.get("description") as string | null;
+
+    const payload = new FormData();
+    payload.append("data", JSON.stringify({ name, description: description || "" }));
+
+    // Attach any new image files
+    const imageEntries = categoryData.getAll("images");
+    imageEntries.forEach((img) => {
+      if (img instanceof File && img.size > 0) {
+        payload.append("images", img);
+      }
+    });
+
+    console.log("Updating category:", id, { name, description });
+
+    const result = await makeApiCall<any>(`/categories/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(modify),
+      body: payload,
     });
 
     if (result?.success || result?.data?.id) {
       revalidatePath("/categorys", "page");
       revalidatePath("/", "layout");
-      // redirect("/admin/dashboard/categories-management");
     }
 
     return result;

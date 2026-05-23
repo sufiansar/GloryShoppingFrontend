@@ -140,6 +140,97 @@ export const navItems: NavItem[] = [
         title: "Skin Care Combo",
         href: "/categorys/skin-care-combo",
       },
+      {
+        title: "Cleansing",
+        href: "/categorys/cleansing",
+      },
+      {
+        title: "Sun Gel",
+        href: "/categorys/sun-gel",
+      },
+      {
+        title: "Glow Balm",
+        href: "/categorys/glow-balm",
+      },
+      {
+        title: "Sun Stick",
+        href: "/categorys/sun-stick",
+      },
+      {
+        title: "Gel Cream",
+        href: "/categorys/gel-cream",
+      },
+      {
+        title: "Sun Lotion",
+        href: "/categorys/sun-lotion",
+      },
+      {
+        title: "Capsule",
+        href: "/categorys/capsule",
+      },
+      {
+        title: "Pads",
+        href: "/categorys/pads",
+      },
+      {
+        title: "Moisturizing Cream",
+        href: "/categorys/moisturizing-cream",
+      },
+      {
+        title: "Cleansing Oil",
+        href: "/categorys/cleansing-oil",
+      },
+      {
+        title: "Spot Cream",
+        href: "/categorys/spot-cream",
+      },
+      {
+        title: "Kit",
+        href: "/categorys/kit",
+      },
+      {
+        title: "Patch",
+        href: "/categorys/patch",
+      },
+      {
+        title: "Power Liquid",
+        href: "/categorys/power-liquid",
+      },
+      {
+        title: "Scrub",
+        href: "/categorys/scrub",
+      },
+      {
+        title: "Day Cream",
+        href: "/categorys/day-cream",
+      },
+      {
+        title: "Night Cream",
+        href: "/categorys/night-cream",
+      },
+      {
+        title: "Baby Sunscreen",
+        href: "/categorys/baby-sunscreen",
+      },
+      {
+        title: "Cleansing Balm",
+        href: "/categorys/cleansing-balm",
+      },
+      {
+        title: "Sun Cream",
+        href: "/categorys/sun-cream",
+      },
+      {
+        title: "Cleansing Gel",
+        href: "/categorys/cleansing-gel",
+      },
+      {
+        title: "Cleansing Foam",
+        href: "/categorys/cleansing-foam",
+      },
+      { title: "Lip Oil", href: "/categorys/lip-oil" },
+      { title: "Lip Balm", href: "/categorys/lip-balm" },
+      { title: "Lip Mask", href: "/categorys/lip-mask" },
     ],
     featured: [
       {
@@ -218,15 +309,17 @@ export const navItems: NavItem[] = [
       },
       { title: "Baby Grooming", href: "/categorys/baby-grooming" },
       { title: "Feeding", href: "/categorys/feeding" },
+      { title: "Baby Sun Lotion", href: "/categorys/baby-sun-lotion" },
+      { title: "Baby Powder", href: "/categorys/baby-powder" },
     ],
   },
   {
     title: "SUPPLEMENT",
     href: "/categorys/supplement",
     subItems: [
-      { title: "Mom's Health", href: "/categorys/moms-health" },
+
       {
-        title: "Women's Health", href: "/categorys/womens-health"
+        title: " Health & Beauty", href: "/categorys/health-beauty"
       },
       {
         title: "Baby's Health", href: "/categorys/babys-health"
@@ -260,6 +353,11 @@ export const navItems: NavItem[] = [
 
       { title: "Hair Serum", href: "/categorys/hair-serum" },
       { title: "Hair Combo", href: "/categorys/hair-combo" },
+      { title: "Hair Scalp", href: "/categorys/hair-scalp" },
+      { title: "Hair Masque", href: "/categorys/hair-masque" },
+      { title: "Hair Ampoule", href: "/categorys/hair-ampoule" },
+      { title: "Scalp", href: "/categorys/scalp" },
+      { title: "Hair Tonic", href: "/categorys/hair-tonic" },
     ],
   },
   {
@@ -343,6 +441,14 @@ export const navItems: NavItem[] = [
       {
         title: "Nail Polish Remover",
         href: "/categorys/nail-polish-remover",
+      },
+      {
+        title: "Foundation",
+        href: "/categorys/foundation",
+      },
+      {
+        title: "Powder",
+        href: "/categorys/powder",
       },
     ],
     featured: [
@@ -446,6 +552,25 @@ export const navItems: NavItem[] = [
       { title: "Mixsoon", href: "/categorys/brand/mixsoon" },
       { title: "TIRTIR", href: "/categorys/brand/tirtir" },
       { title: "Dr. Althea", href: "/categorys/brand/dr-althea" },
+      { title: "Fino", href: "/categorys/brand/fino" },
+      { title: "Wishcare", href: "/categorys/brand/wishcare" },
+      { title: "TRESemmé", href: "/categorys/brand/tresemme" },
+      { title: "Kodomo", href: "/categorys/brand/kodomo" },
+      { title: "Arencia", href: "/categorys/brand/arencia" },
+      { title: "Matrix", href: "/categorys/brand/matrix" },
+      { title: "SimplyO", href: "/categorys/brand/simplyo" },
+      { title: "Sebamed", href: "/categorys/brand/sebamed" },
+      { title: "Dove", href: "/categorys/brand/dove" },
+      { title: "Dabo", href: "/categorys/brand/dabo" },
+      { title: "K-SECRET", href: "/categorys/brand/k-secret" },
+      { title: "EQQUALBERRY", href: "/categorys/brand/eqqualberry" },
+      { title: "KAINE", href: "/categorys/brand/kaine" },
+      { title: "Johnson's", href: "/categorys/brand/johnsons" },
+      { title: "Nella", href: "/categorys/brand/nella" },
+      { title: "Valencia", href: "/categorys/brand/valencia" },
+      { title: "Beaute", href: "/categorys/brand/beaute" },
+      { title: "Skin Aqua", href: "/categorys/brand/skin-aqua" },
+      { title: "Biore", href: "/categorys/brand/biore" },
     ],
   },
 ];

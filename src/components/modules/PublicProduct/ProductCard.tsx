@@ -61,20 +61,24 @@ export default function ProductCard({
             </div>
           )}
 
-          {product.discount && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold flex items-center gap-1 z-10">
-              <Percent className="h-3 w-3" />
+          {/* Discount badge — top-left, small */}
+          {product.discount && product.discount > 0 && (
+            <div className="absolute top-1.5 left-1.5 bg-red-500 text-white px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5 z-10 leading-tight">
+              <Percent className="h-2.5 w-2.5" />
               {product.discount}%
             </div>
           )}
 
-          {/* Stock Badges (Based on isStock boolean) */}
-          {product.isStock ? (
-            <div className="absolute top-2 right-2 bg-emerald-500/90 backdrop-blur-sm text-white px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider z-10 shadow-sm border border-emerald-400">
+          {/* In Stock badge — top-right */}
+          {product.isStock && product.stock !== 0 && (
+            <div className="absolute top-1.5 right-1.5 bg-emerald-500/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wide z-10 leading-tight">
               In Stock
             </div>
-          ) : (
-            <div className="absolute top-2 right-2 bg-gray-900/80 backdrop-blur-sm text-white px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider z-10 shadow-sm border border-gray-700">
+          )}
+
+          {/* Out of Stock badge — bottom-left */}
+          {(!product.isStock || product.stock === 0) && (
+            <div className="absolute bottom-1.5 left-1.5 bg-gray-900/85 backdrop-blur-sm text-white px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wide z-10 leading-tight">
               Out of Stock
             </div>
           )}
