@@ -37,9 +37,11 @@ export const updateProduct = async (id: string, formData: FormData) => {
       isFeatured: entries.isFeatured === "true",
       isTrending: entries.isTrending === "true",
       isBestSeller: entries.isBestSeller === "true",
+      isStock: entries.isStock === "true",
       isActive: entries.isActive === "true",
-      thumbleImage: entries.thumbleImage as string,
     };
+
+
 
     // Add optional fields if they exist in entries
     if (entries.brandId) productData.brandId = entries.brandId as string;

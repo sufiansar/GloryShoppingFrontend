@@ -67,12 +67,12 @@ export default function EditProductForm({ product }: EditProductFormProps) {
     price: product.price?.toString() || "",
     discount: product.discount?.toString() || "",
     stock: product.stock?.toString() || "",
-    isNew: product.isNew || false,
-    isFeatured: product.isFeatured || false,
-    isTrending: product.isTrending || false,
-    isBestSeller: product.isBestSeller || false,
-    isStock: product.isStock || false,
-    isActive: product.isActive !== false,
+    isNew: product.isNew ?? false,
+    isFeatured: product.isFeatured ?? false,
+    isTrending: product.isTrending ?? false,
+    isBestSeller: product.isBestSeller ?? false,
+    isStock: product.isStock ?? false,
+    isActive: product.isActive ?? true,
   });
 
   const [thumbImage, setThumbImage] = useState<string>(
@@ -569,24 +569,35 @@ export default function EditProductForm({ product }: EditProductFormProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  { id: "isNew", label: "Mark as New" },
-                  { id: "isFeatured", label: "Mark as Featured" },
-                  { id: "isTrending", label: "Mark as Trending" },
-                  { id: "isBestSeller", label: "Mark as Best Seller" },
-                  { id: "isStock", label: "Mark as In Stock" }
-                ].map((flag) => (
-                  <div key={flag.id} className="flex items-center justify-between p-4 bg-white/20 dark:bg-slate-800/20 rounded-2xl border border-white/10">
-                    <Label htmlFor={flag.id} className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 cursor-pointer">
-                      {flag.label}
-                    </Label>
-                    <Switch
-                      id={flag.id}
-                      checked={(formData as any)[flag.id]}
-                      onCheckedChange={(checked) => handleSwitchChange(flag.id, checked)}
-                      className="data-[state=checked]:bg-primary-custom"
-                    />
-                  </div>
-                ))}
+                  { id: "isNew",        label: "Mark as New",        color: "data-[state=checked]:bg-blue-500",    activeBg: "bg-blue-50/60 border-blue-200/60" },
+                  { id: "isFeatured",   label: "Mark as Featured",   color: "data-[state=checked]:bg-amber-500",   activeBg: "bg-amber-50/60 border-amber-200/60" },
+                  { id: "isTrending",   label: "Mark as Trending",   color: "data-[state=checked]:bg-violet-500",  activeBg: "bg-violet-50/60 border-violet-200/60" },
+                  { id: "isBestSeller", label: "Mark as Best Seller", color: "data-[state=checked]:bg-rose-500",   activeBg: "bg-rose-50/60 border-rose-200/60" },
+                  { id: "isStock",      label: "Mark as In Stock",   color: "data-[state=checked]:bg-emerald-500", activeBg: "bg-emerald-50/60 border-emerald-200/60" },
+                ].map((flag) => {
+                  const isActive = (formData as any)[flag.id];
+                  return (
+                <div
+                  key={flag.id}
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-colors duration-300 ${
+                    isActive
+                      ? flag.activeBg
+                      : "bg-white/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/40"
+                  }`}
+                >
+                  <Label htmlFor={flag.id} className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 cursor-pointer">
+                    {flag.label}
+                  </Label>
+                  <Switch
+                    id={flag.id}
+                    checked={isActive}
+                    onCheckedChange={(checked) => handleSwitchChange(flag.id, checked)}
+                    className={`data-[state=unchecked]:bg-slate-300 dark:data-[state=unchecked]:bg-slate-600 ${flag.color}`}
+                  />
+                </div>
+                  );
+                })}
+
               </div>
 
               <div className="mt-4 space-y-3 pt-4 border-t border-slate-200/40 dark:border-slate-800/30">
