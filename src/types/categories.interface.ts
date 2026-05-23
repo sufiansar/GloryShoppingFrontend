@@ -1,8 +1,10 @@
 export interface Category {
   id?: string;
+  slug?: string;
   name: string;
   description?: string | null;
   images?: string[] | { url: string; alt?: string }[];
+  productCount?: number;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

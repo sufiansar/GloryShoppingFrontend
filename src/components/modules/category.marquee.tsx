@@ -130,7 +130,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
     const scheme = skincareColorSchemes[index % skincareColorSchemes.length];
     const categorySlug =
-      category.name?.toLowerCase().replace(/\s+/g, "-") || "category";
+      category.slug || category.name?.toLowerCase().replace(/\s+/g, "-") || "category";
 
     // Resolve first image URL from the images array
     const firstImage = category.images && category.images.length > 0
@@ -142,128 +142,82 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
     return (
       <Link href={`/categorys/${categorySlug}`} passHref>
         <div
-          className="relative skincare-card group cursor-pointer"
-          onMouseEnter={() => {
-            setIsHovered(true);
-          }}
-          onMouseLeave={() => {
-            setIsHovered(false);
-            setTilt({ x: 0, y: 0 });
-          }}
-          onMouseMove={handleMouseMove}
+          className="relative group cursor-pointer flex-shrink-0"
           style={{
-            transform: `perspective(1000px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg) scale(${isHovered ? 1.05 : 1})`,
-            transition: "transform 0.3s ease-out",
+            width: "180px",
+            height: "220px",
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: isHovered
+              ? "0 20px 40px rgba(0,0,0,0.18), 0 8px 16px rgba(0,0,0,0.12)"
+              : "0 4px 16px rgba(0,0,0,0.10)",
+            border: "1px solid rgba(0,0,0,0.07)",
+            transition: "transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s ease",
+            transform: isHovered ? "translateY(-8px) scale(1.02)" : "translateY(0) scale(1)",
           }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => { setIsHovered(false); setTilt({ x: 0, y: 0 }); }}
         >
-          {/* Background Pattern */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: skincarePatterns[index % skincarePatterns.length],
-            }}
-          />
-
-          {/* Animated Gradient Border */}
-          <div className="skincare-border" style={{ background: scheme.bg }} />
-
-          {/* Card Content */}
-          <div className="relative z-10 h-full flex flex-col items-center justify-center p-4">
-            {/* Category Image or Icon */}
-            <div className="relative mb-4">
-              {firstImage ? (
-                <div
-                  className="skincare-category-img"
-                  style={{
-                    boxShadow: isHovered ? `0 8px 24px ${scheme.glow}55` : `0 4px 12px rgba(0,0,0,0.12)`,
-                    transition: "box-shadow 0.3s ease",
-                  }}
-                >
-                  <img
-                    src={firstImage}
-                    alt={category.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {isHovered && (
-                    <div className="absolute inset-0 rounded-full" style={{ background: `${scheme.glow}22` }} />
-                  )}
-                </div>
-              ) : (
-                <div
-                  className="skincare-icon shadow-lg"
-                  style={{ background: scheme.bg }}
-                >
-                  {index % 6 === 0 ? (
-                    <Droplets className="w-8 h-8" />
-                  ) : index % 6 === 1 ? (
-                    <Leaf className="w-8 h-8" />
-                  ) : index % 6 === 2 ? (
-                    <Sparkles className="w-8 h-8" />
-                  ) : index % 6 === 3 ? (
-                    <Heart className="w-8 h-8" />
-                  ) : index % 6 === 4 ? (
-                    <Moon className="w-8 h-8" />
-                  ) : (
-                    <Sun className="w-8 h-8" />
-                  )}
-                </div>
-              )}
-              {isHovered && (
-                <div
-                  className="skincare-icon-aura"
-                  style={{ "--glow-color": scheme.glow } as React.CSSProperties}
-                />
-              )}
-            </div>
-
-            {/* Category Name */}
-            <h3 className="skincare-title font-bold mb-2">{category.name}</h3>
-
-            {/* Product Count (if available) */}
-            {/* {category.name && (
-              <div className="skincare-count">
-                {category.productCount} products
+          {/* Full-bleed image / icon bg */}
+          <div style={{ position: "absolute", inset: 0, background: scheme.bg }}>
+            {firstImage ? (
+              <img
+                src={firstImage}
+                alt={category.name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transition: "transform 0.5s ease",
+                  transform: isHovered ? "scale(1.12)" : "scale(1)",
+                }}
+              />
+            ) : (
+              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {index % 6 === 0 ? <Droplets style={{ width: 56, height: 56, opacity: 0.35 }} />
+                  : index % 6 === 1 ? <Leaf style={{ width: 56, height: 56, opacity: 0.35 }} />
+                  : index % 6 === 2 ? <Sparkles style={{ width: 56, height: 56, opacity: 0.35 }} />
+                  : index % 6 === 3 ? <Heart style={{ width: 56, height: 56, opacity: 0.35 }} />
+                  : index % 6 === 4 ? <Moon style={{ width: 56, height: 56, opacity: 0.35 }} />
+                  : <Sun style={{ width: 56, height: 56, opacity: 0.35 }} />}
               </div>
-            )} */}
-
-            {/* View Button */}
-            <button
-              className="skincare-button mt-3"
-              onClick={(e) => e.preventDefault()}
-            >
-              <span>Shop Now</span>
-              <div className="skincare-button-particles">
-                {[...Array(3)].map((_, i) => (
-                  <span
-                    key={i}
-                    className="skincare-particle-dot"
-                    style={{
-                      animationDelay: `${i * 0.1}s`,
-                    }}
-                  />
-                ))}
-              </div>
-            </button>
+            )}
           </div>
 
-          {/* Holographic Rings on Hover */}
-          {isHovered && (
-            <div className="absolute inset-0">
-              {[...Array(2)].map((_, ringIndex) => (
-                <div
-                  key={ringIndex}
-                  className="skincare-data-ring"
-                  style={{
-                    animationDelay: `${ringIndex * 0.3}s`,
-                    borderColor: scheme.border,
-                  }}
-                />
-              ))}
+          {/* Name strip — frosted white pill at bottom, NO gradient */}
+          <div style={{
+            position: "absolute",
+            bottom: "12px",
+            left: "12px",
+            right: "12px",
+          }}>
+            <p style={{
+              margin: 0,
+              fontSize: "13px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "0.01em",
+              lineHeight: 1.3,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
+              {category.name}
+            </p>
+            {/* Shop arrow — slides in on hover */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              marginTop: "3px",
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? "translateY(0)" : "translateY(5px)",
+              transition: "opacity 0.25s ease, transform 0.25s ease",
+            }}>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "#fff", letterSpacing: "0.04em", textShadow: "0 1px 4px rgba(0,0,0,0.4)" }}>Shop Now</span>
+              <span style={{ fontSize: "12px", color: "#fff" }}>→</span>
             </div>
-          )}
-
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 shimmer-effect" />
+          </div>
         </div>
       </Link>
     );
@@ -292,7 +246,7 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
           );
           position: relative;
           overflow: hidden;
-          min-height: 310px;
+          min-height: 250px;
           border-top: 1px solid rgba(0, 0, 0, 0.05);
           border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
@@ -576,13 +530,13 @@ export function CategoryMarquee({ categories }: CategoryMarqueeProps) {
 
       {/* Enhanced Marquee */}
       <div
-        className="relative py-12 px-4"
+        className="relative py-3 px-4"
         onMouseEnter={() => setIsMarqueeHovered(true)}
         onMouseLeave={() => setIsMarqueeHovered(false)}
       >
         <div
           ref={marqueeRef}
-          className="flex gap-8"
+          className="flex gap-4"
           style={{
             animation: `marquee-scroll-left-to-right 60s linear ${isMarqueeHovered ? "paused" : "running"} infinite`,
             paddingLeft: "60px",

@@ -61,13 +61,13 @@ export const updateCategoriesAction = async (
 
     console.log("Updating category:", id, { name, description });
 
-    const result = await makeApiCall<any>(`/categories/${id}`, {
+    const result = await makeApiCall<any>(`/category/${id}`, {
       method: "PATCH",
       body: payload,
     });
 
     if (result?.success || result?.data?.id) {
-      revalidatePath("/categorys", "page");
+      revalidatePath("/category", "page");
       revalidatePath("/", "layout");
     }
 
