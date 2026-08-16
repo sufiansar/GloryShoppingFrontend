@@ -11,7 +11,7 @@ export const createIngreadtAction = async (data: any) => {
       body: data as any,
     });
 
-    if (result?.id) {
+    if (result?.data?.id || result?.success) {
       revalidatePath("/admin/dashboard/ingredients", "page");
     }
 
@@ -29,7 +29,7 @@ export const updateIngredient = async (id: string, data: any) => {
       body: data as any,
     });
 
-    if (result?.id) {
+    if (result?.data?.id || result?.success) {
       revalidatePath("/admin/dashboard/ingredients", "page");
     }
 
@@ -59,7 +59,7 @@ export const deleteIngredient = async (id: string) => {
       method: "DELETE",
     });
 
-    if (result?.id) {
+    if (result?.data?.id || result?.success) {
       revalidatePath("/admin/dashboard/ingredients", "page");
     }
 

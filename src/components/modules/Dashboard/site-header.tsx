@@ -33,7 +33,7 @@ export function SiteHeader({ userInfo }: DashboardNavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border-b border-white/20 dark:border-slate-800/20 transition-all duration-300 shadow-sm">
+    <header className="flex sticky top-0 z-50 h-16 shrink-0 items-center gap-2 bg-white border-b border-slate-100 transition-all duration-300">
       <div className="flex w-full items-center gap-4 px-4 md:px-8">
         <div className="flex items-center gap-2 group">
           <SidebarTrigger className="h-10 w-10 hover:bg-primary-custom/10 hover:text-primary-custom rounded-xl text-slate-500 transition-all duration-300 active:scale-90" />

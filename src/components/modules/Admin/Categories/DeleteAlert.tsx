@@ -1,89 +1,89 @@
 "use client";
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { deleteCategoriesAction } from "@/action/categories/categories.action";
-import { toast } from "sonner";
+ AlertDialog,
+ AlertDialogAction,
+ AlertDialogCancel,
+ AlertDialogContent,
+ AlertDialogDescription,
+ AlertDialogFooter,
+ AlertDialogHeader,
+ AlertDialogTitle,
+} from"@/components/ui/alert-dialog";
+import { useState } from"react";
+import { useRouter } from"next/navigation";
+import { deleteCategoriesAction } from"@/action/categories/categories.action";
+import { toast } from"sonner";
 
 interface DeleteAlertProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  categoryId: string;
-  categoryName: string;
+ open: boolean;
+ onOpenChange: (open: boolean) => void;
+ categoryId: string;
+ categoryName: string;
 }
 
 export default function DeleteAlert({
-  open,
-  onOpenChange,
-  categoryId,
-  categoryName,
+ open,
+ onOpenChange,
+ categoryId,
+ categoryName,
 }: DeleteAlertProps) {
-  const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+ const router = useRouter();
+ const [isDeleting, setIsDeleting] = useState(false);
+ const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = async () => {
-    try {
-      setIsDeleting(true);
-      setError(null);
+ const handleDelete = async () => {
+ try {
+ setIsDeleting(true);
+ setError(null);
 
-      const result = await deleteCategoriesAction(categoryId);
+ const result = await deleteCategoriesAction(categoryId);
 
-      if (result?.success || result?.data?.id) {
-        toast.success("Category deleted successfully");
-        onOpenChange(false);
-        router.refresh();
-      } else {
-        toast.error(result?.message || "Failed to delete category");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to delete category";
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+ if (result?.success || result?.data?.id) {
+ toast.success("Category deleted successfully");
+ onOpenChange(false);
+ router.refresh();
+ } else {
+ toast.error(result?.message ||"Failed to delete category");
+ }
+ } catch (error) {
+ console.error("Delete error:", error);
+ const errorMessage = error instanceof Error ? error.message :"Failed to delete category";
+ setError(errorMessage);
+ toast.error(errorMessage);
+ } finally {
+ setIsDeleting(false);
+ }
+ };
 
-  return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Category</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete "{categoryName}"? This action cannot
-            be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+ return (
+ <AlertDialog open={open} onOpenChange={onOpenChange}>
+ <AlertDialogContent>
+ <AlertDialogHeader>
+ <AlertDialogTitle>Delete Category</AlertDialogTitle>
+ <AlertDialogDescription>
+ Are you sure you want to delete"{categoryName}"? This action cannot
+ be undone.
+ </AlertDialogDescription>
+ </AlertDialogHeader>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-            {error}
-          </div>
-        )}
+ {error && (
+ <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+ {error}
+ </div>
+ )}
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+ <AlertDialogFooter>
+ <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+ <AlertDialogAction
+ onClick={handleDelete}
+ disabled={isDeleting}
+ className="bg-red-600 hover:bg-red-700"
+ >
+ {isDeleting ?"Deleting...":"Delete"}
+ </AlertDialogAction>
+ </AlertDialogFooter>
+ </AlertDialogContent>
+ </AlertDialog>
+ );
 }

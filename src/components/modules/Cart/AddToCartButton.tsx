@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { addToCart } from "@/action/addToCart/addToCart.action";
 import { useCart } from "@/providers/CartProvider";
 import { toast as toastNotification } from "sonner";
+import { trackAddToCart } from "@/lib/gtm";
 
 interface AddToCartButtonProps {
   productId: string;
+  productName?: string;
+  price?: number;
   variantId?: string;
   quantity?: number;
   size?: "default" | "lg" | "sm" | "icon";
@@ -23,6 +26,8 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({
   productId,
+  productName,
+  price,
   variantId,
   quantity = 1,
   size = "lg",
@@ -67,6 +72,14 @@ export default function AddToCartButton({
       if (isSuccessful) {
         setIsSuccess(true);
         toastNotification.success("Product added to cart!");
+
+        // Track GTM add_to_cart event
+        trackAddToCart({
+          item_id: productId,
+          item_name: productName || productId,
+          price: price || 0,
+          quantity,
+        });
 
         // Refresh cart count from backend to sync navbar
         try {

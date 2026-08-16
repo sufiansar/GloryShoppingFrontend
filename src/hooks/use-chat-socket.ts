@@ -40,10 +40,12 @@ export function useChatSocket(
     if (socket.connected) {
       console.log("🔑 Joining chat room:", chatId);
       socket.emit("join-chat", { chatId });
+      socket.emit("mark-read", { chatId });
     } else {
       const handleConnect = () => {
         console.log("🔑 Socket connected, now joining chat room:", chatId);
         socket.emit("join-chat", { chatId });
+        socket.emit("mark-read", { chatId });
       };
       socket.once("connect", handleConnect);
       // Cleanup listener if component unmounts before connect

@@ -52,6 +52,7 @@ export default function ProductCard({
               alt={product.name}
               width={350}
               height={350}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className={`w-full h-full object-contain p-2 transition-transform duration-500 ${isHovered ? "scale-105" : "scale-100"
                 }`}
             />
@@ -158,6 +159,8 @@ export default function ProductCard({
             {product.id && (
               <AddToCartButton
                 productId={product.id}
+                productName={product.name}
+                price={product.price}
                 variantId={product.variants?.[0]?.id}
                 quantity={1}
                 isOutOfStock={product.stock === 0}

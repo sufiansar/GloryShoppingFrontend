@@ -82,7 +82,7 @@ export const getAllBrand = async (queryString: string) => {
     return result;
   } catch (error) {
     console.error("Error fetching brands:", error);
-    throw new Error("Failed to fetch brands");
+    return { data: [], message: "Failed to fetch brands" };
   }
 };
 
@@ -154,7 +154,7 @@ export const getBrandBySlugWithProducts = async (
     return result;
   } catch (error) {
     console.error("Error fetching brand with products:", error);
-    throw new Error("Failed to fetch brand with products");
+    return { data: [], message: "Failed to fetch brand with products" };
   }
 };
 

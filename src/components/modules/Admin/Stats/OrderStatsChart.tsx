@@ -1,126 +1,85 @@
 "use client";
 
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-} from "recharts";
-
-type OrderStats = {
-  last7Days?: { totalOrders?: number; totalRevenue?: number };
-  last15Days?: { totalOrders?: number; totalRevenue?: number };
-  last30Days?: { totalOrders?: number; totalRevenue?: number };
-};
+ BarChart,
+ Bar,
+ XAxis,
+ YAxis,
+ CartesianGrid,
+ Tooltip,
+ ResponsiveContainer,
+} from"recharts";
 
 export default function OrderStatsChart({
-  data: orderStats,
+ data,
 }: {
-  data?: OrderStats | null;
+ data?: any;
 }) {
-  const safe = orderStats ?? {};
+ const safe = data ?? {};
+ const monthlySales = safe.monthlySales || {
+ Jan: 0, Feb: 0, Mar: 0, Apr: 0, May: 0, Jun: 0, Jul: 0, Aug: 0, Sep: 0, Oct: 0, Nov: 0, Dec: 0
+ };
 
-  const chartData = [
-    {
-      time: "10am",
-      value: Math.round((safe.last7Days?.totalOrders ?? 0) * 0.3),
-    },
-    {
-      time: "11am",
-      value: Math.round((safe.last7Days?.totalOrders ?? 0) * 0.5),
-    },
-    {
-      time: "12am",
-      value: Math.round((safe.last7Days?.totalOrders ?? 0) * 0.4),
-    },
-    {
-      time: "01am",
-      value: Math.round((safe.last15Days?.totalOrders ?? 0) * 0.6),
-    },
-    {
-      time: "02am",
-      value: Math.round((safe.last15Days?.totalOrders ?? 0) * 0.45),
-    },
-    {
-      time: "03am",
-      value: Math.round((safe.last15Days?.totalOrders ?? 0) * 0.7),
-    },
-    {
-      time: "04am",
-      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.5),
-    },
-    {
-      time: "05am",
-      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.8),
-    },
-    {
-      time: "06am",
-      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.6),
-    },
-    {
-      time: "07am",
-      value: Math.round((safe.last30Days?.totalOrders ?? 0) * 0.9),
-    },
-  ];
+ // Using beautiful mock data to show the bar chart shape for design purposes
+ const chartData = [
+ { time:"Jan", value: monthlySales?.Jan ?? 0 },
+ { time:"Feb", value: monthlySales?.Feb ?? 0 },
+ { time:"Mar", value: monthlySales?.Mar ?? 0 },
+ { time:"Apr", value: monthlySales?.Apr ?? 0 },
+ { time:"May", value: monthlySales?.May ?? 0 },
+ { time:"Jun", value: monthlySales?.Jun ?? 0 },
+ { time:"Jul", value: monthlySales?.Jul ?? 0 },
+ { time:"Aug", value: monthlySales?.Aug ?? 0 },
+ { time:"Sep", value: monthlySales?.Sep ?? 0 },
+ { time:"Oct", value: monthlySales?.Oct ?? 0 },
+ { time:"Nov", value: monthlySales?.Nov ?? 0 },
+ { time:"Dec", value: monthlySales?.Dec ?? 0 },
+ ];
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg border border-gray-700">
-          <p className="font-semibold text-sm">{payload[0].value}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+ const CustomTooltip = ({ active, payload }: any) => {
+ if (active && payload && payload.length) {
+ return (
+ <div className="bg-white text-slate-900 px-4 py-2 rounded-lg shadow-xl border border-slate-100">
+ <p className="font-semibold text-sm">Sales: {payload[0].value}</p>
+ </div>
+ );
+ }
+ return null;
+ };
 
-  return (
-    <div className="h-80">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={chartData}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="#f0f0f0"
-            vertical={false}
-          />
-          <XAxis
-            dataKey="time"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
-          />
-          <YAxis
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="#8b5cf6"
-            strokeWidth={3}
-            fill="url(#colorValue)"
-            dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 6, fill: "#8b5cf6" }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
+ return (
+ <div className="h-80 w-full mt-4">
+ <ResponsiveContainer width="100%"height="100%">
+ <BarChart
+ data={chartData}
+ margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+ barSize={32}
+ >
+ <CartesianGrid
+ strokeDasharray="3 3"
+ stroke="#f1f5f9"
+ vertical={false}
+ />
+ <XAxis
+ dataKey="time"
+ axisLine={false}
+ tickLine={false}
+ tick={{ fill:"#94a3b8", fontSize: 12 }}
+ dy={10}
+ />
+ <YAxis
+ axisLine={false}
+ tickLine={false}
+ tick={{ fill:"#94a3b8", fontSize: 12 }}
+ />
+ <Tooltip content={<CustomTooltip />} cursor={{ fill:"#fdf2f8"}} />
+ <Bar 
+ dataKey="value"
+ fill="#c25891"
+ radius={[6, 6, 0, 0]} 
+ />
+ </BarChart>
+ </ResponsiveContainer>
+ </div>
+ );
 }

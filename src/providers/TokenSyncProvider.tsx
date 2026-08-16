@@ -53,6 +53,7 @@ export const TokenSyncProvider = ({ children }: { children: React.ReactNode }) =
       if (result?.error) {
         toast.error("Failed to sync account. Please try logging in manually.", { id: toastId });
         console.error("Sync error:", result.error);
+        router.replace(window.location.pathname);
       } else {
         toast.success("Welcome back! Login successful.", { id: toastId });
         
@@ -62,6 +63,7 @@ export const TokenSyncProvider = ({ children }: { children: React.ReactNode }) =
     } catch (error) {
       toast.error("An unexpected error occurred during sync.", { id: toastId });
       console.error("Token sync exception:", error);
+      router.replace(window.location.pathname);
     } finally {
       setIsSyncing(false);
     }

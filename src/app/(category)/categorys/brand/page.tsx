@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAllBrand } from "@/action/brand/brand.action";
 import { getAllProducts } from "@/action/product/product.action";
 import BrandPageClient from "@/components/modules/Brand/BrandPageClient";

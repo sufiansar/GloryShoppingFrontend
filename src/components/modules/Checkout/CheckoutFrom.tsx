@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { createOrder } from "@/action/order/order.action";
 import { getShippingConfigs } from "@/action/shipping/shipping.action";
+import { trackBeginCheckout, trackPurchase } from "@/lib/gtm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -120,7 +121,7 @@ export function CheckoutForm({
   const [directQuantity, setDirectQuantity] = useState(initialDirectQuantity);
   const [shippingConfigs, setShippingConfigs] = useState<any[]>([]);
 
-  // Fetch shipping configurations
+  // Fetch shipping configurations & track begin_checkout
   useEffect(() => {
     const fetchShipping = async () => {
       const result = await getShippingConfigs();
@@ -129,6 +130,19 @@ export function CheckoutForm({
       }
     };
     fetchShipping();
+
+    // GTM begin_checkout tracking
+    if (cartItems.length > 0) {
+      trackBeginCheckout(
+        cartItems.map((item) => ({
+          item_id: item.variantId || item.id || "",
+          item_name: item.productName || "Product",
+          price: item.price || 0,
+          quantity: item.quantity,
+        })),
+        cartItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
+      );
+    }
   }, []);
 
   const baseColor = "oklch(52.801% 0.15987 344.323)";
@@ -248,6 +262,37 @@ export function CheckoutForm({
       }
 
       const order = result.data;
+
+      // Track GTM purchase event
+      try {
+        const purchaseItems =
+          watchCheckoutType === "CART"
+            ? cartItems.map((item) => ({
+                item_id: item.variantId || item.id || "",
+                item_name: item.productName || "Product",
+                price: item.price || 0,
+                quantity: item.quantity,
+              }))
+            : availableVariants
+                .filter((v) => v.id === selectedVariant)
+                .map((v) => ({
+                  item_id: v.id,
+                  item_name: v.productName || v.name,
+                  price: v.price,
+                  quantity: directQuantity,
+                }));
+
+        trackPurchase({
+          transaction_id: order.id || (order as any)._id || String(Date.now()),
+          value: order.amount || grandTotal,
+          currency: "BDT",
+          items: purchaseItems,
+          user_email: values.email || "",
+          user_phone: values.phone || "",
+        });
+      } catch (gtmErr) {
+        console.error("GTM purchase tracking error:", gtmErr);
+      }
 
       toast("Order Created Successfully!", {
         description: `Order ID: ${order.id}`,

@@ -82,10 +82,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     const newSocket = io(BASE_URL, {
       auth: {
+        token: session?.accessToken,
         userId: session?.user?.id,
         guestId: guestId,
         role: session?.user?.role || "GUEST",
       },
+      withCredentials: true,
       transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 10,

@@ -59,6 +59,8 @@ export async function startChatAsUser(data: {
       body: JSON.stringify(data),
     });
 
+    console.log("startChatAsUser API response:", response);
+
     if (response?.success) {
       return {
         success: true,

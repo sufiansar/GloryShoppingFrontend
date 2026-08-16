@@ -28,12 +28,13 @@ import {
   Home,
   MessageSquare,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/product.interface";
 import ProductCard from "./ProductCard";
 import AddToCartButton from "../Cart/AddToCartButton";
+import { trackViewItem } from "@/lib/gtm";
 import {
   IconBrand4chan,
   IconCategory,
@@ -119,6 +120,18 @@ export default function ProductDetailsPage({
     createReview: false,
     faq: false,
   });
+
+  useEffect(() => {
+    if (product) {
+      trackViewItem({
+        item_id: product.id || product.slug || "",
+        item_name: product.name,
+        price: selectedVariant?.price || product.price || 0,
+        item_category: product.category?.name,
+        item_brand: product.brand?.name,
+      });
+    }
+  }, [product?.id]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -295,6 +308,7 @@ export default function ProductDetailsPage({
                           src={selectedImage}
                           alt={product.name}
                           fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
                           className="object-contain"
                           priority
                         />
@@ -467,6 +481,8 @@ export default function ProductDetailsPage({
                   <div className="flex-[3] flex gap-2">
                     <AddToCartButton
                       productId={product.id!}
+                      productName={product.name}
+                      price={displayPrice}
                       variantId={selectedVariant?.id || product?.variants?.[0]?.id}
                       quantity={quantity}
                       isOutOfStock={(selectedVariant?.stock || product?.stock) === 0}
@@ -745,6 +761,8 @@ export default function ProductDetailsPage({
               <div className="flex-[3]">
                 <AddToCartButton
                   productId={product.id!}
+                  productName={product.name}
+                  price={displayPrice}
                   variantId={selectedVariant?.id || product.variants?.[0]?.id}
                   quantity={quantity}
                   isOutOfStock={(selectedVariant?.stock || product?.stock) === 0}

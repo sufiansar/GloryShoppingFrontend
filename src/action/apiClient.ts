@@ -237,7 +237,8 @@ export const makeApiCall = async <T>(
 
     // Default: return original parsed data
     return data as T;
-  } catch (err) {
+  } catch (err: any) {
+    console.error("❌ makeApiCall crashed:", endpoint, err);
     return data as T;
   }
 };

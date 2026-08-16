@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getMyProfile } from "@/action/user/user.action";
 import { AppSidebar } from "@/components/modules/Dashboard/AppSideBar";
 import { SiteHeader } from "@/components/modules/Dashboard/site-header";
@@ -32,25 +34,26 @@ export default async function AdminDashboard({
   const navItems = getNavItemsByRole(role);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 aura-bg overflow-hidden">
+    <div className="min-h-screen bg-slate-50 overflow-hidden">
       <SidebarProvider
         style={
           {
             "--sidebar-width": "18rem",
+            "--sidebar-width-icon": "6rem",
             "--header-height": "4rem",
           } as React.CSSProperties
         }
       >
         <AppSidebar userInfo={userInfo} navItems={navItems} variant="inset" />
-        <SidebarInset className="bg-transparent/20 backdrop-blur-3xl">
+        <SidebarInset className="bg-slate-50 flex flex-col flex-1 overflow-y-auto scrollbar-premium h-screen">
           <SiteHeader userInfo={userInfo} />
-          <main className="flex-1 overflow-y-auto scrollbar-premium dashboard-gradient-bg">
-            <div className="mx-auto w-full max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8">
+          <div className="flex-1 bg-slate-50 shadow-none border-none outline-none ring-0">
+            <div className="mx-auto w-full max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-1000 shadow-none">
+              <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8 shadow-none">
                 {children}
               </div>
             </div>
-          </main>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </div>

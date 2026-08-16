@@ -9,7 +9,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import * as Icons from "lucide-react";
 
@@ -38,70 +47,94 @@ export function AppSidebar({ userInfo, navItems, ...props }: AppSidebarProps) {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-none bg-transparent group-data-[side=left]:pl-4 group-data-[side=right]:pr-4 py-4"
+      className="border-r border-slate-200 bg-white group-data-[side=left]:border-r group-data-[side=right]:border-l py-0"
       {...props}
     >
-      <div className="flex flex-col h-full rounded-[2.5rem] bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/40 dark:border-slate-800/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden transition-all duration-500 group-data-[collapsible=icon]:rounded-[2rem]">
-        <SidebarHeader className="h-20 border-b border-slate-200/20 px-6 py-0 flex items-center">
+      <div className="flex flex-col flex-1 min-h-0 bg-white transition-all duration-500">
+        <SidebarHeader className="h-16 border-b border-slate-100 px-4 group-data-[collapsible=icon]:px-0 py-0 flex items-center group-data-[collapsible=icon]:justify-center">
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild className="hover:bg-transparent h-auto p-0 group/logo">
-                <Link href="/admin/dashboard" className="flex items-center gap-4">
-                  <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-custom shadow-xl shadow-primary-custom/30 ring-2 ring-white/20 transition-transform duration-500 group-hover/logo:scale-110 group-hover/logo:rotate-3">
-                    <div className="absolute inset-0 bg-white/20 rounded-2xl animate-pulse" />
-                    <Image
-                      src={logo}
-                      width={24}
-                      height={24}
-                      alt="logo"
-                      className="brightness-0 invert relative z-10"
-                    />
-                  </div>
-                  <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                    <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
-                      Glory Shop
-                    </span>
-                    <span className="text-[10px] font-bold text-primary-custom tracking-[0.2em] uppercase mt-1 opacity-80">
-                      Enterprise
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+            <SidebarMenuItem className="flex items-center justify-between">
+              <div className="group-data-[collapsible=icon]:hidden w-full">
+                <SidebarMenuButton asChild className="hover:bg-slate-50 h-auto p-2 rounded-lg group/logo">
+                  <Link href="/admin/dashboard" className="flex items-center gap-3">
+                    <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary-custom text-white font-bold text-lg">
+                      G
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-base font-bold text-slate-900 leading-none">
+                        Glory Shop
+                      </span>
+                    </div>
+                  </Link>
+                </SidebarMenuButton>
+              </div>
+              <div className="hidden group-data-[collapsible=icon]:flex w-full justify-center">
+                 <SidebarTrigger className="text-slate-500 hover:text-slate-900" />
+              </div>
+              <div className="group-data-[collapsible=icon]:hidden ml-2">
+                 <SidebarTrigger className="text-slate-500 hover:text-slate-900" />
+              </div>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
 
-        <SidebarContent className="px-3 py-6 scrollbar-hide">
+        <SidebarContent className="flex-1 overflow-y-auto group-data-[collapsible=icon]:overflow-y-auto px-3 group-data-[collapsible=icon]:px-1 py-4 scrollbar-hide">
           <NavMain sections={mappedSections} />
         </SidebarContent>
 
-        <div className="mt-auto border-t border-slate-200/20 p-5 group-data-[collapsible=icon]:p-3">
+        <div className="mt-auto p-4 group-data-[collapsible=icon]:p-2 shrink-0">
           {userInfo ? (
-            <div className="flex flex-col gap-5">
-              <div className="flex items-center gap-3 overflow-hidden rounded-[2rem] bg-white/30 dark:bg-slate-800/30 p-2.5 shadow-sm border border-white/20 dark:border-slate-700/50 group-data-[collapsible=icon]:p-1.5 transition-all duration-300">
-                <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-custom shadow-lg ring-2 ring-white/20">
-                  <span className="text-sm font-black text-white uppercase mt-0.5">
-                    {userInfo.name?.charAt(0)}
-                  </span>
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-800 bg-primary-custom shadow-xs" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 bg-pink-50 hover:bg-pink-100 rounded-xl p-3 border border-pink-100 group-data-[collapsible=icon]:p-1.5 transition-all duration-300 cursor-pointer">
+                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm border border-pink-100">
+                    <span className="text-sm font-bold text-primary-custom uppercase">
+                      {userInfo.name?.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="flex flex-1 flex-col truncate group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-bold text-slate-900 truncate">
+                      {userInfo.name}
+                    </span>
+                    <span className="text-xs text-slate-500 truncate">
+                      {userInfo.email || userInfo.role}
+                    </span>
+                  </div>
+                  <Icons.ChevronsUpDown className="ml-auto h-4 w-4 text-slate-500 group-data-[collapsible=icon]:hidden" />
                 </div>
-                <div className="flex flex-1 flex-col truncate group-data-[collapsible=icon]:hidden">
-                  <span className="text-[13px] font-black text-slate-900 dark:text-white truncate">
-                    {userInfo.name}
-                  </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-primary-custom mt-0.5">
-                    {userInfo.role}
-                  </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" side="top">
+                <div className="flex items-center gap-2 p-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <span className="text-xs font-bold text-primary-custom uppercase">
+                      {userInfo.name?.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col truncate">
+                    <span className="text-sm font-bold text-slate-900 truncate">
+                      {userInfo.name}
+                    </span>
+                    <span className="text-xs text-slate-500 truncate">
+                      {userInfo.email || userInfo.role}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-                <div className="group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:rounded-xl transition-all duration-300">
-                  <LogoutButton />
-                </div>
-              </div>
-            </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/dashboard/profile" className="cursor-pointer flex items-center gap-2">
+                    <Icons.User className="h-4 w-4" /> Account
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="text-rose-600 focus:bg-rose-50 focus:text-rose-600 cursor-pointer">
+                  <div className="w-full flex items-center">
+                    <LogoutButton />
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex justify-center group-data-[collapsible=icon]:hidden">
               <LogoutButton />
             </div>
           )}

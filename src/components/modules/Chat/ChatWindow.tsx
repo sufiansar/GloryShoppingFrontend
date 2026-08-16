@@ -29,11 +29,6 @@ import { useHydrated } from "@/hooks/use-hydrated";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
-import {
-  sendMessageAsAdmin,
-  sendMessageAsGuest,
-  sendMessageAsUser,
-} from "@/action/chat/chat.action";
 
 interface ChatWindowProps {
   chat: IChat;
@@ -308,59 +303,18 @@ export function ChatWindow({
 
     try {
       if (isAdmin) {
-        console.log("📨 Sending admin message (HTTP)...");
-        const result = await sendMessageAsAdmin(chat.id, messageContent);
-        
-        // Update optimistic message with real ID and SUCCESS status
-        const realId = result.data?.id;
-        if (realId) messageIdsRef.current.add(realId);
-        
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === optimisticMessage.id
-              ? { ...msg, id: realId || msg.id, status: "SENT" as const }
-              : msg,
-          ),
-        );
+        console.log("📨 Sending admin message (SOCKET)...");
+        sendAdminReply(messageContent, senderName);
       } else {
-        if (senderType === "GUEST" && guestId) {
-          console.log("📨 Sending guest message (HTTP)...");
-          const result = await sendMessageAsGuest(
-            chat.id,
-            messageContent,
-            guestId,
-          );
-
-          const realId = result.data?.id;
-          if (realId) messageIdsRef.current.add(realId);
-
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === optimisticMessage.id
-                ? { ...msg, id: realId || msg.id, status: "SENT" as const }
-                : msg,
-            ),
-          );
-        } else {
-          console.log("📨 Sending user message (HTTP)...");
-          const result = await sendMessageAsUser(chat.id, messageContent);
-
-          const realId = result.data?.id;
-          if (realId) messageIdsRef.current.add(realId);
-
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === optimisticMessage.id
-                ? { ...msg, id: realId || msg.id, status: "SENT" as const }
-                : msg,
-            ),
-          );
-        }
+        console.log("📨 Sending message (SOCKET)...");
+        sendMessage(messageContent, senderType);
       }
-    } catch (error: any) {
-      console.error("❌ Failed to save message via HTTP API:", error);
       
-      // NEW: Show toast for better debugging
+      // Note: We don't have the real ID yet since it's via socket.
+      // The optimistic message will be updated in onMessageReceived when the server broadcasts it.
+    } catch (error: any) {
+      console.error("❌ Failed to send message via Socket API:", error);
+      
       toast.error("Message failed to send. Please try again.");
 
       // Mark optimistic message as FAILED

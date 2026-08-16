@@ -32,7 +32,7 @@ export const createSkinType = async (data: any) => {
       body: sanitizedData,
     });
 
-    if (result?.id) {
+    if (result?.data?.id || result?.success) {
       revalidatePath("/admin/dashboard/skin-types", "page");
     }
 
@@ -66,7 +66,7 @@ export const updateSkinType = async (id: string, data: any) => {
       body: sanitizedData,
     });
 
-    if (res?.id) {
+    if (res?.data?.id || res?.success) {
       revalidatePath("/admin/dashboard/skin-types", "page");
     }
 
@@ -94,7 +94,7 @@ export const getAllSkinType = async (queryString: string) => {
       builtQueryString = `?page=${page}&limit=${limit}`;
     }
 
-    const result = await makeApiCall(`/skin/skin-types${builtQueryString}`);
+    const result = await makeApiCall<any>(`/skin/skin-types${builtQueryString}`);
     return result;
   } catch (error) {
     console.error("Failed to fetch skin types:", error);

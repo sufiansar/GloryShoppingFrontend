@@ -161,7 +161,7 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#ca428b] transition-all hover:translate-x-1"
@@ -189,7 +189,7 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2">
               {supportLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="text-sm text-gray-600 hover:text-[#ca428b] transition-all hover:translate-x-1 inline-block"
@@ -208,7 +208,7 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2">
               {companyLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.label}>
                   <Link
                     href={link.href}
                     className="text-sm text-gray-600 hover:text-[#ca428b] transition-all hover:translate-x-1 inline-block"

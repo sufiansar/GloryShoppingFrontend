@@ -80,8 +80,9 @@ export function FloatingChatButtonImproved({
     }, 15000);
 
     try {
-      // --- Flow A: Logged-in User ---
-      if (session?.user) {
+      // Flow A: Authenticated User with valid backend token
+      if (session?.user?.id && (session as any)?.accessToken) {
+        console.log("👤 Initializing for authenticated user:", session.user.id);
         let userChatId = storage.local.get(`userChatId_${session.user.id}`);
         
         // Always try to fetch first if we are logged in
@@ -122,6 +123,7 @@ export function FloatingChatButtonImproved({
             return;
           }
         }
+        throw new Error(startResult?.error || "Initialization failed");
       } 
       // --- Flow B: Guest User (Selection Screen) ---
       else {
@@ -131,10 +133,9 @@ export function FloatingChatButtonImproved({
         storage.local.set("isChatExpanded", "true");
         return;
       }
-      throw new Error("Initialization failed");
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Initialization failed:", error);
-      toast.error("Support chat is temporarily unavailable.");
+      toast.error(error.message || "Support chat is temporarily unavailable.");
     } finally {
       setIsInitializing(false);
       isInitializingRef.current = false;

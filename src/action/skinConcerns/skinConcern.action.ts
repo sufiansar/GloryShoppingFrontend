@@ -9,7 +9,7 @@ export const createSkinConcern = async (payload: any) => {
       body: payload,
     });
 
-    if (result?.id) {
+    if (result?.data?.id || result?.success) {
       revalidatePath("/admin/dashboard/skin-concerns", "page");
     }
 
@@ -27,7 +27,7 @@ export const updateSkinConcern = async (id: string, payload: any) => {
       body: payload,
     });
 
-    if (result?.id) {
+    if (result?.data?.id || result?.success) {
       revalidatePath("/admin/dashboard/skin-concerns", "page");
     }
 
@@ -55,7 +55,7 @@ export const getAllSkinConcerns = async (queryString: string) => {
       builtQueryString = `?page=${page}&limit=${limit}`;
     }
 
-    const result = await makeApiCall(`/skin/skin-concerns${builtQueryString}`);
+    const result = await makeApiCall<any>(`/skin/skin-concerns${builtQueryString}`);
     return result;
   } catch (error) {
     console.error("Failed to fetch skin concerns:", error);

@@ -3,15 +3,16 @@ import { revalidatePath } from "next/cache";
 import { makeApiCall } from "../apiClient";
 import { redirect } from "next/navigation";
 
-export const createProduct = async (formData: FormData) => {
+export const createProduct = async (payload: any) => {
   try {
-    console.log("📤 Creating product with FormData");
+    console.log("📤 Creating product with JSON payload");
     const result = await makeApiCall<any>("/product", {
       method: "POST",
-      body: formData,
+      body: JSON.stringify(payload),
     });
     revalidatePath("/", "layout");
     console.log("product", result);
+    return result;
   } catch (error) {
     console.error("Error creating product:", error);
     throw new Error("Failed to create product");
@@ -114,7 +115,7 @@ export const getAllProducts = async (queryString: string) => {
     return result;
   } catch (error) {
     console.error("Error fetching products:", error);
-    throw new Error("Failed to fetch products");
+    return { data: [], message: "Failed to fetch products" };
   }
 };
 
