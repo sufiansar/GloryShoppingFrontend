@@ -52,6 +52,18 @@ export default function AddToCartButton({
 
     console.log("🛒 [AddToCartButton] Adding product:", productId, "variant:", variantId, "qty:", quantity);
     setIsLoading(true);
+
+    // Track GTM add_to_cart event immediately on click
+    try {
+      trackAddToCart({
+        item_id: productId,
+        item_name: productName || productId,
+        price: price || 0,
+        quantity,
+      });
+    } catch (gtmErr) {
+      console.error("🛒 [AddToCartButton] GTM tracking error:", gtmErr);
+    }
     
     try {
       const result = await addToCart({
@@ -72,14 +84,6 @@ export default function AddToCartButton({
       if (isSuccessful) {
         setIsSuccess(true);
         toastNotification.success("Product added to cart!");
-
-        // Track GTM add_to_cart event
-        trackAddToCart({
-          item_id: productId,
-          item_name: productName || productId,
-          price: price || 0,
-          quantity,
-        });
 
         // Refresh cart count from backend to sync navbar
         try {
